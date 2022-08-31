@@ -1,0 +1,87 @@
+---
+title: "Two-Sample Means (Independent) - Week 2, Lecture 1"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+
+```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
+library(tidyverse)
+library(gsheet)
+```
+
+**A large credit union awards quarterly bonuses to its employees. To ensure fairness across departments, data on the bonuses are regularly reviewed for equality. Consider the data in the following Google Sheet, which includes the bonus percentage for each employee in two departments.**
+
+```{r, echo = TRUE}
+data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1q0Ouhr6hGBDp-5oyQuYGcsWTLrsayywVHJS7o17Sm6Y/edit?usp=sharing"))
+```
+
+#### 1. Summarize the data. Provide appropriate summary statistics for the study population.
+
+```{r, echo=TRUE}
+summary(data)
+```
+
+#### 2. Construct the 99% confidence interval for the difference in bonuses for the two departments.
+
+```{r, echo=TRUE}
+t.test(Bonus ~ Department, 
+       data = data,
+       conf.level = 0.99)
+```
+
+### Result
+The 95% CI $\mu_Bonus - \mu_Department$ are (0.36, 1.94)
+
+#### 3. Use the appropriate hypothesis test to determine if the two departments are given different bonus amounts. Test at the &alpha;=0.01 level.
+
+```{r, echo=TRUE}
+# two-sided, two-sample t-test
+t.test(Bonus ~ Department, 
+       data = data,
+       var.equal = TRUE,
+       paired = FALSE,
+       conf.level = 0.99)
+```
+
+### Hypothesis
+H0: $\mu_Credit = \mu_Mortgage$\
+H1: $\mu_Credit \ne \mu_Mortgage$\
+
+### Test
+t0 = 4.04
+
+### p-Value
+p = 0.0001609
+
+## Conclusion
+Reject H0 at the $\alpha$=0.01 level. There is sufficient evidence to suggest that the two departments are given different bonuses.
+
+
+#### 4. (Challenge!) Construct a graph that will help you explain your findings to management.
+
+```{r, echo=TRUE}
+data %>% 
+  ggplot(aes(x = Department, y = Bonus, fill=Department))+
+  geom_boxplot(alpha=0.45, size=1)+
+  scale_fill_manual(values = c("Credit" = "cyan",
+                                "Mortgage" = "magenta"))+
+  theme_bw()
+  
+```
+
+#### 5. Write a brief paragraph explaining your findings to management. Are there any actions that should be considered as a result of your analysis?
+
+The credit department has better bonus results than the mortgage department.
+Mortgage products are more complex than credit cards. There is no sufficient data to suggest a solution. 
+
+However, we need to investigate the entire mortgage process, the client's income statement, credit score, the interest rates if it is competitive relative to the Fed Fund Rate, commission, and fees.
+In that case, we can spot potential problems and make better decisions. 
+
+
+
+
+
+
+

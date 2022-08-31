@@ -1,0 +1,79 @@
+---
+title: "One Sample Means - Week 1, Lecture 2"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+
+```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
+library(tidyverse)
+library(gsheet)
+```
+
+**Recall the data from the abstract of research study (beginning on page 62). We examined data from 22 elementary schools located in a Florida school district in 1999. Reading and math scores from a standardized test, percent minority of the particular grade level in that school, percent in poverty of the particular grade level in that school, and total number of students in that grade at that school are included.**
+
+```{r, echo = TRUE}
+data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1cVGLLdILMI34xjnzHfJNHua6fJROJwCzUBFgV22OLT4/edit#gid=0"))
+```
+
+#### 1. From last class, what are the average math and reading scores for each grade?
+
+```{r, echo=TRUE}
+data %>% 
+  select(Grade, Math, Reading) %>% 
+  drop_na() %>% 
+  group_by(Grade) %>% 
+  summarise(Average_Math = (mean(Math)), Average_Reading = (mean(Reading))) 
+```
+
+#### 2. Construct the 95% confidence interval for the mean math score for 3rd grade students.
+
+```{r, echo=TRUE}
+math_ci <- data %>% 
+  filter(Grade == 3) %>% 
+  drop_na() %>%
+  select(Math)
+t.test(math_ci, conf.level = 0.95)
+
+```
+The 95% CI for mu is (167.8106 points, 175.9348 points)
+
+#### 3. If school districts should aim for an average greater than 165 points, how is this school district doing?
+The school meets the minimum the required.
+
+#### 4. Use the appropriate hypothesis test to determine if the average math score for 3rd grade students is above 165 points. Test at the $\alpha$=0.05 level.
+
+```{r, echo=TRUE}
+math_ci <- data %>% 
+  filter(Grade == 3) %>% 
+  drop_na() %>%
+  select(Math)
+t.test(math_ci, mu = 165, alternative = "greater")
+```
+--Hypotheses
+H0: mu <= 165
+H1: mu >  165
+
+--Test
+t0 = 3.518
+--p-Value
+p = 0.001
+
+--Conclusion
+Reject H0 at the \alpha = 0.05 level. There is sufficient evidence to suggest that the average math score for 3rd grade students is above 165 points.
+
+#### 5. (Challenge!) Use `ggplot()` to graph the confidence intervals for the average reading scores for each grade.
+
+```{r, echo=TRUE}
+ci_read <- data %>% 
+  group_by(Grade) %>%
+  drop_na() %>% 
+  summarise(
+    mean_reading = mean(Reading),
+    ci_low = t.test(Reading, conf.level = 0.95)$conf.int[1],
+    ci_up = t.test(Reading, conf.level = 0.95)$conf.int[2]
+  )
+ci_read
+
+```

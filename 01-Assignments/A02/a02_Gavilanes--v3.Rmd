@@ -1,0 +1,118 @@
+---
+title: "One Sample Means - Week 1, Lecture 2"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+
+```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
+library(tidyverse)
+library(gsheet)
+library(formattable)
+```
+
+**Recall the data from the abstract of research study (beginning on page 62). We examined data from 22 elementary schools located in a Florida school district in 1999. Reading and math scores from a standardized test, percent minority of the particular grade level in that school, percent in poverty of the particular grade level in that school, and total number of students in that grade at that school are included.**
+
+```{r, echo = TRUE}
+# clear environment
+rm(list = ls())
+# extract data
+data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1cVGLLdILMI34xjnzHfJNHua6fJROJwCzUBFgV22OLT4/edit#gid=0"))
+# transform data
+clean_data <- data %>% 
+  # delete empty rows
+  drop_na() %>% 
+  # rename columns
+  rename(Poverty = `%Poverty`) %>% 
+  rename(Minority = `%Minority`)
+# ***FUNCTIONS***
+# f01 // change default table format
+change_table <- function(table_name){
+  formattable(
+  table_name, align =c("c","c", "c"),
+  list(area() ~ color_text("black", "#555888"))
+  )
+}
+# f02 // get course by grade level
+get_course_grade_level <- function(level, course){
+  clean_data %>% 
+    filter(Grade == level) %>% 
+    select(!! sym(course))
+  }
+# f03 // get course confidence intervals for each grade
+get_mean_ci_course_byGrade <- function(course){
+  clean_data %>% 
+    group_by(Grade) %>%
+    summarise(
+      mean_course = mean(!! sym(course)),
+      ci_low = t.test(!! sym(course), conf.level = 0.95)$conf.int[1],
+      ci_up = t.test(!! sym(course), conf.level = 0.95)$conf.int[2]
+    )
+}
+# f04 // graph course confidence intervals for each grade
+plot_ci_course <- function(mean_ci){
+  mean_ci%>% 
+    ggplot(aes(x=Grade, y = mean_course, fill = factor(Grade)))+
+    geom_bar(stat = "identity")+
+    scale_fill_manual(values=c("#c2d4dd", "#b1cbbb", "#e4d1d1"))+
+    geom_errorbar(aes(ymin = ci_low, ymax = ci_up), size = 1.5, color = "#034f84", width = 0.4)+
+    geom_text(aes(y = ci_low, label = round(ci_low,1)), size = 4, vjust = 2, color = "black")+
+    geom_text(aes(y = ci_up, label = round(ci_up,1)), size = 4, vjust = -1, color = "black")+
+    labs(title = "Chart with 95% Confidence Intervals")+
+    labs(x="Grades", y="Average Reading Scores")+
+    ylim(0, 280)+
+    lims(colour = c("3", "4", "5"))+
+    theme_bw()+
+    theme(legend.position="none")
+} 
+```
+
+#### 1. From last class, what are the average math and reading scores for each grade?
+
+```{r, echo=TRUE}
+math_read_table <- clean_data %>% 
+  select(Grade, Math, Reading) %>% 
+  group_by(Grade) %>% 
+  summarise(Average_Math = mean(Math), Average_Reading = mean(Reading))
+# f01: change math and reading table
+change_table(math_read_table)
+```
+
+#### 2. Construct the 95% confidence interval for the mean math score for 3rd grade students.
+
+```{r, echo=TRUE}
+# f02: get math confidence interval by 3rd grade
+t.test(get_course_grade_level(3, "Math"))
+```
+## Conclusion
+The 95% CI for $\mu$ are (167.8106 points, 175.9348 points)
+
+#### 3. If school districts should aim for an average greater than 165 points, how is this school district doing?
+The school meets the minimum the required. However, the evidence is not especially strong.
+
+#### 4. Use the appropriate hypothesis test to determine if the average math score for 3rd grade students is above 165 points. Test at the $\alpha$=0.05 level.
+
+```{r, echo=TRUE}
+# f02: get math confidence interval by 3rd grade, mu > 165
+t.test(get_course_grade_level(3, "Math"), mu = 165, alternative = "greater")
+```
+### Hypotheses
+H0: $\mu \le 165$\
+H1: $\mu >  165$\
+
+### Test
+t0 = 3.518
+
+### p-Value
+p = 0.001
+
+## Conclusion
+Reject H0 at the $\alpha$ = 0.05 level. There is sufficient evidence to suggest that the average math score for 3rd grade students is above 165 points.
+
+#### 5. (Challenge!) Use `ggplot()` to graph the confidence intervals for the average reading scores for each grade.
+
+```{r}
+# f04: graph confidence intervals for average READING scores for each grade  
+plot_ci_course(get_mean_ci_course_byGrade("Reading"))
+```

@@ -1,0 +1,156 @@
+---
+title: "Summarizing Data - Week 1, Lecture 1"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+
+```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
+#rm(list = ls())
+#install.packages("tidyverse")
+#install.packages("gsheet")
+#install.packages("gridExtra")
+#install.packages(formattable)
+library(tidyverse)
+library(gsheet)
+library(gridExtra)
+library(formattable)
+```
+
+**Consider the data from the abstract of research study (beginning on page 62). We have data from 22 elementary schools located in a Florida school district in 1999. Reading and math scores from a standardized test, percent minority of the particular grade level in that school, percent in poverty of the particular grade level in that school, and total number of students in that grade at that school are included.**
+
+```{r, echo = TRUE}
+data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1cVGLLdILMI34xjnzHfJNHua6fJROJwCzUBFgV22OLT4/edit#gid=0"))
+
+clean_data <- drop_na(data)
+```
+
+#### 1. What are the average math and reading scores for each grade?
+
+```{r}
+dafault_table <- clean_data %>% 
+  select(Grade, Math, Reading) %>% 
+  group_by(Grade) %>% 
+  summarise(Average_Math = mean(Math), Average_Reading = mean(Reading)) 
+
+nice_table <- formattable(dafault_table, align =c("c","c", "c"), list(
+  `Grade` = formatter("span", style = ~ style(color = "#006622",font.weight = "bold")), 
+  `Average_Math`= formatter("span", style = ~ style(color = "#006622",font.weight = "bold")),
+  `Average_Reading`= formatter("span", style = ~ style(color = "#006622",font.weight = "bold"))
+))
+
+nice_table
+```
+
+#### 2. What are the median math scores for each grade?
+
+```{r}
+clean_data %>% 
+  select(Grade, Math) %>% 
+  group_by(Grade) %>% 
+  summarise(Median_Math = median(Math))
+```
+
+#### 3. (Challenge!) Use `ggplot()` to construct histograms of the math and reading scores and determine if we should report the mean or median. 
+```{r}
+clean_data %>% 
+  ggplot(aes(Math))+
+  geom_histogram(binwidth = 10, fill = "#d5f4e6", color = "black")+
+  geom_vline(aes(xintercept=mean(Math)),size=1, color="#FD4D0C", linetype="dashed")+
+  labs(title = "Average Math Scores - Histogram")+
+  ylab(NULL)+
+  theme_bw()
+clean_data %>%
+  ggplot(aes(Reading))+
+  geom_histogram(binwidth = 10, fill = "#D4E4F7", color = "black")+
+  geom_vline(aes(xintercept=mean(Math)),size=1, color="magenta", linetype="dashed")+
+  labs(title = "Average Reading Scores - Histogram")+
+  ylab(NULL)+
+  theme_bw()
+```
+There is no influence of outliers; thus, the mean (average) would be adequate to report because it will not skew the grades. 
+
+
+
+#### 4. What is the average percent in poverty for each grade?
+
+```{r}
+clean_data %>% 
+  select(Grade, '%Poverty') %>%
+  group_by(Grade) %>%
+  summarise(Average_Poverty = mean(`%Poverty`))
+```
+
+#### 5. (Challenge!) Why should we be careful when reporting an average percentage of students in poverty? (Note: I am asking for a mathematical answer.)
+```{r}
+poverty_data <- clean_data %>%
+  select(Grade, '%Poverty') %>%
+  group_by(Grade) %>%
+  summarise(Average_Poverty = mean(`%Poverty`), 
+            Median_Poverty = median(`%Poverty`)
+            )
+
+poverty_data
+```
+
+The median percentage provides a better measure.The advantage of the median is that it removes extreme measurements from the data set; thus, it is less susceptible to the influence of outliers.
+
+A graphical representation demonstrates the difference between both calculations.
+
+```{r}
+poverty_plot <- clean_data %>% 
+  rename('Poverty' = '%Poverty') %>% 
+  ggplot(aes(Poverty))+
+  geom_histogram(binwidth = 10, fill = "#aaeedf", color = "#32D5B3")+
+  geom_vline(aes(xintercept=mean(Poverty)),size=1, color="#5655B0", linetype="dotted")+
+  annotate("text",x=52, y=7.8, label="Average", color="#5655B0", angle=90, size=10)+
+  geom_vline(aes(xintercept=median(Poverty)),size=1, color="#ff0066", linetype="longdash")+
+  annotate("text",x=65, y=8.5, label="Median", color="#ff0066", angle=90, size=10)+
+  labs(title = "Poverty Level",
+       subtitle = "Average & Median")+
+  ylab("Data")+
+  ylim(0,13)+
+  theme_light()+
+  theme(plot.title=element_text(hjust=0.5),
+        plot.subtitle = element_text(hjust = 0.5))
+
+poverty_plot
+```
+#### 6. (Challenge!) Use `ggplot()` to construct side-by-side box plots for reading and, separately, math scores by grade level (i.e., reconstruct Figure 3.33 from the textbook).
+```{r}
+y_limit <- ylim(150,230)
+# Boxplot for Math
+math_plot <- clean_data %>% 
+  ggplot(aes(factor(Grade), y=Math))+
+  geom_boxplot(fill="cyan", alpha=0.4, size=1)+
+  xlab("Math")+
+  ylab("")+
+  y_limit+
+  theme_minimal()+
+  theme(text=element_text(color="#009999"))
+# Boxplot for Reading
+reading_plot <- clean_data %>% 
+  ggplot(aes(factor(Grade), y=Reading))+
+  geom_boxplot(fill="Magenta", alpha=0.4, size=1)+
+  xlab("Reading")+
+  ylab("")+
+  y_limit+
+  theme_minimal()+
+  theme(text=element_text(color="magenta"))
+# Combine both plots
+grid.arrange(math_plot, reading_plot, nrow=1, bottom = "Grades", left = "Data", top = "Math vs Reading by Grade Levels")
+```
+
+#### 7. (Challenge!) Use `ggplot()` to construct a scatterplot of reading vs. math scores for each grade level (i.e., create a different version of Figure 3.34 from the textbook).
+```{r}
+clean_data %>% 
+  select(Grade, Math, Reading) %>% 
+  group_by(Grade) %>%
+  ggplot(aes(x=Math, y=Reading, colour=factor(Grade)))+
+  geom_point(size=4, alpha=0.55)+
+  geom_smooth(formula = y ~ x, method=lm, se=FALSE, colour="#191970")+
+  theme_bw()+
+  labs(title = "Reading vs Math Scores per Grade Levels", colour="Grade Levels")+
+  theme(plot.title=element_text(hjust=0.5))
+```
