@@ -19,15 +19,18 @@ library(gridExtra)
 ```{r, echo = TRUE}
 data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1ijxX7c6qcFAw-r_mNSxC-Ps5b5njw-WtE4RcxPTySXU/edit?usp=sharing"))
 
+# ---CUSTOM COLORS---
+custom_green_dark = "#DeF7E9"
+custom_green_light = "#71CA97"
+custom_gray = "#3d3d3d"
 # ---FUNCTIONS---
 # Change default table format
 change_table_format <- function(data_table){
-  formattable(data_table, align =c("l",rep("c", NCOL(data_table) - 1)))
+  formattable(data_table, align =c("l",rep("c", NCOL(data_table) - 1)),
+              list("Test" = formatter("span", style = ~ style(color = custom_gray, font.weight = "bold")),
+              area(row = 1, col = 2:6) ~ color_tile(custom_green_dark, custom_green_light)
+              ))
 }
-custom_green_dark = "#DeF7E9"
-custom_green_light = "#71CA97"
-custom_red = "#ff7f7f"
-
 ```
 
 #### 1. Summarize the data. Provide appropriate summary statistics for the pilot study.
@@ -42,7 +45,11 @@ data_long <- data %>%
 summary_table <- data_long %>% 
   group_by(Test) %>%
   select(Test, Scores) %>% 
-  summarise_all(list(Avg = mean,SD = sd, Median = median, Min = min, Max = max))
+  summarise_all(list(Avg = mean,
+                     SD = sd, 
+                     Median = median, 
+                     Min = min, 
+                     Max = max))
 # change table format
 change_table_format(summary_table)
 ```
