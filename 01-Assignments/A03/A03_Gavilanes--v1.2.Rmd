@@ -1,0 +1,130 @@
+---
+title: "Two-Sample Means (Independent) - Week 2, Lecture 1"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+
+```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
+# install.packages("formattable")
+library(tidyverse)
+library(gsheet)
+library(formattable)
+```
+
+**A large credit union awards quarterly bonuses to its employees. To ensure fairness across departments, data on the bonuses are regularly reviewed for equality. Consider the data in the following Google Sheet, which includes the bonus percentage for each employee in two departments.**
+
+```{r, echo = TRUE}
+# clear environment
+rm(list = ls())
+
+# extract data
+data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1q0Ouhr6hGBDp-5oyQuYGcsWTLrsayywVHJS7o17Sm6Y/edit?usp=sharing"))
+
+# transform data
+clean_data <- data %>% 
+  # delete empty rows
+  drop_na()
+  
+# ---FUNCTIONS---
+# get custom summary statistics
+# !! sym() creates a symbol from a string
+get_custom_summary <- function(data_table, category, values){
+  data_table %>% 
+    group_by(!! sym(category)) %>% 
+    summarise(SD = sd(!! sym(values)),
+              Avg = mean(!! sym(values)),
+              Median = median(!! sym(values)),
+              Min = min(!! sym(values)),
+              Max = max(!! sym(values))
+              )
+}
+# change default table format
+change_table_format <- function(data_table){
+  # ---LOCAL VARIABLES---
+  # first_column
+  first_colum <- select(data, 1)
+  # row number, or range
+  row_range = 1
+  # column number, or range
+  col_range = 2:6
+  # custom colors
+  custom_green_dark = "#DeF7E9"
+  custom_green_light = "#71CA97"
+  custom_gray = "#3d3d3d"
+  # format
+  formattable(data_table, align =c("l",rep("c", NCOL(data_table) - 1)),
+              list(first_colum = formatter("span", style = ~ style(color = custom_gray, font.weight = "bold")),
+              area(row = row_range, col = col_range) ~ color_tile(custom_green_dark, custom_green_light)
+              ))
+}
+```
+
+#### 1. Summarize the data. Provide appropriate summary statistics for the study population.
+
+```{r, echo=TRUE}
+# custom summary statistics with standard deviation by department
+change_table_format(get_custom_summary(clean_data, "Department", "Bonus"))
+```
+
+#### 2. Construct the 99% confidence interval for the difference in bonuses for the two departments.
+
+```{r, echo=TRUE}
+#Welch two-sample t-test
+t.test(data$Bonus ~ data$Department, 
+       conf.level = 0.99,)
+```
+
+### Result
+The 95% CI $\mu Credit - \mu Mortgage$ is (0.36, 1.94)
+
+#### 3. Use the appropriate hypothesis test to determine if the two departments are given different bonus amounts. Test at the &alpha;=0.01 level.
+
+```{r, echo=TRUE}
+# two-sided, two-sample t-test
+t.test(data$Bonus ~ data$Department,
+       var.equal = TRUE,
+       )
+```
+
+### Hypothesis
+H0: $\mu Credit = \mu Mortgage$\
+H1: $\mu Credit \ne \mu Mortgage$\
+
+### Test
+t0 = 4.04
+
+### p-Value
+p < 0.001
+
+## Conclusion
+Reject H0 at the $\alpha$=0.01 level. There is sufficient evidence to suggest that the two departments are given different bonuses.
+
+
+#### 4. (Challenge!) Construct a graph that will help you explain your findings to management.
+
+```{r, echo=TRUE}
+data %>% 
+  ggplot(aes(x = Department, y = Bonus, fill=Department))+
+  geom_boxplot(alpha=0.45, size=1)+
+  scale_fill_manual(values = c("Credit" = "cyan",
+                               "Mortgage" = "magenta"))+
+  theme_bw()
+  
+```
+
+#### 5. Write a brief paragraph explaining your findings to management. Are there any actions that should be considered as a result of your analysis?
+
+The credit department has better bonus results than the mortgage department.
+Mortgage products are more complex than credit cards. There is no sufficient data to suggest a solution. 
+
+However, we need to investigate the entire mortgage process, the client's income statement, credit score, the interest rates if it is competitive relative to the Fed Fund Rate, commission, and fees.
+In that case, we can spot potential problems and make better decisions. 
+
+
+
+
+
+
+

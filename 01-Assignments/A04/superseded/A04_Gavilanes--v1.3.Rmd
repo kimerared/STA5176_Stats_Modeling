@@ -1,0 +1,125 @@
+---
+title: "Two-Sample Means (Dependent) - Week 2, Lecture 2"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+
+```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
+#install.packages("formattable")
+library(tidyverse)
+library(gsheet)
+library(formattable)
+library(gridExtra)
+```
+
+**A new 2 hour reading comprehension program has been developed by a local tutoring center. A pilot study of 30 students has been conducted and we have data on a reading comprehension test taken before the program and a separate reading comprehension test taken after the program. Consider the data, found in the following Google Sheet.**
+
+```{r, echo = TRUE}
+data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1ijxX7c6qcFAw-r_mNSxC-Ps5b5njw-WtE4RcxPTySXU/edit?usp=sharing"))
+
+# ---CUSTOM COLORS---
+custom_green_dark = "#DeF7E9"
+custom_green_light = "#71CA97"
+custom_gray = "#3d3d3d"
+# ---FUNCTIONS---
+# Change default table format
+change_table_format <- function(data_table){
+  formattable(data_table, align =c("l",rep("c", NCOL(data_table) - 1)),
+              list("Test" = formatter("span", style = ~ style(color = custom_gray, font.weight = "bold")),
+              area(row = 1, col = 2:6) ~ color_tile(custom_green_dark, custom_green_light)
+              ))
+}
+```
+
+#### 1. Summarize the data. Provide appropriate summary statistics for the pilot study.
+
+```{r, echo=TRUE}
+# transform table from wide to long
+data_long <- data %>% 
+  drop_na() %>% 
+  pivot_longer(cols = Pre:Post, 
+               names_to = "Test", 
+               values_to = "Scores")
+# summary statistics
+summary_table <- data_long %>% 
+  group_by(Test) %>%
+  select(Test, Scores) %>% 
+  summarise_all(list(Avg = mean,
+                     SD = sd, 
+                     Median = median, 
+                     Min = min, 
+                     Max = max))
+# change table format
+change_table_format(summary_table)
+```
+
+#### 2. Construct the 95% confidence interval for the difference in test scores. Hint: we want to discuss this in terms of the *increase* in test scores.
+
+```{r, echo=TRUE}
+t.test(data$Post, data$Pre,
+       paired = TRUE)
+```
+
+The 95% CI is (2.23, 5.37)
+
+#### 3. Use the appropriate hypothesis test to determine if the program raises comprehension test averages by at least 5 points. Test at the &alpha;=0.05 level.
+
+```{r, echo=TRUE}
+
+# H0: Post <= Pre
+# H1: Post > Pre
+# p-Value < 0.001; Reject H0
+t.test(data$Post, data$Pre,
+       paired = TRUE,
+       alternative = "greater")
+
+```
+### Hypothesis
+H0: $\mu Post \le \mu Pre$\
+H1: $\mu Post > \mu Pre$\
+
+### Test
+t0 = 4.9496
+
+### p-Value
+p < 0.001
+
+## Conclusion
+Reject H0 at the $\alpha$=0.05 level. There is sufficient evidence to suggest that the program raises comprehension test averages by at least 5 points.
+
+
+#### 4. (Challenge!) Construct a graph that will help you explain your findings to the tutoring center.
+
+### Boxplots - Reading Pilot Program
+```{r}
+# Graph Boxplot
+plot_boxes <- function(y_cord, fill_color, x_label, txt_color){
+  data %>%
+    ggplot(aes(y=y_cord))+
+    geom_boxplot(fill=fill_color, alpha=0.4, size=1.2, notch = TRUE, notchwidth = 0.6)+
+    xlab(x_label)+
+    ylab("")+
+    ylim(40,100)+
+    theme_minimal()+
+    theme(text=element_text(color=txt_color))
+}
+
+pre_plot <- plot_boxes(data$Pre, "magenta", "PRE", "purple")
+post_plot <- plot_boxes(data$Post, "cyan", "POST", "#009999")
+grid.arrange(pre_plot, post_plot, nrow=1, bottom = "Reading Program", left = "Scores", top = "Reading Comprehension Program")
+```
+
+
+
+#### 5. Write a brief paragraph explaining your findings to the tutoring center. 
+
+The tutoring center should continue developing similar programs for other classes because students are improving their grade scores. 
+
+
+
+
+
+
+

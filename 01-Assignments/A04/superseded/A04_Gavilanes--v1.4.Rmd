@@ -31,27 +31,30 @@ change_table_format <- function(data_table){
               area(row = 1, col = 2:6) ~ color_tile(custom_green_dark, custom_green_light)
               ))
 }
+# get summary statistics
+get_summary_table <- function(data_table) { 
+  data_table %>% 
+    group_by(Test) %>%
+    select(Test, Scores) %>% 
+    summarise_all(list(Avg = mean,
+                     SD = sd, 
+                     Median = median, 
+                     Min = min, 
+                     Max = max))
+}
 ```
 
 #### 1. Summarize the data. Provide appropriate summary statistics for the pilot study.
 
 ```{r, echo=TRUE}
 # transform table from wide to long
-data_long <- data %>% 
-  pivot_longer(cols = Pre:Post, 
-               names_to = "Test", 
-               values_to = "Scores")
-# summary statistics
-summary_table <- data_long %>% 
-  group_by(Test) %>%
-  select(Test, Scores) %>% 
-  summarise_all(list(Avg = mean,
-                     SD = sd, 
-                     Median = median, 
-                     Min = min, 
-                     Max = max))
-# change table format
-change_table_format(summary_table)
+data_wide_long <- data %>%
+   pivot_longer(cols = Pre:Post, 
+                 names_to = "Test", 
+                 values_to = "Scores")
+
+# change table format for summary statistics
+change_table_format(get_summary_table(data_wide_long))
 ```
 
 #### 2. Construct the 95% confidence interval for the difference in test scores. Hint: we want to discuss this in terms of the *increase* in test scores.
