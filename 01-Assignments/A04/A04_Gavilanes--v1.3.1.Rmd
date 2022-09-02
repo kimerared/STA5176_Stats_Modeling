@@ -23,6 +23,8 @@ data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1ijxX7c6qcF
 custom_green_dark = "#DeF7E9"
 custom_green_light = "#71CA97"
 custom_gray = "#3d3d3d"
+custom_cyan_dark = "#009999"
+
 # ---FUNCTIONS---
 # Change default table format
 change_table_format <- function(data_table){
@@ -107,7 +109,7 @@ plot_boxes <- function(y_cord, fill_color, x_label, txt_color){
 }
 
 pre_plot <- plot_boxes(data$Pre, "magenta", "PRE", "purple")
-post_plot <- plot_boxes(data$Post, "cyan", "POST", "#009999")
+post_plot <- plot_boxes(data$Post, "cyan", "POST", custom_cyan_dark)
 grid.arrange(pre_plot, post_plot, nrow=1, bottom = "Reading Program", left = "Scores", top = "Reading Comprehension Program")
 ```
 
