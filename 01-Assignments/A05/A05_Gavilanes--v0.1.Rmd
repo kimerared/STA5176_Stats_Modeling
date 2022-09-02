@@ -16,6 +16,10 @@ library(gsheet)
 **Recall the first dataset from last week. A large credit union awards quarterly bonuses to its employees. To ensure fairness across departments, data on the bonuses are regularly reviewed for equality. Consider the data in the following Google Sheet, which includes the bonus percentage for each employee in two departments.**
 
 ```{r, echo = TRUE}
+# clear environment
+rm(list = ls())
+
+# extract data
 data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1q0Ouhr6hGBDp-5oyQuYGcsWTLrsayywVHJS7o17Sm6Y/edit?usp=sharing"))
 
 # transform data
@@ -69,31 +73,60 @@ Reject H0 at the $\alpha$=0.01 level. There is sufficient evidence to suggest th
 
 ### Assumptions
 ```{r}
-bonus_data %>% 
+credit_qq <- bonus_data %>% 
   filter(Department == "Credit") %>% 
   ggplot(aes(sample = Bonus)) +
     stat_qq(size=3) +
     stat_qq_line() +
     theme_minimal() +
     xlab("Theoretical") +
-    ylab("Sample")
+    ylab("Credit Sample")
+credit_qq
+
+mortgage_qq <- bonus_data %>% 
+  filter(Department == "Mortgage") %>% 
+  ggplot(aes(sample = Bonus)) +
+    stat_qq(size=3) +
+    stat_qq_line() +
+    theme_minimal() +
+    xlab("Theoretical") +
+    ylab("Mortgage Sample")
+mortgage_qq
 ```
 ### Frequency Table
 ```{r}
-bonus_data %>% 
+# mean by department
+groups_mean <- bonus_data %>% 
   group_by(Department) %>% 
+  summarise(Mean = mean(Bonus),
+            Median = median(Bonus))
+groups_mean
+
+# frequency
+bonus_data %>% 
+  group_by(Department) %>%
+  
   ggplot(aes(x = Bonus, colour = Department, fill = Department)) +
   geom_freqpoly(bins = 15)+
   theme_bw()
-
+# density
 bonus_data %>% 
-  filter(Department == "Credit") %>% 
+  group_by(Department) %>% 
   ggplot(aes(x = Bonus, colour = Department, fill = Department)) +
-  geom_freqpoly(bins = 15)
-  theme_bw()    
+  geom_density(alpha=0.3)+
+  geom_vline(data = groups_mean, aes(xintercept=Mean, color=Department), linetype="dashed", size = 1.1)+
+  geom_vline(data = groups_mean, aes(xintercept=Median, color=Department), size = 0.5)+
+  xlim(5,13)+
+  labs(title = "Bonuses by Department")+
+  theme(legend.position="bottom")+
+  theme_bw()
+
 ```
 
 #### d. Write a brief paragraph explaining your findings to management, based on the test chosen in part c.
+
+## Conclusion
+The T-test demonstrated that there was a different of bonuses earned for both groups.
 
 ## Question 2: 
 
@@ -121,7 +154,7 @@ data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1ijxX7c6qcF
 graph_qq_plot <- function(continous_var, grouping_var){
   data_table %>%
     group_by(grouping_var) %>% 
-    mutate(diff = continous_var - grouping_var) %>%
+    mutate(diff = continous_var ~ grouping_var) %>%
     ggplot(aes(sample = diff)) +
       stat_qq(size=3) +
       stat_qq_line() +

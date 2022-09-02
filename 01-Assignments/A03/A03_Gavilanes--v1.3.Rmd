@@ -115,6 +115,24 @@ data %>%
   
 ```
 
+### Second Graph
+
+```{r}
+graph_qq_plot <- function(continous_var, grouping_var){
+  data_table %>%
+    group_by(grouping_var) %>% 
+    mutate(diff = continous_var - grouping_var) %>%
+    ggplot(aes(sample = diff)) +
+      stat_qq(size=3) +
+      stat_qq_line() +
+      theme_bw() +
+      xlab("Theoretical") +
+      ylab("Sample")
+}
+# qq plot
+graph_qq_plot(clean_data, 'Bonus', 'Department')
+```
+
 #### 5. Write a brief paragraph explaining your findings to management. Are there any actions that should be considered as a result of your analysis?
 
 The credit department has better bonus results than the mortgage department.
