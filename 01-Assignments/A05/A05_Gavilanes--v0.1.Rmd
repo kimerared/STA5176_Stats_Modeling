@@ -22,10 +22,10 @@ rm(list = ls())
 # extract data
 data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1q0Ouhr6hGBDp-5oyQuYGcsWTLrsayywVHJS7o17Sm6Y/edit?usp=sharing"))
 
-# transform data
+# transform data to Bonus dataframe
 bonus_data <- data %>% 
   # delete empty rows
-  drop_na()  
+  drop_na()
 ```
 
 #### a. (From last week!) Use the appropriate *t*-test to determine if the two departments are given different bonus amounts. Test at the &alpha;=0.01 level.
@@ -126,35 +126,84 @@ bonus_data %>%
 #### d. Write a brief paragraph explaining your findings to management, based on the test chosen in part c.
 
 ## Conclusion
-The T-test demonstrated that there was a different of bonuses earned for both groups.
+The T-test demonstrated that there was a different of bonuses earned for both groups. Especially towards the right tail, we can find some outliers.
 
 ## Question 2: 
 
 **Recall the second dataset from last week. A new 2 hour reading comprehension program has been developed by a local tutoring center. A pilot study of 30 students has been conducted and we have data on a reading comprehension test taken before the program and a separate reading comprehension test taken after the program. Consider the data, found in the following Google Sheet.**
 
 ```{r, echo = TRUE}
+# extract data
 data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1ijxX7c6qcFAw-r_mNSxC-Ps5b5njw-WtE4RcxPTySXU/edit?usp=sharing"))
+
+# transform data to Reading dataframe
+reading_data <- data %>% 
+  # delete empty rows
+  drop_na()
 ```
 
 #### a. (From last week!) Use the appropriate *t*-test to determine if the program raises comprehension test averages by at least 5 points. Test at the &alpha;=0.05 level.
 
 ```{r, echo=TRUE}
-
+# H0: Post <= Pre
+# H1: Post > Pre
+# p-Value < 0.001; Reject H0
+t.test(data$Post, data$Pre,
+       paired = TRUE,
+       alternative = "greater")
 ```
+### Hypothesis
+H0: $\mu Post \le \mu Pre$\
+H1: $\mu Post > \mu Pre$\
+
+### Test
+t0 = 4.9496
+
+### p-Value
+p < 0.001
+
+## Conclusion
+Reject H0 at the $\alpha$=0.05 level. There is sufficient evidence to suggest that the program raises comprehension test averages by at least 5 points.
 
 #### b. Use the appropriate nonparametric test to determine if the program raises comprehension test averages by at least 5 points. Test at the &alpha;=0.05 level.
 
 ```{r, echo=TRUE}
-
+wilcox.test(reading_data$Post, reading_data$Pre,
+            paired = TRUE,
+            alternative = "greater")
 ```
+### Hypothesis
+H0: $\mu Post \le \mu Pre$\
+H1: $\mu Post > \mu Pre$\
+
+### Test
+t0 = 414
+
+### p-Value
+p < 0.001
+
+## Conclusion
+Reject H0 at the $\alpha$=0.05 level. There is sufficient evidence to suggest that the program raises comprehension test averages by at least 5 points.
 
 #### c. Assess the assumption(s) associated with the *t*-test in part a. In your assessment, determine if the *t*-test or the corresponding nonparametric test should be reported.
+Working Reference
+```{r}
+credit_qq <- bonus_data %>% 
+  filter(Department == "Credit") %>% 
+  ggplot(aes(sample = Bonus)) +
+    stat_qq(size=3) +
+    stat_qq_line() +
+    theme_minimal() +
+    xlab("Theoretical") +
+    ylab("Credit Sample")
+credit_qq
+```
 
 ```{r}
 graph_qq_plot <- function(continous_var, grouping_var){
   data_table %>%
     group_by(grouping_var) %>% 
-    mutate(diff = continous_var ~ grouping_var) %>%
+    mutate(diff = continous_var - grouping_var) %>%
     ggplot(aes(sample = diff)) +
       stat_qq(size=3) +
       stat_qq_line() +
@@ -163,7 +212,7 @@ graph_qq_plot <- function(continous_var, grouping_var){
       ylab("Sample")
 }
 # qq plot
-graph_qq_plot(bonus_data, 'Bonus', 'Department')
+graph_qq_plot(reading_data, 'Post', 'Pre')
 ```
 #### d. Write a brief paragraph explaining your findings to the tutoring center, based on the test chosen in part c.
 
