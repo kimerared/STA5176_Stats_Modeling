@@ -242,13 +242,13 @@ data_long <- reading_data %>%
                names_to = "Test", 
                values_to = "Scores")
 # summary statistics
-summary_table <- data_long %>% 
+summary_long_table <- data_long %>% 
   group_by(Test) %>%
   select(Test, Scores) %>% 
   summarise_all(list(Avg = mean,
                      Median = median))
 
-change_table_format(summary_table)
+change_table_format(summary_long_table)
 
 # reading frequency
 data_long %>% 
