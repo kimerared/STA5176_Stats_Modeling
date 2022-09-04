@@ -7,8 +7,11 @@ editor: source
 ---
 
 ```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
+
 library(tidyverse)
 library(gsheet)
+library(formattable)
+library(gridExtra)
 ```
 
 ## Question 1:
@@ -26,6 +29,24 @@ data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1q0Ouhr6hGB
 bonus_data <- data %>% 
   # delete empty rows
   drop_na()
+
+# ---CUSTOM COLORS---
+custom_green_dark = "#DeF7E9"
+custom_green_light = "#71CA97"
+custom_gray = "#3D3D3D"
+# ---FUNCTIONS---
+# Change default table format
+change_table_format <- function(data_table){
+  # local variables
+  first_column <- data_table[1]
+  dataframe_length <- NCOL(data_table)
+  # format
+  formattable(data_table, align = c("l",rep("c", dataframe_length - 1)),
+              list(first_column = formatter("span", style = ~ style(color = custom_gray, font.weight = "bold")),
+              area(row = 1, col = 2:dataframe_length) ~ color_tile(custom_green_dark, custom_green_light)
+              )#/end list
+              )#/end formattable
+}
 ```
 
 #### a. (From last week!) Use the appropriate *t*-test to determine if the two departments are given different bonus amounts. Test at the &alpha;=0.01 level.
@@ -53,6 +74,7 @@ Reject H0 at the $\alpha$=0.01 level. There is sufficient evidence to suggest th
 #### b. Use the appropriate nonparametric test to determine if the two departments are given different bonus amounts. Test at the &alpha;=0.01 level.
 
 ```{r, echo=TRUE}
+# nonparametric test for independent groups
 wilcox.test(bonus_data$Bonus ~ bonus_data$Department)
 ```
 
@@ -100,7 +122,7 @@ groups_mean <- bonus_data %>%
   group_by(Department) %>% 
   summarise(Mean = mean(Bonus),
             Median = median(Bonus))
-groups_mean
+change_table_format(groups_mean)
 
 # frequency
 bonus_data %>% 
@@ -140,6 +162,7 @@ data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1ijxX7c6qcF
 reading_data <- data %>% 
   # delete empty rows
   drop_na()
+
 ```
 
 #### a. (From last week!) Use the appropriate *t*-test to determine if the program raises comprehension test averages by at least 5 points. Test at the &alpha;=0.05 level.
@@ -186,24 +209,14 @@ p < 0.001
 Reject H0 at the $\alpha$=0.05 level. There is sufficient evidence to suggest that the program raises comprehension test averages by at least 5 points.
 
 #### c. Assess the assumption(s) associated with the *t*-test in part a. In your assessment, determine if the *t*-test or the corresponding nonparametric test should be reported.
-Working Reference
-```{r}
-credit_qq <- bonus_data %>% 
-  filter(Department == "Credit") %>% 
-  ggplot(aes(sample = Bonus)) +
-    stat_qq(size=3) +
-    stat_qq_line() +
-    theme_minimal() +
-    xlab("Theoretical") +
-    ylab("Credit Sample")
-credit_qq
-```
+
+### Assumption
+
 
 ```{r}
-graph_qq_plot <- function(continous_var, grouping_var){
+graph_paired_qq_plot <- function(data_table, after_sample, before_sample){
   data_table %>%
-    group_by(grouping_var) %>% 
-    mutate(diff = continous_var - grouping_var) %>%
+    mutate(diff = after_sample - before_sample) %>%
     ggplot(aes(sample = diff)) +
       stat_qq(size=3) +
       stat_qq_line() +
@@ -211,8 +224,54 @@ graph_qq_plot <- function(continous_var, grouping_var){
       xlab("Theoretical") +
       ylab("Sample")
 }
-# qq plot
-graph_qq_plot(reading_data, 'Post', 'Pre')
+# Paired qq plot for Post - Pre reading scores
+graph_paired_qq_plot(reading_data, reading_data$Post, reading_data$Pre)
+```
+
+### Frequency Reading
+```{r}
+# mean and median by dependent samples
+# transform table from wide to long
+data_long <- reading_data %>% 
+  drop_na() %>% 
+  pivot_longer(cols = Pre:Post, 
+               names_to = "Test", 
+               values_to = "Scores")
+# summary statistics
+summary_long_table <- data_long %>% 
+  group_by(Test) %>%
+  select(Test, Scores) %>% 
+  summarise_all(list(Avg = mean,
+                     Median = median))
+
+change_table_format(summary_long_table)
+
+# frequency
+
+data_long %>% 
+  ggplot(aes(x = Scores, colour = Test, fill = Test)) +
+  geom_freqpoly(bins = 15)+
+  theme_bw()
+
+# density
+data_long %>% 
+  group_by(Test) %>% 
+  ggplot(aes(x = Scores, colour = Test, fill = Test)) +
+  geom_density(alpha=0.3)+
+  geom_vline(data = summary_table, aes(xintercept=Avg, color=Test), linetype="dashed", size = 1.1)+
+  geom_vline(data = summary_table, aes(xintercept=Median, color=Test), size = 0.5)+
+  xlim(30,110)+
+  labs(title = "Scores by Dependent Tests")+
+  theme(legend.position="bottom")+
+  theme_bw()
+```
+### Function Tester 
+```{r}
+
+
+
+
+
 ```
 #### d. Write a brief paragraph explaining your findings to the tutoring center, based on the test chosen in part c.
 
