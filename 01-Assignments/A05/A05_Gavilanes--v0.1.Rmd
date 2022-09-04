@@ -34,6 +34,10 @@ bonus_data <- data %>%
 custom_green_dark = "#DeF7E9"
 custom_green_light = "#71CA97"
 custom_gray = "#3D3D3D"
+custom_orange = "#FC7307"
+custom_purple = "#5A18C9"
+custom_tan_light = "#F7E3D4"
+custom_density_hue = c(custom_purple,custom_orange)
 # ---FUNCTIONS---
 # Change default table format
 change_table_format <- function(data_table){
@@ -124,24 +128,24 @@ groups_mean <- bonus_data %>%
             Median = median(Bonus))
 change_table_format(groups_mean)
 
-# frequency
+# bonus frequency
 bonus_data %>% 
   group_by(Department) %>%
-  
   ggplot(aes(x = Bonus, colour = Department, fill = Department)) +
   geom_freqpoly(bins = 15)+
   theme_bw()
-# density
+# bonus density
 bonus_data %>% 
   group_by(Department) %>% 
-  ggplot(aes(x = Bonus, colour = Department, fill = Department)) +
-  geom_density(alpha=0.3)+
-  geom_vline(data = groups_mean, aes(xintercept=Mean, color=Department), linetype="dashed", size = 1.1)+
-  geom_vline(data = groups_mean, aes(xintercept=Median, color=Department), size = 0.5)+
+  ggplot(aes(x = Bonus, colour = Bonus, fill = Department)) +
+  geom_density(alpha=0.2)+
+  geom_vline(data = groups_mean, aes(xintercept=Median, color=Department), linetype="dashed", size = 1.1)+
   xlim(5,13)+
-  labs(title = "Bonuses by Department")+
+  labs(title = "Credit & Mortgage", subtitle = "Median Bonus")+
   theme(legend.position="bottom")+
-  theme_bw()
+  theme_bw()+
+  scale_fill_manual(values = custom_density_hue)+
+  scale_color_manual(values = custom_density_hue)
 
 ```
 
@@ -246,40 +250,46 @@ summary_long_table <- data_long %>%
 
 change_table_format(summary_long_table)
 
-# frequency
-
+# reading frequency
 data_long %>% 
   ggplot(aes(x = Scores, colour = Test, fill = Test)) +
   geom_freqpoly(bins = 15)+
   theme_bw()
 
-# density
+# reading density
 data_long %>% 
   group_by(Test) %>% 
-  ggplot(aes(x = Scores, colour = Test, fill = Test)) +
-  geom_density(alpha=0.3)+
+  ggplot(aes(x = Scores, color = Scores, fill = Test)) +
+  geom_density(alpha=0.2)+
   geom_vline(data = summary_table, aes(xintercept=Avg, color=Test), linetype="dashed", size = 1.1)+
-  geom_vline(data = summary_table, aes(xintercept=Median, color=Test), size = 0.5)+
-  xlim(30,110)+
-  labs(title = "Scores by Dependent Tests")+
-  theme(legend.position="bottom")+
-  theme_bw()
+  xlim(35,110)+
+  labs(title = "Test Scores", subtitle = "Average Increase")+
+  theme_bw()+
+  scale_fill_manual(values = custom_density_hue)+
+  scale_color_manual(values = custom_density_hue)
 ```
+## Assumption Conclusion
+The T-test should be reported since the test scores are normal distributed. It is adequate to assume normality.
+The density graph displays an improvement in the average scores.
+
+
+#### d. Write a brief paragraph explaining your findings to the tutoring center, based on the test chosen in part c.
+The tutoring department pilot study was a success. The reading comprehension should be integrated to their curriculum.
+Moreover, record the scores for 3-6 months to have a bigger sample data.
+
 ### Function Tester 
 ```{r}
+# bonus frequency
+freq_test <- function(data, group_variable, num_variable){
+  data %>% 
+    ggplot(aes(x = num_variable, colour = group_variable, fill = group_variable)) +
+    geom_freqpoly(bins = 15)+
+    theme_bw()+
+    scale_color_manual(values = custom_density_hue)
+}
 
-
-
-
-
+# bonus frequency
+freq_test(bonus_data, bonus_data$Department, bonus_data$Bonus)
+# reading frequency
+freq_test(data_long, data_long$Test, data_long$Scores)
 ```
-#### d. Write a brief paragraph explaining your findings to the tutoring center, based on the test chosen in part c.
-
-
-
-
-
-
-
-
-
