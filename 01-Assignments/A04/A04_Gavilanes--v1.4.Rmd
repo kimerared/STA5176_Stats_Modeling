@@ -27,11 +27,23 @@ custom_cyan_dark = "#009999"
 
 # ---FUNCTIONS---
 # Change default table format
+# change_table_format <- function(data_table){
+#   formattable(data_table, align =c("l",rep("c", NCOL(data_table) - 1)),
+#               list("Test" = formatter("span", style = ~ style(color = custom_gray, font.weight = "bold")),
+#               area(row = 1, col = 2:6) ~ color_tile(custom_green_dark, custom_green_light)
+#               ))
+# }
+# Change default table format
 change_table_format <- function(data_table){
-  formattable(data_table, align =c("l",rep("c", NCOL(data_table) - 1)),
-              list("Test" = formatter("span", style = ~ style(color = custom_gray, font.weight = "bold")),
-              area(row = 1, col = 2:6) ~ color_tile(custom_green_dark, custom_green_light)
-              ))
+  # local variables
+  first_column <- data_table[1]
+  dataframe_length <- NCOL(data_table)
+  # format
+  formattable(data_table, align = c("l",rep("c", dataframe_length - 1)),
+              list(first_column = formatter("span", style = ~ style(color = custom_gray, font.weight = "bold")),
+              area(row = 1, col = 2:dataframe_length) ~ color_tile(custom_green_dark, custom_green_light)
+              )#/end list
+              )#/end formattable
 }
 ```
 
@@ -72,9 +84,10 @@ The 95% CI is (2.23, 5.37)
 
 # H0: Post <= Pre
 # H1: Post > Pre
-# p-Value < 0.001; Reject H0
+# mu = 5
 t.test(data$Post, data$Pre,
        paired = TRUE,
+       mu = 5,
        alternative = "greater")
 
 ```
@@ -83,13 +96,13 @@ H0: $\mu Post \le \mu Pre$\
 H1: $\mu Post > \mu Pre$\
 
 ### Test
-t0 = 4.9496
+t0 = -1.56
 
 ### p-Value
-p < 0.001
+p = 0.94
 
 ## Conclusion
-Reject H0 at the $\alpha$=0.05 level. There is sufficient evidence to suggest that the program raises comprehension test averages by at least 5 points.
+Keep H0 at the $\alpha$=0.05 level. There is no sufficient evidence to suggest that the program raises comprehension test averages by at least 5 points.
 
 
 #### 4. (Challenge!) Construct a graph that will help you explain your findings to the tutoring center.
@@ -117,7 +130,7 @@ grid.arrange(pre_plot, post_plot, nrow=1, bottom = "Reading Program", left = "Sc
 
 #### 5. Write a brief paragraph explaining your findings to the tutoring center. 
 
-The tutoring center should continue developing similar programs for other classes because students are improving their grade scores. 
+The tutoring center should continue developing the reading comprehension program because students are improving their scores. However, the grade average is not significant to be greater than 5 points.
 
 
 

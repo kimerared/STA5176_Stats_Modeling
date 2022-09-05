@@ -283,7 +283,7 @@ Moreover, record the scores for 3-6 months to have a bigger sample data.
 freq_test <- function(data, group_variable, num_variable){
   data %>% 
     ggplot(aes(x = num_variable, colour = group_variable, fill = group_variable)) +
-    geom_freqpoly(bins = 15)+
+    geom_freqpoly(bins = 50)+
     theme_bw()+
     scale_color_manual(values = custom_density_hue)
 }
