@@ -57,9 +57,7 @@ change_table_format <- function(data_table){
 
 ```{r, echo=TRUE}
 # two-sided, two-sample t-test
-t.test(bonus_data$Bonus ~ bonus_data$Department,
-       var.equal = TRUE,
-       )
+t.test(bonus_data$Bonus ~ bonus_data$Department)
 ```
 
 ### Hypothesis
@@ -67,7 +65,7 @@ H0: $\mu Credit = \mu Mortgage$\
 H1: $\mu Credit \ne \mu Mortgage$\
 
 ### Test
-t0 = 4.04
+t0 = 3.9
 
 ### p-Value
 p < 0.001
@@ -102,22 +100,25 @@ Reject H0 at the $\alpha$=0.01 level. There is sufficient evidence to suggest th
 credit_qq <- bonus_data %>% 
   filter(Department == "Credit") %>% 
   ggplot(aes(sample = Bonus)) +
-    stat_qq(size=3) +
-    stat_qq_line() +
-    theme_minimal() +
-    xlab("Theoretical") +
-    ylab("Credit Sample")
+  stat_qq(size=3, alpha = 0.5) +
+  stat_qq_line() +
+  theme_minimal() +
+  xlab("Theoretical Credit") +
+  ylab("Sample Credit")
 credit_qq
 
 mortgage_qq <- bonus_data %>% 
   filter(Department == "Mortgage") %>% 
   ggplot(aes(sample = Bonus)) +
-    stat_qq(size=3) +
+    stat_qq(size=3, alpha = 0.5) +
     stat_qq_line() +
     theme_minimal() +
-    xlab("Theoretical") +
-    ylab("Mortgage Sample")
+    xlab("Theoretical Mortgage") +
+    ylab("Sample Mortgage")
 mortgage_qq
+
+# Combine both graphs
+grid.arrange(credit_qq, mortgage_qq, nrow=1, bottom = "Bonus", top = "Nonparametric Test")
 ```
 ### Frequency Table
 ```{r}
@@ -128,17 +129,23 @@ groups_mean <- bonus_data %>%
             Median = median(Bonus))
 change_table_format(groups_mean)
 
+# bonus histogram
+bonus_data %>% 
+  group_by(Department) %>% 
+  ggplot(aes(x = Bonus, colour = Department, fill = Department)) +
+  geom_histogram(binwidth = 1)+
+  theme_bw()
 # bonus frequency
 bonus_data %>% 
   group_by(Department) %>%
   ggplot(aes(x = Bonus, colour = Department, fill = Department)) +
-  geom_freqpoly(bins = 15)+
+  geom_freqpoly(bins = 8)+
   theme_bw()
 # bonus density
 bonus_data %>% 
   group_by(Department) %>% 
   ggplot(aes(x = Bonus, colour = Bonus, fill = Department)) +
-  geom_density(alpha=0.2)+
+  geom_density(alpha = 0.4)+
   geom_vline(data = groups_mean, aes(xintercept=Median, color=Department), linetype="dashed", size = 1.1)+
   xlim(5,13)+
   labs(title = "Credit & Mortgage", subtitle = "Median Bonus")+
@@ -148,11 +155,13 @@ bonus_data %>%
   scale_color_manual(values = custom_density_hue)
 
 ```
+The nonparametric QQ test should be reported.
 
 #### d. Write a brief paragraph explaining your findings to management, based on the test chosen in part c.
 
 ## Conclusion
-The T-test demonstrated that there was a difference of bonuses earned for both groups. Especially for the credit department, there are some outliers towards the right tail.
+The T-test demonstrated a difference of bonuses earned for both groups. 
+However, during the assumption, QQ plot discrepancies are shown. Especially for the credit department, there are some outliers towards the right tail. The mortgage department probably will benefit and learn from the credit department process.
 
 ## Question 2: 
 
@@ -224,7 +233,7 @@ graph_paired_qq_plot <- function(data_table, after_sample, before_sample){
   data_table %>%
     mutate(diff = after_sample - before_sample) %>%
     ggplot(aes(sample = diff)) +
-      stat_qq(size=3) +
+      stat_qq(size=3, alpha = 0.6) +
       stat_qq_line() +
       theme_bw() +
       xlab("Theoretical") +
@@ -252,10 +261,15 @@ summary_long_table <- data_long %>%
 
 change_table_format(summary_long_table)
 
+# reading histogram
+data_long %>% 
+  ggplot(aes(x = Scores, colour = Test, fill = Test)) +
+  geom_histogram(bins = 10)+
+  theme_bw()
 # reading frequency
 data_long %>% 
   ggplot(aes(x = Scores, colour = Test, fill = Test)) +
-  geom_freqpoly(bins = 15)+
+  geom_freqpoly(bins = 10)+
   theme_bw()
 
 # reading density
@@ -263,7 +277,7 @@ data_long %>%
   group_by(Test) %>% 
   ggplot(aes(x = Scores, color = Scores, fill = Test)) +
   geom_density(alpha=0.2)+
-  geom_vline(data = summary_long_htable, aes(xintercept=Avg, color=Test), linetype="dashed", size = 1.1)+
+  geom_vline(data = summary_long_table, aes(xintercept=Avg, color=Test), linetype="dashed", size = 1.1)+
   xlim(35,110)+
   labs(title = "Test Scores", subtitle = "Average Increase")+
   theme_bw()+
@@ -276,7 +290,7 @@ The density graph displays an improvement in the average scores.
 
 
 #### d. Write a brief paragraph explaining your findings to the tutoring center, based on the test chosen in part c.
-Even though the scores have improved, the grade average is not greater than 5 points. The tutoring department should continue working on the reading comprehension program. Yet, the reading comprehension program is not ready to be integrated into its curriculum. 
+Even though the scores have improved, the grade average is not greater than 5 points. The tutoring department should continue working on the reading comprehension program. Yet, the reading comprehension program is not ready to be integrated into its curriculum. Moreover, a bigger sample size will help to confidently reach a conclusion.
 
 ### Function Tester 
 ```{r}
