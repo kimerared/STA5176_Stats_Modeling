@@ -87,7 +87,7 @@ H0: $\mu Credit = \mu Mortgage$\
 H1: $\mu Credit \ne \mu Mortgage$\
 
 ### Test
-$\T_0$ = 683
+T0 = 683
 
 ### p-Value
 p < 0.001
@@ -152,7 +152,7 @@ bonus_data %>%
 #### d. Write a brief paragraph explaining your findings to management, based on the test chosen in part c.
 
 ## Conclusion
-The T-test demonstrated that there was a different of bonuses earned for both groups. Especially towards the right tail, we can find some outliers.
+The T-test demonstrated that there was a difference of bonuses earned for both groups. Especially for the credit department, there are some outliers towards the right tail.
 
 ## Question 2: 
 
@@ -177,6 +177,7 @@ reading_data <- data %>%
 # p-Value < 0.001; Reject H0
 t.test(data$Post, data$Pre,
        paired = TRUE,
+       mu = 5,
        alternative = "greater")
 ```
 ### Hypothesis
@@ -184,19 +185,20 @@ H0: $\mu Post \le \mu Pre$\
 H1: $\mu Post > \mu Pre$\
 
 ### Test
-t0 = 4.9496
+t0 = -1.56
 
 ### p-Value
-p < 0.001
+p = 0.94
 
 ## Conclusion
-Reject H0 at the $\alpha$=0.05 level. There is sufficient evidence to suggest that the program raises comprehension test averages by at least 5 points.
+Keep H0 at the $\alpha$=0.05 level. There is insufficient evidence to suggest that the program raises comprehension test averages by at least 5 points.
 
 #### b. Use the appropriate nonparametric test to determine if the program raises comprehension test averages by at least 5 points. Test at the &alpha;=0.05 level.
 
 ```{r, echo=TRUE}
 wilcox.test(reading_data$Post, reading_data$Pre,
             paired = TRUE,
+            mu = 5,
             alternative = "greater")
 ```
 ### Hypothesis
@@ -204,13 +206,13 @@ H0: $\mu Post \le \mu Pre$\
 H1: $\mu Post > \mu Pre$\
 
 ### Test
-t0 = 414
+t0 = 124.5
 
 ### p-Value
-p < 0.001
+p = 0.91
 
 ## Conclusion
-Reject H0 at the $\alpha$=0.05 level. There is sufficient evidence to suggest that the program raises comprehension test averages by at least 5 points.
+Keep H0 at the $\alpha$=0.05 level. There is insufficient evidence to suggest that the program raises comprehension test averages by at least 5 points.
 
 #### c. Assess the assumption(s) associated with the *t*-test in part a. In your assessment, determine if the *t*-test or the corresponding nonparametric test should be reported.
 
@@ -261,7 +263,7 @@ data_long %>%
   group_by(Test) %>% 
   ggplot(aes(x = Scores, color = Scores, fill = Test)) +
   geom_density(alpha=0.2)+
-  geom_vline(data = summary_table, aes(xintercept=Avg, color=Test), linetype="dashed", size = 1.1)+
+  geom_vline(data = summary_long_htable, aes(xintercept=Avg, color=Test), linetype="dashed", size = 1.1)+
   xlim(35,110)+
   labs(title = "Test Scores", subtitle = "Average Increase")+
   theme_bw()+
@@ -274,22 +276,24 @@ The density graph displays an improvement in the average scores.
 
 
 #### d. Write a brief paragraph explaining your findings to the tutoring center, based on the test chosen in part c.
-The tutoring department pilot study was a success. The reading comprehension should be integrated to their curriculum.
-Moreover, record the scores for 3-6 months to have a bigger sample data.
+Even though the scores have improved, the grade average is not greater than 5 points. The tutoring department should continue working on the reading comprehension program. Yet, the reading comprehension program is not ready to be integrated into its curriculum. 
 
 ### Function Tester 
 ```{r}
 # bonus frequency
-freq_test <- function(data, group_variable, num_variable){
+freq_test <- function(data, group_variable, num_variable, x_num, group_legend){
   data %>% 
     ggplot(aes(x = num_variable, colour = group_variable, fill = group_variable)) +
-    geom_freqpoly(bins = 15)+
+    geom_freqpoly(bins = 10)+
     theme_bw()+
-    scale_color_manual(values = custom_density_hue)
+    scale_color_manual(values = custom_density_hue)+
+    xlab(x_num)+
+    guides(fill = guide_legend(title = group_legend))
+    # theme(legend.title = element_text(group_legend))
 }
 
 # bonus frequency
-freq_test(bonus_data, bonus_data$Department, bonus_data$Bonus)
+freq_test(bonus_data, bonus_data$Department, bonus_data$Bonus, "Bonus", "Department")
 # reading frequency
-freq_test(data_long, data_long$Test, data_long$Scores)
+freq_test(data_long, data_long$Test, data_long$Scores, "Scores", "Test")
 ```

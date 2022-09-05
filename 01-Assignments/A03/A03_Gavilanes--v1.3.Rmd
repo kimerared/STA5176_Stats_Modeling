@@ -26,8 +26,24 @@ data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1q0Ouhr6hGB
 clean_data <- data %>% 
   # delete empty rows
   drop_na()
-  
+
+# ---CUSTOM COLORS---
+custom_green_dark = "#DeF7E9"
+custom_green_light = "#71CA97"
+custom_gray = "#3D3D3D"
 # ---FUNCTIONS---
+# Change default table format
+change_table_format <- function(data_table){
+  # local variables
+  first_column <- data_table[1]
+  dataframe_length <- NCOL(data_table)
+  # format
+  formattable(data_table, align = c("l",rep("c", dataframe_length - 1)),
+              list(first_column = formatter("span", style = ~ style(color = custom_gray, font.weight = "bold")),
+              area(row = 1, col = 2:dataframe_length) ~ color_tile(custom_green_dark, custom_green_light)
+              )#/end list
+              )#/end formattable
+}
 # get custom summary statistics
 # !! sym() creates a symbol from a string
 get_custom_summary <- function(data_table, category, values){
@@ -40,25 +56,6 @@ get_custom_summary <- function(data_table, category, values){
               Max = max(!! sym(values)),
               IQRange = IQR(!! sym(values))
               )
-}
-# change default table format
-change_table_format <- function(data_table){
-  # ---LOCAL VARIABLES---
-  # first_column
-  first_colum <- select(data, 1)
-  # row number, or range
-  row_range = 1
-  # column number, or range
-  col_range = 2:7
-  # custom colors
-  custom_green_dark = "#DeF7E9"
-  custom_green_light = "#71CA97"
-  custom_gray = "#3d3d3d"
-  # format
-  formattable(data_table, align =c("l",rep("c", NCOL(data_table) - 1)),
-              list(first_colum = formatter("span", style = ~ style(color = custom_gray, font.weight = "bold")),
-              area(row = row_range, col = col_range) ~ color_tile(custom_green_dark, custom_green_light)
-              ))
 }
 ```
 
@@ -106,31 +103,13 @@ Reject H0 at the $\alpha$=0.01 level. There is sufficient evidence to suggest th
 #### 4. (Challenge!) Construct a graph that will help you explain your findings to management.
 
 ```{r, echo=TRUE}
-data %>% 
+clean_data %>% 
   ggplot(aes(x = Department, y = Bonus, fill=Department))+
   geom_boxplot(alpha=0.45, size=1)+
   scale_fill_manual(values = c("Credit" = "cyan",
                                "Mortgage" = "magenta"))+
   theme_bw()
   
-```
-
-### Second Graph
-
-```{r}
-graph_qq_plot <- function(continous_var, grouping_var){
-  data_table %>%
-    group_by(grouping_var) %>% 
-    mutate(diff = continous_var - grouping_var) %>%
-    ggplot(aes(sample = diff)) +
-      stat_qq(size=3) +
-      stat_qq_line() +
-      theme_bw() +
-      xlab("Theoretical") +
-      ylab("Sample")
-}
-# qq plot
-graph_qq_plot(clean_data, 'Bonus', 'Department')
 ```
 
 #### 5. Write a brief paragraph explaining your findings to management. Are there any actions that should be considered as a result of your analysis?

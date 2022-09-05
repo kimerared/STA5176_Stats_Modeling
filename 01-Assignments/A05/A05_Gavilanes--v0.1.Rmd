@@ -253,7 +253,7 @@ change_table_format(summary_table)
 # reading frequency
 data_long %>% 
   ggplot(aes(x = Scores, colour = Test, fill = Test)) +
-  geom_freqpoly(bins = 15)+
+  geom_freqpoly(bins = 50)+
   theme_bw()
 
 # reading density
