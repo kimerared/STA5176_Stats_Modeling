@@ -160,6 +160,7 @@ The nonparametric QQ test should be reported.
 #### d. Write a brief paragraph explaining your findings to management, based on the test chosen in part c.
 
 ## Conclusion
+
 The T-test demonstrated a difference of bonuses earned for both groups. 
 However, during the assumption, QQ plot discrepancies are shown. Especially for the credit department, there are some outliers towards the right tail. The mortgage department probably will benefit and learn from the credit department process.
 
@@ -310,4 +311,16 @@ freq_test <- function(data, group_variable, num_variable, x_num, group_legend){
 freq_test(bonus_data, bonus_data$Department, bonus_data$Bonus, "Bonus", "Department")
 # reading frequency
 freq_test(data_long, data_long$Test, data_long$Scores, "Scores", "Test")
+
+# shapiro test
+credit_department <- bonus_data %>%
+  filter(Department == "Credit") %>% 
+  select(Bonus)
+
+credit_department
+
+shapiro.test(bonus_dat0a$Bonus)
+
+
+shapiro.test(reading_0data$Pre)
 ```
