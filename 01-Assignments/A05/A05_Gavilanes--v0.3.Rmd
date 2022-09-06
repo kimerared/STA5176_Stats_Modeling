@@ -121,7 +121,7 @@ mortgage_qq
 # Combine both graphs
 grid.arrange(credit_qq, mortgage_qq, nrow=1, bottom = "Bonus", top = "Nonparametric Test")
 ```
-### Frequency Table
+### Assumption Supporting Graphs
 ```{r}
 # mean by department
 groups_mean <- bonus_data %>% 
@@ -231,7 +231,6 @@ Keep H0 at the $\alpha$=0.05 level. There is insufficient evidence to suggest th
 
 ### Assumption
 
-
 ```{r}
 graph_paired_qq_plot <- function(data_table, after_sample, before_sample){
   data_table %>%
@@ -248,7 +247,7 @@ graph_paired_qq_plot <- function(data_table, after_sample, before_sample){
 graph_paired_qq_plot(reading_data, reading_data$Post, reading_data$Pre)
 ```
 
-### Frequency Reading
+### Assumption Supporting Graphs
 ```{r}
 # mean and median by dependent samples
 # transform table from wide to long
@@ -291,36 +290,7 @@ data_long %>%
 ```
 ## Assumption Conclusion
 The T-test should be reported since the test scores are normally distributed. It is adequate to assume normality.
-The density graph displays an improvement in the average scores.
-
+The density graph displays an improvement in the average scores; however, it is not greater than 5 points.
 
 #### d. Write a brief paragraph explaining your findings to the tutoring center, based on the test chosen in part c.
 Even though the scores have improved, the grade average is not greater than 5 points. The tutoring department should continue working on the reading comprehension program. Yet, the reading comprehension program is not ready to be integrated into its curriculum. Moreover, a bigger sample size will help to confidently reach a conclusion.
-
-### Function Tester 
-```{r}
-# bonus frequency
-freq_test <- function(data, group_variable, num_variable, x_num, group_legend){
-  data %>% 
-    ggplot(aes(x = num_variable, colour = group_variable, fill = group_variable)) +
-    geom_freqpoly(bins = 10)+
-    theme_bw()+
-    scale_color_manual(values = custom_density_hue)+
-    xlab(x_num)+
-    guides(fill = guide_legend(title = group_legend))
-    # theme(legend.title = element_text(group_legend))
-}
-
-# bonus frequency
-freq_test(bonus_data, bonus_data$Department, bonus_data$Bonus, "Bonus", "Department")
-# reading frequency
-freq_test(data_long, data_long$Test, data_long$Scores, "Scores", "Test")
-
-# shapiro test
-# if p-value > 0.05 normally distributed
-# if p-value <= 0.05 NOT normally distributed 
-shapiro.test(bonus_data$Bonus)# Not
-
-
-shapiro.test(reading_data$Pre)# normality
-```
