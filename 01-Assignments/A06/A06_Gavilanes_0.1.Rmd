@@ -7,7 +7,7 @@ editor: source
 ---
 
 ```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
-install.packages("EnvStats")
+#install.packages("EnvStats")
 library(tidyverse)
 library(gsheet)
 library(EnvStats)
@@ -28,10 +28,10 @@ clean_data <- data %>%
 #### a. Construct the 99% confidence interval for the standard deviation of math scores for 4th graders.
 
 ```{r, echo=TRUE}
-math_4grade <- clean_data %>% 
+grade4 <- clean_data %>% 
   filter(Grade == 4)
 
-varTest(math_4grade$Math,
+varTest(grade4$Math,
         conf.level = 0.99)
 low_ci = sqrt(47.12)
 high_ci = sqrt(242.86)
@@ -42,9 +42,25 @@ After taking the square root,
 The 99% CI for $\sigma$\ is (6.86, 15.58)
 
 #### b. Use the confidence interval found in part A to determine if the standard deviation is smaller than 10.
-The UCL, or lower interval is lower than 10.
+```{r}
+varTest(grade4$Math,
+        conf.level = 0.99,
+        alternative = "less",
+        sigma.squared = 100)
+```
+### Hypothesis:  
+$H_0: \ \sigma \ge 10$ OR $\sigma^2 \ge 100$
+$H_1: \ \sigma < 10$ OR $\sigma^2 < 100$
 
+### Test Statistic
+$\chi^2_0 = 19.51$
+ 
+### p-Value
+$p = 0.45$
 
+## Conclusion
+Keep $H_0$, There is sufficient evidence to suggest that the standard deviation of math scores for 4th graders is less than 10.
+ 
 ## Question 2:
 
 **Recall the following dataset from the second week. A large credit union awards quarterly bonuses to its employees. To ensure fairness across departments, data on the bonuses are regularly reviewed for equality. Consider the data in the following Google Sheet, which includes the bonus percentage for each employee in two departments.**
