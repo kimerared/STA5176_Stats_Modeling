@@ -31,8 +31,8 @@ bonus_data <- data %>%
   drop_na()
 
 # ---CUSTOM COLORS---
-custom_green_dark = "#DeF7E9"
-custom_green_light = "#71CA97"
+custom_green_dark = "#71CA97"
+custom_green_light = "#DeF7E9"
 custom_gray = "#3D3D3D"
 custom_orange = "#FC7307"
 custom_purple = "#5A18C9"
@@ -47,7 +47,7 @@ change_table_format <- function(data_table){
   # format
   formattable(data_table, align = c("l",rep("c", dataframe_length - 1)),
               list(first_column = formatter("span", style = ~ style(color = custom_gray, font.weight = "bold")),
-              area(row = 1, col = 2:dataframe_length) ~ color_tile(custom_green_dark, custom_green_light)
+              area(row = 1, col = 2:dataframe_length) ~ color_tile(custom_green_light, custom_green_dark)
               )#/end list
               )#/end formattable
 }
@@ -82,8 +82,8 @@ wilcox.test(bonus_data$Bonus ~ bonus_data$Department,
 ```
 
 ### Hypothesis
-H0: $\mu Credit = \mu Mortgage$\
-H1: $\mu Credit \ne \mu Mortgage$\
+$H_0: \ M credit = \ M mortgage$\
+$H_1: \ M credit \ne \ M mortgage$\
 
 ### Test
 T0 = 683
@@ -101,7 +101,7 @@ Reject H0 at the $\alpha$=0.01 level. There is sufficient evidence to suggest th
 credit_qq <- bonus_data %>% 
   filter(Department == "Credit") %>% 
   ggplot(aes(sample = Bonus)) +
-  stat_qq(size=3, alpha = 0.4, color = "cyan") +
+  stat_qq(size=3, alpha = 0.6, color = custom_orange) +
   stat_qq_line() +
   theme_minimal() +
   xlab("Theoretical Credit") +
@@ -111,7 +111,7 @@ credit_qq
 mortgage_qq <- bonus_data %>% 
   filter(Department == "Mortgage") %>% 
   ggplot(aes(sample = Bonus)) +
-    stat_qq(size=3, alpha = 0.4, color = "magenta") +
+    stat_qq(size=3, alpha = 0.6, color = "magenta") +
     stat_qq_line() +
     theme_minimal() +
     xlab("Theoretical Mortgage") +
@@ -126,8 +126,7 @@ grid.arrange(credit_qq, mortgage_qq, nrow=1, bottom = "Bonus", top = "Nonparamet
 # mean by department
 groups_mean <- bonus_data %>% 
   group_by(Department) %>% 
-  summarise(Mean = mean(Bonus),
-            Median = median(Bonus))
+  summarise(Median = median(Bonus))
 change_table_format(groups_mean)
 
 # bonus histogram
@@ -146,7 +145,7 @@ bonus_data %>%
 bonus_data %>% 
   group_by(Department) %>% 
   ggplot(aes(x = Bonus, colour = Bonus, fill = Department)) +
-  geom_density(alpha = 0.4)+
+  geom_density(alpha = 0.3)+
   geom_vline(data = groups_mean, aes(xintercept=Median, color=Department), linetype="dashed", size = 1.1)+
   xlim(5,13)+
   labs(title = "Credit & Mortgage", subtitle = "Median Bonus")+
@@ -161,9 +160,8 @@ The Wilcoxon nonparametric test and the QQ graph should be reported since the da
 #### d. Write a brief paragraph explaining your findings to management, based on the test chosen in part c.
 
 ## Conclusion
-
-The T-test demonstrated a difference of bonuses earned for both groups. 
-However, during the assumption, QQ plot discrepancies are shown. Especially for the credit department, there are some outliers towards the right tail.
+The Wilcoxon nonparametric test should be reported since the data is not normally distributed.
+During the assumption, the QQ plot has shown some discrepancies. Especially for the credit department, there are some outliers towards the right tail.
 
 ## Question 2: 
 
@@ -215,8 +213,8 @@ wilcox.test(reading_data$Post, reading_data$Pre,
             exact = FALSE)
 ```
 ### Hypothesis
-$H_0$: $\mu Post - \mu Pre \le 5$\
-$H_1$: $\mu Post - \mu Pre > 5$\
+$H_0$: $\ M post - \ M pre \le 5$\
+$H_1$: $\ M post - \ M pre > 5$\
 
 ### Test Statistic
 $t_0 = 124.5$
@@ -225,7 +223,7 @@ $t_0 = 124.5$
 p = 0.91
 
 ## Conclusion
-Keep H0 at the $\alpha$=0.05 level. There is insufficient evidence to suggest that the program raises comprehension test averages by at least 5 points.
+Keep H0 at the $\alpha$=0.05 level. There is not sufficient evidence to suggest that the program raises comprehension test averages by at least 5 points.
 
 #### c. Assess the assumption(s) associated with the *t*-test in part a. In your assessment, determine if the *t*-test or the corresponding nonparametric test should be reported.
 
@@ -236,7 +234,7 @@ graph_paired_qq_plot <- function(data_table, after_sample, before_sample){
   data_table %>%
     mutate(diff = after_sample - before_sample) %>%
     ggplot(aes(sample = diff)) +
-    stat_qq(size=3, alpha = 0.6) +
+    stat_qq(size=3, alpha = 0.6, color = custom_orange) +
     stat_qq_line() +
     theme_bw() +
     labs(title = "Tutoring Center", subtitle = "Reading Comprehension Test")+
@@ -249,7 +247,6 @@ graph_paired_qq_plot(reading_data, reading_data$Post, reading_data$Pre)
 
 ### Assumption Supporting Graphs
 ```{r}
-# mean and median by dependent samples
 # transform table from wide to long
 data_long <- reading_data %>% 
   drop_na() %>% 
@@ -257,11 +254,11 @@ data_long <- reading_data %>%
                names_to = "Test", 
                values_to = "Scores")
 # summary statistics
+# median by dependent samples
 summary_long_table <- data_long %>% 
   group_by(Test) %>%
   select(Test, Scores) %>% 
-  summarise_all(list(Avg = mean,
-                     Median = median))
+  summarise_all(list(Median = median))
 
 change_table_format(summary_long_table)
 
@@ -280,8 +277,8 @@ data_long %>%
 data_long %>% 
   group_by(Test) %>% 
   ggplot(aes(x = Scores, color = Scores, fill = Test)) +
-  geom_density(alpha=0.2)+
-  geom_vline(data = summary_long_table, aes(xintercept=Avg, color=Test), linetype="dashed", size = 1.1)+
+  geom_density(alpha=0.3)+
+  geom_vline(data = summary_long_table, aes(xintercept=Median, color=Test), linetype="dashed", size = 1.1)+
   xlim(35,110)+
   labs(title = "Test Scores", subtitle = "Average Increase")+
   theme_bw()+
@@ -290,7 +287,6 @@ data_long %>%
 ```
 ## Assumption Conclusion
 The T-test should be reported since the test scores are normally distributed. It is adequate to assume normality.
-The density graph displays an improvement in the average scores; however, it is not greater than 5 points.
 
 #### d. Write a brief paragraph explaining your findings to the tutoring center, based on the test chosen in part c.
-Even though the scores have improved, the grade average is not greater than 5 points. The tutoring department should continue working on the reading comprehension program. Yet, the reading comprehension program is not ready to be integrated into its curriculum. Moreover, a bigger sample size will help to confidently reach a conclusion.
+Even though the scores have improved, the grade average is not greater than 5 points. The tutoring department should continue working on the reading comprehension program. Yet, the reading comprehension program is not ready to be integrated into its curriculum. Moreover, a bigger sample size will help to confidently reach a final conclusion.
