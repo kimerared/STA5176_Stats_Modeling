@@ -2684,8 +2684,8 @@ mean difference
 <section id="use-the-appropriate-hypothesis-test-to-determine-if-the-program-raises-comprehension-test-averages-by-at-least-5-points.-test-at-the-α0.05-level." class="level4">
 <h4 class="anchored" data-anchor-id="use-the-appropriate-hypothesis-test-to-determine-if-the-program-raises-comprehension-test-averages-by-at-least-5-points.-test-at-the-α0.05-level.">3. Use the appropriate hypothesis test to determine if the program raises comprehension test averages by at least 5 points. Test at the α=0.05 level.</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># H0: Post &lt;= Pre</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># H1: Post &gt; Pre</span></span>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># H0: Post - Pre &lt;= 5</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># H1: Post - Pre &gt; 5</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># mu = 5</span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(data<span class="sc">$</span>Post, data<span class="sc">$</span>Pre,</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
@@ -2708,8 +2708,8 @@ mean difference
 </section>
 <section id="hypothesis" class="level3">
 <h3 class="anchored" data-anchor-id="hypothesis">Hypothesis</h3>
-<p>H0: <span class="math inline">\(\mu Post \le \mu Pre\)</span><br>
-H1: <span class="math inline">\(\mu Post &gt; \mu Pre\)</span><br>
+<p>H0: <span class="math inline">\(\mu Post - \mu Pre \le 5\)</span><br>
+H1: <span class="math inline">\(\mu Post - \mu Pre &gt; 5\)</span><br>
 </p>
 </section>
 <section id="test" class="level3">

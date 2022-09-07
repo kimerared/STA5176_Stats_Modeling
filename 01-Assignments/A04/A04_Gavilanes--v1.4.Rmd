@@ -82,8 +82,8 @@ The 95% CI is (2.23, 5.37)
 
 ```{r, echo=TRUE}
 
-# H0: Post <= Pre
-# H1: Post > Pre
+# H0: Post - Pre <= 5
+# H1: Post - Pre > 5
 # mu = 5
 t.test(data$Post, data$Pre,
        paired = TRUE,
@@ -92,8 +92,8 @@ t.test(data$Post, data$Pre,
 
 ```
 ### Hypothesis
-H0: $\mu Post \le \mu Pre$\
-H1: $\mu Post > \mu Pre$\
+H0: $\mu Post - \mu Pre \le 5$\
+H1: $\mu Post - \mu Pre > 5$\
 
 ### Test
 t0 = -1.56
