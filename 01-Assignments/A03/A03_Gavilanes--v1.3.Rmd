@@ -82,8 +82,7 @@ The 95% CI $\mu Credit - \mu Mortgage$ is (0.36, 1.94)
 ```{r, echo=TRUE}
 # two-sided, two-sample t-test
 t.test(data$Bonus ~ data$Department,
-       var.equal = TRUE,
-       )
+       var.equal = TRUE)
 ```
 
 ### Hypothesis
