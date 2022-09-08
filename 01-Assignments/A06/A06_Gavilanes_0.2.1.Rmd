@@ -75,10 +75,10 @@ t.test(bonus_data$Bonus ~ bonus_data$Department)
 - $H_1$: $\mu Credit \ne \mu Mortgage$\
 
 ### Test Statistic
-$t_0 = 3.9$
+- $T_0 = 3.9$
 
 ### p-Value
-$p < 0.001$
+- $p < 0.001$
 
 ## Conclusion
 Reject $H_0$ at the $\alpha$=0.01 level. There is sufficient evidence to suggest that the two departments are given different bonuses.
@@ -93,10 +93,10 @@ var.test(credit$Bonus, mortgage$Bonus)
 - $H_1$: $\sigma^2 Credit\ \ne \sigma^2 Mortgage$
 
 ### Test Statistic
-$t_0 = 0.71$
+- $T_0 = 0.71$
 
 ### p-Value
-$p = 0.36$
+- $p = 0.36$
 
 ## Conclusion
 Keep $H_0$ at the $\alpha$=0.01 level. There is not sufficient evidence to suggest that the two departments have different variance.
@@ -113,10 +113,10 @@ t.test(bonus_data$Bonus ~ bonus_data$Department,
 - $H_1$: $\mu Credit \ne \mu Mortgage$\
 
 ### Test Statistic
-$t_0 = 4.04$
+- $T_0 = 4.04$
 
 ### p-Value
-$p < 0.001$
+- $p < 0.001$
 
 ## Conclusion
 Reject $H_0$ at the $\alpha$=0.01 level. There is sufficient evidence to suggest that the two departments are given different bonuses.

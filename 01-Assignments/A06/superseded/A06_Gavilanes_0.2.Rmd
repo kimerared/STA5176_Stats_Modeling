@@ -1,0 +1,124 @@
+---
+title: "Statistical Inference on Variances - Week 4, Lecture 1"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+
+```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
+#install.packages("EnvStats")
+library(tidyverse)
+library(gsheet)
+library(EnvStats)
+library(stats)
+```
+
+## Question 1: 
+
+**Recall the following dataset from the first week. We have data from 22 elementary schools located in a Florida school district in 1999. Reading and math scores from a standardized test, percent minority of the particular grade level in that school, percent in poverty of the particular grade level in that school, and total number of students in that grade at that school are included.**
+
+```{r, echo = TRUE}
+data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1cVGLLdILMI34xjnzHfJNHua6fJROJwCzUBFgV22OLT4/edit#gid=0"))
+
+clean_data <- data %>% 
+  drop_na()
+```
+
+#### a. Construct the 99% confidence interval for the standard deviation of math scores for 4th graders.
+
+```{r, echo=TRUE}
+grade4 <- clean_data %>% 
+  filter(Grade == 4)
+
+varTest(grade4$Math,
+        conf.level = 0.99)
+# Confidence Intervals
+low_ci <- round(sqrt(47.1247),2)
+high_ci <- round(sqrt(242.8550),2)
+
+```
+
+- The 99% CI for $\sigma^2$ is (47.12, 242.86)
+- After taking the square root.
+- The 99% CI for $\sigma$ is (`r low_ci`, `r high_ci`)
+
+
+#### b. Use the confidence interval found in part A to determine if the standard deviation is smaller than 10.
+
+
+The standard deviation is not smaller than 10.
+ 
+## Question 2:
+
+**Recall the following dataset from the second week. A large credit union awards quarterly bonuses to its employees. To ensure fairness across departments, data on the bonuses are regularly reviewed for equality. Consider the data in the following Google Sheet, which includes the bonus percentage for each employee in two departments.**
+
+```{r, echo = TRUE}
+data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1q0Ouhr6hGBDp-5oyQuYGcsWTLrsayywVHJS7o17Sm6Y/edit?usp=sharing"))
+
+bonus_data <- data %>% 
+  drop_na()
+# Variables
+mortgage <- bonus_data %>% 
+  filter(Department == "Mortgage") 
+credit <- bonus_data %>% 
+  filter(Department == "Credit") 
+```
+
+#### a. (From two weeks ago!) Use the appropriate *t*-test to determine if the two departments are given different bonus amounts. Test at the &alpha;=0.01 level.
+
+```{r, echo=TRUE}
+t.test(bonus_data$Bonus ~ bonus_data$Department)
+```
+### Hypothesis
+- $H_0$: $\mu Credit = \mu Mortgage$\
+- $H_1$: $\mu Credit \ne \mu Mortgage$\
+
+### Test Statistic
+- $T_0 = 3.9$
+
+### p-Value
+- $p < 0.001$
+
+## Conclusion
+Reject $H_0$ at the $\alpha$=0.01 level. There is sufficient evidence to suggest that the two departments are given different bonuses.
+
+#### b. Use the appropriate test to show that we meet the assumption of equal variance.
+
+```{r, echo=TRUE}
+var.test(credit$Bonus, mortgage$Bonus)
+```
+### Hypothesis
+- $H_0$: $\sigma^2 Credit$ = $\sigma^2 Mortgage$
+- $H_1$: $\sigma^2 Credit\ \ne \sigma^2 Mortgage$
+
+### Test Statistic
+- $T_0 = 0.71$
+
+### p-Value
+- $p = 0.36$
+
+## Conclusion
+Keep $H_0$ at the $\alpha$=0.01 level. There is not sufficient evidence to suggest that the two departments have different variance.
+
+#### c. Change the hypothesis used in part A to account for equal variances. Do you reach a different conclusion?
+
+```{r, echo=TRUE}
+t.test(bonus_data$Bonus ~ bonus_data$Department,
+       var.equal = TRUE)
+
+```
+### Hypothesis
+- $H_0$: $\mu Credit = \mu Mortgage$\
+- $H_1$: $\mu Credit \ne \mu Mortgage$\
+
+### Test Statistic
+- $T_0 = 4.04$
+
+### p-Value
+- $p < 0.001$
+
+## Conclusion
+Reject $H_0$ at the $\alpha$=0.01 level. There is sufficient evidence to suggest that the two departments are given different bonuses.
+
+The conclusions are the same for both A and C. 
