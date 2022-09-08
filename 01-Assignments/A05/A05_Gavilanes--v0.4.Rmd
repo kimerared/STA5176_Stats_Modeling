@@ -134,7 +134,7 @@ bonus_data %>%
   geom_density(alpha = 0.3)+
   geom_vline(data = groups_mean, aes(xintercept=Median, color=Department), linetype="dashed", size = 1.1)+
   xlim(5,13)+
-  labs(title = "Credit & Mortgage", subtitle = "Median Bonus")+
+  labs(title = "Bonuses by Department", subtitle = "Density Plot")+
   theme(legend.position="bottom")+
   theme_bw()+
   scale_fill_manual(values = custom_density_hue)+
@@ -224,7 +224,7 @@ graph_paired_qq_plot <- function(data_table, after_sample, before_sample){
     stat_qq(size=3, alpha = 0.6, color = custom_orange) +
     stat_qq_line() +
     theme_bw() +
-    labs(title = "Tutoring Center", subtitle = "Reading Comprehension Test")+
+    labs(title = "Reading Comprehension Test", subtitle = "QQ Plot")+
     xlab("Theoretical Reading") +
     ylab("Sample Reading")
 }
@@ -256,7 +256,7 @@ data_long %>%
   geom_density(alpha=0.3)+
   geom_vline(data = summary_long_table, aes(xintercept=Median, color=Test), linetype="dashed", size = 1.1)+
   xlim(35,110)+
-  labs(title = "Test Scores", subtitle = "Average Increase")+
+  labs(title = "Reading Comprehension Test", subtitle = "Density Plot")+
   theme_bw()+
   scale_fill_manual(values = custom_density_hue)+
   scale_color_manual(values = custom_density_hue)
