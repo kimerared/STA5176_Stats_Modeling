@@ -141,7 +141,7 @@ bonus_data %>%
   scale_color_manual(values = custom_density_hue)
 
 ```
-The assumption of normality may not be valid; therefore, the report uses the Wilcoxon nonparametric test.
+The assumption of normality may not be valid; therefore, the report should use the Wilcoxon nonparametric test.
 Furthermore, the QQ plot shows some discrepancies for the credit department, with some outliers towards the right tail. The density graph displays the median for both departments. 
 
 #### d. Write a brief paragraph explaining your findings to management, based on the test chosen in part c.
@@ -177,8 +177,8 @@ t.test(data$Post, data$Pre,
        alternative = "greater")
 ```
 ### Hypothesis
-- $H_0$: $\mu Post - \mu Pre \le 5$\
-- $H_1$: $\mu Post - \mu Pre > 5$\
+- $H_0$ : $\mu Post - \mu Pre \le 5$\
+- $H_1$ : $\mu Post - \mu Pre > 5$\
 
 ### Test Statistic
 - $T_0 = -1.56$
