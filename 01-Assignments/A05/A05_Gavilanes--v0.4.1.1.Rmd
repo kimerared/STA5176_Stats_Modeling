@@ -119,26 +119,29 @@ mortgage_qq <- bonus_data %>%
 # Combine both graphs
 grid.arrange(credit_qq, mortgage_qq, nrow=1, bottom = "Bonus", top = "QQ Plot of Bonuses by Department")
 ```
-### Assumption Supporting Graphs
+### Assumption Supporting Graph
 ```{r}
-# mean by department
-groups_mean <- bonus_data %>% 
+# median by department
+groups_median <- bonus_data %>% 
   group_by(Department) %>% 
   summarise(Median = median(Bonus))
-change_table_format(groups_mean)
+change_table_format(groups_median)
 
 # bonus density
 bonus_data %>% 
   group_by(Department) %>% 
   ggplot(aes(x = Bonus, colour = Bonus, fill = Department)) +
-  geom_density(alpha = 0.3)+
-  geom_vline(data = groups_mean, aes(xintercept=Median, color=Department), linetype="dashed", size = 1.1)+
-  xlim(5,13)+
+  geom_density(data = bonus_data, aes(color = Department), alpha = 0.25)+
+  geom_vline(data = groups_median, aes(xintercept=Median, color=Department), 
+             linetype="dashed", size = 1.1)+
+  annotate("text", x=9, y=0.1, label="Median", angle=90, size=6, color=custom_purple)+
   labs(title = "Bonuses by Department", subtitle = "Density Plot")+
+  ylab("Department")+
   theme(legend.position="bottom")+
   theme_bw()+
   scale_fill_manual(values = custom_density_hue)+
-  scale_color_manual(values = custom_density_hue)
+  scale_color_manual(values = custom_density_hue)+
+  scale_x_continuous(labels = scales::percent_format(scale = 1), limits = c(5,13))
 
 ```
 The assumption of normality may not be valid; therefore, the report should use the Wilcoxon nonparametric test.
@@ -147,7 +150,7 @@ Furthermore, the QQ plot shows some discrepancies for the credit department, wit
 #### d. Write a brief paragraph explaining your findings to management, based on the test chosen in part c.
 
 ## Conclusion
-The mortgage department needs improvement. Perhaps the credit department can share insights into business processes to help the mortgage department. The mortgage department needs further investigation.
+The mortgage department needs improvement. Perhaps the credit department can share insights into its business processes to help the mortgage department. The mortgage department needs further investigation.
 
 
 ## Question 2: 
@@ -232,7 +235,7 @@ graph_paired_qq_plot <- function(data_table, after_sample, before_sample){
 graph_paired_qq_plot(reading_data, reading_data$Post, reading_data$Pre)
 ```
 
-### Assumption Supporting Graphs
+### Assumption Supporting Graph
 ```{r}
 # transform table from wide to long
 data_long <- reading_data %>% 
@@ -254,8 +257,11 @@ data_long %>%
   group_by(Test) %>% 
   ggplot(aes(x = Scores, color = Scores, fill = Test)) +
   geom_density(alpha=0.3)+
-  geom_vline(data = summary_long_table, aes(xintercept=Median, color=Test), linetype="dashed", size = 1.1)+
-  xlim(35,110)+
+  geom_vline(data = summary_long_table, aes(xintercept=Median, color=Test), 
+             linetype="dashed", size = 1.1)+
+  annotate("text", x=70, y=0.01, label="Median", angle=90, size=6, color= custom_purple) + 
+  xlim(35,112)+
+  ylab("Reading Test")+
   labs(title = "Reading Comprehension Test", subtitle = "Density Plot")+
   theme_bw()+
   scale_fill_manual(values = custom_density_hue)+
@@ -265,4 +271,4 @@ data_long %>%
 It is adequate to assume normality; thus, the report should use the T-test.
 
 #### d. Write a brief paragraph explaining your findings to the tutoring center, based on the test chosen in part c.
-Even though the scores have improved, the grade average is not greater than 5 points. The tutoring department should continue working on the reading comprehension program. Yet, the reading comprehension program is not ready to be integrated into its curriculum. Moreover, a bigger sample size will help helpful.
+Even though the scores have improved, the grade average is not greater than 5 points. The tutoring department should continue working on the reading comprehension program. Yet, the reading comprehension program is not ready to be integrated into its curriculum. Moreover, a bigger sample size will be helpful.
