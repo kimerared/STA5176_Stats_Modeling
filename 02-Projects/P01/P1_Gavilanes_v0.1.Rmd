@@ -39,10 +39,13 @@ data_long <- basketball %>%
                names_to = "Time", 
                values_to = "Scores")
 # ---CUSTOM COLORS---
-custom_green_dark = "#DeF7E9"
-custom_green_light = "#71CA97"
-custom_gray = "#3d3d3d"
-custom_cyan_dark = "#009999"
+custom_green_dark = "#71CA97"
+custom_green_light = "#DeF7E9"
+custom_gray = "#3D3D3D"
+custom_orange = "#FC7307"
+custom_purple = "#5A18C9"
+custom_tan_light = "#F7E3D4"
+custom_density_hue = c(custom_purple,custom_orange)
 # ---FUNCTIONS---
 # f00 - Change default table format
 change_table_format <- function(data_table){
@@ -59,7 +62,7 @@ change_table_format <- function(data_table){
 # f01 - get custom summary statistics
 # !! sym() creates a symbol from a string
 get_custom_summary <- function(data_table, category, values){
-  data_table %>% 
+  summary <- data_table %>%
     group_by(!! sym(category)) %>% 
     summarise(SD = sd(!! sym(values)),
               Avg = mean(!! sym(values)),
@@ -68,21 +71,94 @@ get_custom_summary <- function(data_table, category, values){
               Max = max(!! sym(values)),
               IQRange = IQR(!! sym(values))
               )
+    return(summary)
 }
 ```
 
 **a. Find the appropriate summary statistics to summarize the data.**
 ```{r}
-
 # summary statistics with custom table format
-change_table_format(get_custom_summary(data_long, "Time", "Scores"))
+change_table_format(get_custom_summary(data_long, "Time","Scores"))
 ```
 
 **b. Perform the appropriate *t* test to determine if there is a difference in the number of free throws made during the first and second halves of games. Remember to typeset the hypothesis test results.**
-    
+```{r}
+t.test(basketball$half_1st, basketball$half_2nd,
+       paired = TRUE)
+```
+### Hypothesis
+$H_0$: $\mu 1st = \mu 2nd$\
+$H_1$: $\mu 1st \ne \mu 2nd$\
+
+### Test Statistics
+$t_0 = 2.359$
+
+### p-Value
+$p = 0.036$
+
+## Conclusion
+Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in the number of free throws made during the first and second halves of games.
+
 **c. Perform the appropriate nonparametric test to determine if there is a difference in the number of free throws made during the first and second halves of games. Remember to typeset the hypothesis test results.**
-    
+```{r}
+wilcox.test(basketball$half_1st, basketball$half_2nd,
+            exact = FALSE)
+```
+### Hypothesis
+$H_0$: $M_1st = M_2nd$\
+$H_1$: $M_1st \ne M_2nd$\
+
+### Test Statistics
+$t_0 = 104.5$
+
+### p-Value
+$p = 0.32$
+
+## Conclusion
+Keep $H_0$ at the $\alpha$=0.05 level. There is not sufficient evidence to suggest that there is a difference in the number of free throws made during the first and second halves of games.
+
 **d. Construct the necessary graphs / hypothesis tests to assess the assumptions on the *t* test.**
+
+### Assumption
+```{r}
+graph_paired_qq_plot <- function(data_table, after_sample, before_sample){
+  data_table %>%
+    mutate(diff = after_sample - before_sample) %>%
+    ggplot(aes(sample = diff)) +
+    stat_qq(size=3, alpha = 0.6, color = custom_orange) +
+    stat_qq_line() +
+    theme_bw() +
+    labs(title = "Basketball Free Throws", subtitle = "QQ Plot")+
+    xlab("Theoretical Basketball Throws") +
+    ylab("Sample Basketball Throws")
+}
+graph_paired_qq_plot(basketball, half_2, half_1)
+```
+```{r}
+# summary statistics
+# median by dependent samples
+summary_long_table <- data_long %>% 
+  group_by(Time) %>%
+  select(Time, Scores) %>% 
+  summarise_all(list(Median = median))
+
+change_table_format(summary_long_table)
+
+# Basketball density
+data_long %>% 
+  group_by(Time) %>% 
+  ggplot(aes(x = Scores, color = Scores, fill = Time)) +
+  geom_density(data = data_long, aes(color = Time), alpha = 0.25)+
+  geom_vline(data = summary_long_table, aes(xintercept=Median, color=Time), 
+             linetype="dashed", size = 1.1)+
+  annotate("text", x=12, y=0.025, label="Median", angle=90, size=5, color= custom_purple) +
+  xlim(0,30)+
+  labs(title = "Basketball Free Throws", subtitle = "Density Plot")+
+  theme_bw()+
+  scale_fill_manual(values = custom_density_hue)+
+  scale_color_manual(values = custom_density_hue)
+
+```
     
 **e. State the assumption(s) on the *t* test and provide your assessment based on results in part (d).**
     
