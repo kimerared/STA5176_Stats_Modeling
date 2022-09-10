@@ -9,6 +9,8 @@ editor: source
 ```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
 library(tidyverse)
 library(gsheet)
+library(formattable)
+library(gridExtra)
 ```
 
 
@@ -18,9 +20,62 @@ library(gsheet)
 |----------|----|----|---|----|----|----|----|---|----|----|----|---|----|
 | **2nd Half** | **17** | **9**  | **8** | **22** | **14** | **9** | **15** | **8** | **12** | **14** | **8**  | **8** | **10** |
 
+```{r}
+# clear environment
+rm(list = ls())
+# data as vector
+half_1 <- c(19, 13, 7, 21, 20, 13, 14, 8, 11, 20, 16, 9, 10)
+half_2 <- c(17, 9, 8, 22, 14, 9, 15, 8, 12, 14, 8, 8, 10)
+
+# create data frame
+basketball <- data.frame(
+  half_1st = half_1,
+  half_2nd = half_2
+)
+# transform table from wide to long
+data_long <- basketball %>% 
+  drop_na() %>% 
+  pivot_longer(cols = half_1st:half_2nd, 
+               names_to = "Time", 
+               values_to = "Scores")
+# ---CUSTOM COLORS---
+custom_green_dark = "#DeF7E9"
+custom_green_light = "#71CA97"
+custom_gray = "#3d3d3d"
+custom_cyan_dark = "#009999"
+# ---FUNCTIONS---
+# f00 - Change default table format
+change_table_format <- function(data_table){
+  # local variables
+  first_column <- data_table[1]
+  dataframe_length <- NCOL(data_table)
+  # format
+  formattable(data_table, align = c("l",rep("c", dataframe_length - 1)),
+              list(first_column = formatter("span", style = ~ style(color = custom_gray, font.weight = "bold")),
+              area(row = 1, col = 2:dataframe_length) ~ color_tile(custom_green_light, custom_green_dark)
+              )#/end list
+              )#/end formattable
+}
+# f01 - get custom summary statistics
+# !! sym() creates a symbol from a string
+get_custom_summary <- function(data_table, category, values){
+  data_table %>% 
+    group_by(!! sym(category)) %>% 
+    summarise(SD = sd(!! sym(values)),
+              Avg = mean(!! sym(values)),
+              Median = median(!! sym(values)),
+              Min = min(!! sym(values)),
+              Max = max(!! sym(values)),
+              IQRange = IQR(!! sym(values))
+              )
+}
+```
+
 **a. Find the appropriate summary statistics to summarize the data.**
 ```{r}
 
+# summary statistics with custom table format
+change_table_format(get_custom_summary(data_long, "Time", "Scores"))
 ```
 
 **b. Perform the appropriate *t* test to determine if there is a difference in the number of free throws made during the first and second halves of games. Remember to typeset the hypothesis test results.**
