@@ -28,15 +28,12 @@ half_1 <- c(19, 13, 7, 21, 20, 13, 14, 8, 11, 20, 16, 9, 10)
 half_2 <- c(17, 9, 8, 22, 14, 9, 15, 8, 12, 14, 8, 8, 10)
 
 # create data frame
-basketball <- data.frame(
-  half_1st = half_1,
-  half_2nd = half_2
-)
+basketball <- tibble(half_1,half_2)
 # transform table from wide to long
 data_long <- basketball %>% 
   drop_na() %>% 
-  pivot_longer(cols = half_1st:half_2nd, 
-               names_to = "Time", 
+  pivot_longer(cols = half_1:half_2, 
+               names_to = "Half", 
                values_to = "Scores")
 # ---CUSTOM COLORS---
 custom_green_dark = "#71CA97"
@@ -64,9 +61,9 @@ change_table_format <- function(data_table){
 get_custom_summary <- function(data_table, category, values){
   summary <- data_table %>%
     group_by(!! sym(category)) %>% 
-    summarise(SD = sd(!! sym(values)),
-              Avg = mean(!! sym(values)),
+    summarise(Avg = mean(!! sym(values)),
               Median = median(!! sym(values)),
+              SD = sd(!! sym(values)),
               Min = min(!! sym(values)),
               Max = max(!! sym(values)),
               IQRange = IQR(!! sym(values))
@@ -78,17 +75,17 @@ get_custom_summary <- function(data_table, category, values){
 **a. Find the appropriate summary statistics to summarize the data.**
 ```{r}
 # summary statistics with custom table format
-change_table_format(get_custom_summary(data_long, "Time","Scores"))
+change_table_format(get_custom_summary(data_long, "Half","Scores"))
 ```
 
 **b. Perform the appropriate *t* test to determine if there is a difference in the number of free throws made during the first and second halves of games. Remember to typeset the hypothesis test results.**
 ```{r}
-t.test(basketball$half_1st, basketball$half_2nd,
+t.test(basketball$half_1, basketball$half_2,
        paired = TRUE)
 ```
 ### Hypothesis
-$H_0$: $\mu 1st = \mu 2nd$\
-$H_1$: $\mu 1st \ne \mu 2nd$\
+$H_0$: $\mu_{1st} = \mu_{2nd}$\
+$H_1$: $\mu_{1st} \ne \mu_{2nd}$\
 
 ### Test Statistics
 $t_0 = 2.359$
@@ -99,23 +96,25 @@ $p = 0.036$
 ## Conclusion
 Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in the number of free throws made during the first and second halves of games.
 
+
 **c. Perform the appropriate nonparametric test to determine if there is a difference in the number of free throws made during the first and second halves of games. Remember to typeset the hypothesis test results.**
 ```{r}
-wilcox.test(basketball$half_1st, basketball$half_2nd,
+basket_wilcox <- wilcox.test(basketball$half_1, basketball$half_2,
+            paired = TRUE,
             exact = FALSE)
 ```
 ### Hypothesis
-$H_0$: $M_1st = M_2nd$\
-$H_1$: $M_1st \ne M_2nd$\
+$H_0$: $M_{1st} = M_{2nd}$\
+$H_1$: $M_{1st} \ne M_{2nd}$\
 
 ### Test Statistics
-$t_0 = 104.5$
+$t_0 = 54$
 
 ### p-Value
-$p = 0.32$
+$p = 0.065$
 
 ## Conclusion
-Keep $H_0$ at the $\alpha$=0.05 level. There is not sufficient evidence to suggest that there is a difference in the number of free throws made during the first and second halves of games.
+Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in the number of free throws made during the first and second halves of games.
 
 **d. Construct the necessary graphs / hypothesis tests to assess the assumptions on the *t* test.**
 
@@ -129,8 +128,8 @@ graph_paired_qq_plot <- function(data_table, after_sample, before_sample){
     stat_qq_line() +
     theme_bw() +
     labs(title = "Basketball Free Throws", subtitle = "QQ Plot")+
-    xlab("Theoretical Basketball Throws") +
-    ylab("Sample Basketball Throws")
+    xlab("Theoretical Free Throws") +
+    ylab("Sample Free Throws")
 }
 graph_paired_qq_plot(basketball, half_2, half_1)
 ```
@@ -138,21 +137,21 @@ graph_paired_qq_plot(basketball, half_2, half_1)
 # summary statistics
 # median by dependent samples
 summary_long_table <- data_long %>% 
-  group_by(Time) %>%
-  select(Time, Scores) %>% 
+  group_by(Half) %>%
   summarise_all(list(Median = median))
 
 change_table_format(summary_long_table)
 
 # Basketball density
-data_long %>% 
-  group_by(Time) %>% 
-  ggplot(aes(x = Scores, color = Scores, fill = Time)) +
-  geom_density(data = data_long, aes(color = Time), alpha = 0.25)+
-  geom_vline(data = summary_long_table, aes(xintercept=Median, color=Time), 
+basketball_density <- data_long %>% 
+  group_by(Half) %>% 
+  ggplot(aes(x = Scores, color = Scores, fill = Half)) +
+  geom_density(data = data_long, aes(color = Half), alpha = 0.25)+
+  geom_vline(data = summary_long_table, aes(xintercept=Median, color=Half), 
              linetype="dashed", size = 1.1)+
   annotate("text", x=12, y=0.025, label="Median", angle=90, size=5, color= custom_purple) +
   xlim(0,30)+
+  ylab("Free Throws")+
   labs(title = "Basketball Free Throws", subtitle = "Density Plot")+
   theme_bw()+
   scale_fill_manual(values = custom_density_hue)+
@@ -161,11 +160,64 @@ data_long %>%
 ```
     
 **e. State the assumption(s) on the *t* test and provide your assessment based on results in part (d).**
-    
+
+### Hypothesis
+$H_0$: $M_{1st} = M_{2nd}$\
+$H_1$: $M_{1st} \ne M_{2nd}$\
+
+### Test Statistics
+$t_0 = 54$
+
+### p-Value
+$p = 0.065$
+
+## Conclusion
+Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in the number of free throws made during the first and second halves of games.
+
 **f. Based on your assessment in part (e), are you going to report the *t* test or the nonparametric test?**
-    
+
+The assumption of normality may not be valid; therefore, the report will use the Wilcoxon nonparametric test.
+
 **g. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of your chosen hypothesis test from part (f), and a graph to help convey the results.**
-    
+
+## Analysis
+The first half has shown better scores. I can conclude that the team has more energy at the beginning of the match; therefore, they can make better throws. The UWF basketball team has to improve stamina and concentration throughout the game.
+
+
+### Summary Statistics
+The following summary statistics displays the difference in scores.
+```{r}
+change_table_format(get_custom_summary(data_long, "Half","Scores"))
+```
+
+### NonParametric Test
+The assumption of normality may not be valid; therefore, the report uses the Wilcoxon nonparametric test.
+#### Wilcoxon Test
+```{r}
+basket_wilcox
+```
+#### Hypothesis
+$H_0$: $M_{1st} = M_{2nd}$\
+$H_1$: $M_{1st} \ne M_{2nd}$\
+
+#### Test Statistics
+$t_0 = 54$
+
+#### p-Value
+$p = 0.065$
+
+#### Conclusion
+Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in the number of free throws made during the first and second halves of games.
+
+## Assumption
+The following QQ and Density plots demonstrate some discrepancies between the two halves. The data is not normally distributed.
+```{r}
+graph_paired_qq_plot(basketball, half_2, half_1)
+basketball_density
+```
+
+
+
 **2. It is hypothesized that students in College Algebra skip class less often than students in General Chemistry I; both courses seat 90 students. Data on the total number of absences per section was collected for one fall semester, and is as follows:**
 
 | General Chemistry I | 161 | 140 | 136 | 171 | 106 | 149 |
