@@ -80,6 +80,7 @@ change_table_format(get_custom_summary(data_long, "Half","Scores"))
 
 **b. Perform the appropriate *t* test to determine if there is a difference in the number of free throws made during the first and second halves of games. Remember to typeset the hypothesis test results.**
 ```{r}
+# dependent two.sided
 t.test(basketball$half_1, basketball$half_2,
        paired = TRUE)
 ```
@@ -99,13 +100,14 @@ Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest
 
 **c. Perform the appropriate nonparametric test to determine if there is a difference in the number of free throws made during the first and second halves of games. Remember to typeset the hypothesis test results.**
 ```{r}
+# dependent two.sided nonparametric
 basket_wilcox <- wilcox.test(basketball$half_1, basketball$half_2,
             paired = TRUE,
             exact = FALSE)
 ```
 ### Hypothesis
-$H_0$: $M_{1st} = M_{2nd}$\
-$H_1$: $M_{1st} \ne M_{2nd}$\
+$H_0$ : $M_{1st} = M_{2nd}$\
+$H_1$ : $M_{1st} \ne M_{2nd}$\
 
 ### Test Statistics
 $t_0 = 54$
@@ -161,44 +163,36 @@ basketball_density <- data_long %>%
     
 **e. State the assumption(s) on the *t* test and provide your assessment based on results in part (d).**
 
-### Hypothesis
-$H_0$: $M_{1st} = M_{2nd}$\
-$H_1$: $M_{1st} \ne M_{2nd}$\
-
-### Test Statistics
-$t_0 = 54$
-
-### p-Value
-$p = 0.065$
-
-## Conclusion
-Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in the number of free throws made during the first and second halves of games.
+The assumption of normality may not be valid. The data is not normally distributed.
 
 **f. Based on your assessment in part (e), are you going to report the *t* test or the nonparametric test?**
 
-The assumption of normality may not be valid; therefore, the report will use the Wilcoxon nonparametric test.
+The report will use the Wilcoxon nonparametric test.
 
 **g. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of your chosen hypothesis test from part (f), and a graph to help convey the results.**
 
+# UWF Basketball Free Throw Statistics Report
+
 ## Analysis
-The first half has shown better scores. I can conclude that the team has more energy at the beginning of the match; therefore, they can make better throws. The UWF basketball team has to improve stamina and concentration throughout the game.
+The first half has shown better scores. The team has more energy at the beginning of the match; therefore, they can make better  free throws. The UWF basketball team has to improve stamina and concentration throughout the game. The team has to perform better under pressure.
 
 
 ### Summary Statistics
 The following summary statistics displays the difference in scores.
-```{r}
+```{r, echo=FALSE}
 change_table_format(get_custom_summary(data_long, "Half","Scores"))
 ```
 
 ### NonParametric Test
-The assumption of normality may not be valid; therefore, the report uses the Wilcoxon nonparametric test.
+The report uses the Wilcoxon nonparametric test.
+
 #### Wilcoxon Test
-```{r}
+```{r, echo=FALSE}
 basket_wilcox
 ```
 #### Hypothesis
-$H_0$: $M_{1st} = M_{2nd}$\
-$H_1$: $M_{1st} \ne M_{2nd}$\
+$H_0$ : $M_{1st} = M_{2nd}$\
+$H_1$ : $M_{1st} \ne M_{2nd}$\
 
 #### Test Statistics
 $t_0 = 54$
@@ -209,9 +203,10 @@ $p = 0.065$
 #### Conclusion
 Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in the number of free throws made during the first and second halves of games.
 
-## Assumption
-The following QQ and Density plots demonstrate some discrepancies between the two halves. The data is not normally distributed.
-```{r}
+### Assumption
+The assumption of normality may not be valid. The data is not normally distributed.
+The following QQ and Density plots demonstrate some discrepancies between the two halves.
+```{r, echo=FALSE}
 graph_paired_qq_plot(basketball, half_2, half_1)
 basketball_density
 ```
