@@ -163,11 +163,11 @@ basketball_density <- data_long %>%
     
 **e. State the assumption(s) on the *t* test and provide your assessment based on results in part (d).**
 
-The assumption of normality may not be valid. The data is not normally distributed.
+The assumption of normality may not be valid. Normal distribution is not assumed.
 
 **f. Based on your assessment in part (e), are you going to report the *t* test or the nonparametric test?**
 
-The report will use the Wilcoxon nonparametric test.
+The report will use the **nonparametric test**.
 
 **g. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of your chosen hypothesis test from part (f), and a graph to help convey the results.**
 
@@ -184,7 +184,6 @@ change_table_format(get_custom_summary(data_long, "Half","Scores"))
 ```
 
 ### NonParametric Test
-The report uses the Wilcoxon nonparametric test.
 
 #### Wilcoxon Test
 ```{r, echo=FALSE}
@@ -204,7 +203,7 @@ $p = 0.065$
 Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in the number of free throws made during the first and second halves of games.
 
 ### Assumption
-The assumption of normality may not be valid. The data is not normally distributed.
+The assumption of normality may not be valid. The normal distribution is not assumed.
 The following QQ and Density plots demonstrate some discrepancies between the two halves.
 ```{r, echo=FALSE}
 graph_paired_qq_plot(basketball, half_2, half_1)
@@ -219,21 +218,174 @@ basketball_density
 |---------------------|-----|-----|-----|-----|-----|-----|
 | **College Algebra** | **158** | **132** | **135** | **185** | **106** | **150** |
 
+
+```{r}
+# clear environment
+#rm(list = ls())
+# data as vector
+chemistry <- c(161, 140, 136, 171, 106, 149)
+algebra <- c(158, 132, 135, 185, 106, 150)
+
+# create data frame
+skip_class <- tibble(chemistry, algebra)
+# transform table from wide to long
+skip_long <- skip_class %>%
+  drop_na() %>%
+  pivot_longer(cols = chemistry: algebra,
+               names_to = "Course",
+               values_to = "Absence")
+
+```
+
+
 **a. Find the appropriate summary statistics to summarize the data.**
+```{r}
+change_table_format(get_custom_summary(skip_long, "Course", "Absence"))
+```
 
 **b. Perform the appropriate *t* test to determine if there are fewer absences in College Algebra. Remember to typeset the hypothesis test results.**
-    
+```{r}
+# independent less
+t.test(skip_long$Absence ~ skip_long$Course,
+       alternative = "less")
+```
+
+### Hypothesis
+$H_0$: $\mu_{Algebra} \ge \mu_{Chemistry}$\
+$H_1$: $\mu_{Algebra} < \mu_{Chemistry}$\
+
+### Test Statistics
+$t_0 = 0.035$
+
+### p-Value
+$p = 0.51$
+
+## Conclusion
+Keep $H_0$ at the $\alpha$=0.05 level. There is not sufficient evidence to determine that there are fewer absences in College Algebra.
+
 **c. Perform the appropriate nonparametric test to determine if there are fewer absences in College Algebra. Remember to typeset the hypothesis test results.**
-    
+```{r}
+wilcox.test(skip_long$Absence ~ skip_long$Course,
+            alternative = "less",
+            exact = FALSE)
+```
+
+### Hypothesis
+$H_0$: $M_{Algebra} \ge M_{Chemistry}$\
+$H_1$: $M_{Algebra} < M_{Chemistry}$\
+
+### Test Statistics
+$t_0 = 16.5$
+
+### p-Value
+$p = 0.44$
+
+## Conclusion
+Keep $H_0$ at the $\alpha$=0.05 level. There is not sufficient evidence to determine that there are fewer absences in College Algebra.
+
 **d. Construct the necessary graphs / hypothesis tests to assess the assumptions on the *t* test.**
+
+### Assumptions
+
+#### QQ Plot
+```{r}
+# algebra qq
+algebra_qq <- skip_long %>% 
+  filter(Course == "algebra") %>% 
+  ggplot(aes(sample = Absence)) +
+  stat_qq(size=3, alpha = 0.7, color = "magenta") +
+  stat_qq_line() +
+  theme_minimal() +
+  xlab("Theoretical Algebra") +
+  ylab("Sample Algebra")+
+  ylim(90, 190)
+# chemistry qq
+chemistry_qq <- skip_long %>% 
+  filter(Course == "chemistry") %>% 
+  ggplot(aes(sample = Absence)) +
+  stat_qq(size=3, alpha = 0.7, color = custom_orange) +
+  stat_qq_line() +
+  theme_minimal() +
+  xlab("Theoretical Chemistry") +
+  ylab("Sample Chemistry")+
+  ylim(90, 190)
+# Combine both graphs
+grid.arrange(algebra_qq, chemistry_qq, nrow=1, bottom = "Courses", top = "QQ Plot of Absences by Course")
+```
+### Assumption Supporting Graph
+```{r}
+# median by courses
+groups_median <- skip_long %>% 
+  group_by(Course) %>% 
+  summarise(Median = median(Absence))
+change_table_format(groups_median)
+```
+```{r}
+# absences density
+absence_density <- skip_long %>% 
+  group_by(Course) %>% 
+  ggplot(aes(x = Absence, colour = Absence, fill = Course)) +
+  geom_density(data = skip_long, aes(color = Course), alpha = 0.25)+
+  geom_vline(data = groups_median, aes(xintercept=Median, color=Course), 
+             linetype="dashed", size = 1.1)+
+  annotate("text", x=138, y=0.005, label="Median", angle=90, size=6, color=custom_purple)+
+  labs(title = "Absences by Course", subtitle = "Density Plot")+
+  ylab("Course")+
+  theme(legend.position="bottom")+
+  theme_bw()+
+  scale_fill_manual(values = custom_density_hue)+
+  scale_color_manual(values = custom_density_hue)+
+  xlim(70,220)
+
+absence_density
+```
+
     
 **e. State the assumption(s) on the *t* test and provide your assessment based on results in part (d).**
-    
+
+The assumption of normality may be valid. Normal distribution is assumed. 
+
 **f. Based on your assessment in part (e), are you going to report the *t* test or the nonparametric test?**
-    
+
+The report will use the **T-test**.
+
 **g. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of your chosen hypothesis test from part (f), and a graph to help convey the results.**
 
-    
+# Number of Absences per Course Report
 
+## Analisys
+College Algebra students skip class more often than students in General Chemistry. Algebra students need more time to understand the subject; however, students might feel frustrated. The educators should offer different tools to help students to understand the curriculum. Moreover, students can complement their studies with tutoring classes, video recordings, and study groups.  
 
+### Summary Statistics
+The following summary statistics displays the difference in absences per course.
+```{r, echo=FALSE}
+change_table_format(get_custom_summary(skip_long, "Course", "Absence"))
+```
+
+### T-test
+```{r, echo=FALSE}
+t.test(skip_long$Absence ~ skip_long$Course,
+       alternative = "less")
+```
+
+#### Hypothesis
+$H_0$: $\mu_{Algebra} \ge \mu_{Chemistry}$\
+$H_1$: $\mu_{Algebra} < \mu_{Chemistry}$\
+
+#### Test Statistics
+$t_0 = 0.035$
+
+#### p-Value
+$p = 0.51$
+
+### Conclusion
+Keep $H_0$ at the $\alpha$=0.05 level. There is not sufficient evidence to determine that there are fewer absences in College Algebra.
+
+### Assumption
+The assumption of normality may be valid. The normal distribution is assumed. The following QQ and Density plots demonstrate how the data match the general appearance of a normal distribution.
+
+```{r, echo=FALSE}
+grid.arrange(algebra_qq, chemistry_qq, nrow=1, bottom = "Courses", top = "QQ Plot of Absences by Course")
+absence_density
+```
 
