@@ -7,7 +7,7 @@ editor: source
 ---
 
 ```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
-#install.packages(DescTools)
+install.packages(DescTools)
 library(tidyverse)
 library(gsheet)
 library(formattable)
@@ -75,8 +75,7 @@ get_mean_ci <- function(df, category, continue_variable){
 plot_mean_ci <- function(mean_ci){
   mean_ci%>% 
     ggplot(aes(x = Herbicide_groups, y = Results, fill = factor(Herbicide_groups)))+
-    # geom_bar(stat = "identity")+
-    geom_boxplot(alpha = 0.45, size = 1)+
+    geom_bar(stat = "identity")+
     stat_summary(y = mean_herbicide)
     scale_fill_manual(values=c("#c2d4dd", "#b1cbbb", "#e4d1d1"))+
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), size = 1.5, color = "#034f84", width = 0.4)+
@@ -89,7 +88,7 @@ plot_mean_ci <- function(mean_ci){
     theme_bw()+
     theme(legend.position="none")
 } 
-plot_mean_ci(get_mean_ci(long_data, "Herbicide_groups", "Results"))
+# plot_mean_ci(get_mean_ci(long_data, "Herbicide_groups", "Results"))
 
 # boxplot(get_mean_ci(long_data, "Herbicide_groups", "Results"))
 ```
@@ -123,22 +122,29 @@ Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest
 ##### a. Herbicide A vs. Herbicide B. Test at the $\alpha=0.05$ level.
 
 ```{r, echo=TRUE}
+# plot(module_data_anova)
+
 long_data$Herbicide_groups <- as.factor(long_data$Herbicide_groups)
 contrasts(long_data$Herbicide_groups)
-plot(module_data_anova)
+
+contrasts(long_data$Herbicide_groups) <- cbind(c(0, -1, 1), 
+                                    c(-1, 0.5, 0.5))
 ```
 
 ##### b. Herbicide A and Herbicide B vs. Control. Test at the $\alpha=0.05$ level.
 
 ```{r, echo=TRUE}
-
+m1 <- aov(Results ~ Herbicide_groups, 
+          data = long_data)
+summary.aov(m1, split=list(Herbicide_groups=list("A vs. B"=1,
+                                                 "A + B vs. Control."=2)))
 ```
 
 #### 6. Use the appropriate posthoc test to perform all pairwise comparisons of yield. Test at the $\alpha=0.05$ level.
 
 ```{r, echo=TRUE}
-TukeyHSD(module_data_anova)
-plot(TukeyHSD(module_data_anova), las = 2)
+TukeyHSD(m1)
+plot(TukeyHSD(m1), las = 2)
 
 ```
 
