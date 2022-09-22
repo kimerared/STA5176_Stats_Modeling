@@ -7,12 +7,11 @@ editor: source
 ---
 
 ```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
-install.packages(DescTools)
+#install.packages(DescTools)
 library(tidyverse)
 library(gsheet)
 library(formattable)
-# perform Dunnett Test
-library(DescTools) 
+library(DescTools) # perform Dunnett Test
 ```
 
 **An agricultural researcher investigated two new herbicides and their effects on crop yields of tomatoes, which can be demolished by the [tomato hornworm](https://extension.umn.edu/yard-and-garden-insects/tomato-hornworms) in mere hours. There were three areas for the experiment: an area for herbicide A, an area for herbicide B, and an area for no herbicide at all (control). At the end of the growing season, the yields (in bushels per acre) were measured and are available in the following [Google Sheet](https://docs.google.com/spreadsheets/d/1CFyuuWy-4YmVU3wkYuC8Uf3xW3qkpCnpF468NjBAhbY/edit#gid=0).**
@@ -82,6 +81,8 @@ get_mean_ci <- function(df, category, continue_variable){
   return(ci)
 }
 
+mean_ci <- get_mean_ci(long_data, 'Herbicide_groups', 'Results')
+
 # Plot Confidence Intervals
 ggplot(mean_ci, aes(x = Herbicide_groups, y = mean))+
   # geom_line(aes(x = Herbicide_groups, y = mean))+
@@ -98,11 +99,12 @@ ggplot(mean_ci, aes(x = Herbicide_groups, y = mean))+
   theme(legend.position="none")+
   ylim(80, 95)+
   theme_bw()
-
 ```
 
 #### 3. Challenge! Why should we be cautious when using the individual CIs found in Q1 and displayed in Q2 to directly compare the three groups?
 Visually, there is not a significant variance between the groups. However, the ANOVA test signals a difference.
+the CI overlapping method fails to reject the null hypothesis more frequently than the corresponding hypothesis test. Using this method decreases the statistical power of your assessment (higher type II error rate), potentially causing you to miss essential findings.
+
 #### 4. Use the appropriate hypothesis test to show that there is a difference in the average yield between the three groups. Test at the $\alpha=0.05$ level.
 
 ```{r, echo=TRUE}
@@ -125,6 +127,7 @@ summary(module_data_anova)
 
 ## Conclusion
 Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in the average yield between the three groups.
+
 #### 5. Construct and test the following contrasts for the following comparisons:
 
 ##### a. Herbicide A vs. Herbicide B. Test at the $\alpha=0.05$ level.
@@ -134,29 +137,37 @@ Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest
 
 long_data$Herbicide_groups <- as.factor(long_data$Herbicide_groups)
 contrasts(long_data$Herbicide_groups)
-
+# check the order of the groups
 contrasts(long_data$Herbicide_groups) <- cbind(c(0, -1, 1), 
-                                    c(-1, 0.5, 0.5))
+                                               c(-1, 0.5, 0.5))
 ```
-
-##### b. Herbicide A and Herbicide B vs. Control. Test at the $\alpha=0.05$ level.
+After the Order Verification Process, I proceed with the test
 
 ```{r, echo=TRUE}
 m1 <- aov(Results ~ Herbicide_groups, 
           data = long_data)
-summary.aov(m1, split=list(Herbicide_groups=list("A vs. B"=1,
-                                                 "A + B vs. Control."=2)))
+summary.aov(m1, split=list(Herbicide_groups=list("A vs. B"=1)))
 ```
+There is a difference between Herbicide A and B (p = 0.00825).
+
+##### b. Herbicide A and Herbicide B vs. Control. Test at the $\alpha=0.05$ level.
+
+```{r, echo=TRUE}
+m2 <- aov(Results ~ Herbicide_groups, 
+          data = long_data)
+summary.aov(m2, split=list(Herbicide_groups=list("A + B vs. Control."=2)))
+```
+No significant difference against the control group.
 
 #### 6. Use the appropriate posthoc test to perform all pairwise comparisons of yield. Test at the $\alpha=0.05$ level.
 
 ```{r, echo=TRUE}
 TukeyHSD(m1)
-plot(TukeyHSD(m1), las = 2)
+# plot(TukeyHSD(m1), las = 2)
 
 ```
 
-There is a difference between Herbicide 1 and 2 (p = 0.022).
+There is a difference between Herbicide A and B (p = 0.022).
 
 #### 7. Use the appropriate posthoc test to only compare the individual herbicides to the control. Test at the $\alpha=0.05$ level.
 
@@ -165,4 +176,4 @@ DunnettTest(x = long_data$Results,
             g = long_data$Herbicide_groups,
             control = "Control")
 ```
-No herbicide groups are significant different from the control group.
+No significant difference against the control group.
