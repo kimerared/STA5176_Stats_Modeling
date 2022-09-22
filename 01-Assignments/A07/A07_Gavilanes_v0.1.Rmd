@@ -33,14 +33,25 @@ long_data <- clean_data %>%
   pivot_longer(cols = c("Herbicide1", "Herbicide2", "Control"),
                names_to = "Herbicide_groups",
                values_to = "Results")
+
+# --- Colors ---
+custom_green = "#7FBD32"
+custom_purple = "#700CBC"
+custom_orange = "#FB8604"
+
+# ***FUNCTIONS***
+# f01 // change default table format
+change_table_format <- function(table_name){
+  formattable(
+  table_name, align =c("c","c", "c"),
+  list(area() ~ color_text("black", "#555888"))
+  )
+}
 ```
 
 #### 1. Construct the 95% confidence interval for the average yield for each group (A, B, control).
 
 ```{r, echo=TRUE}
-# t.test(clean_data$Control)
-# t.test(clean_data$Herbicide1)
-# t.test(clean_data$Herbicide2)
 # f02 // get confidence intervals for each group
 get_ci <- function(df, category, continue_variable){
   ci <- df %>% 
@@ -51,46 +62,43 @@ get_ci <- function(df, category, continue_variable){
     )
   return(ci)
 }
+# print CI
+ci <- get_ci(long_data, 'Herbicide_groups', 'Results')
+change_table_format(ci)
 ```
 
 #### 2. Challenge! Construct a graph to display all confidence intervals.
 
 ```{r, echo=TRUE}
-boxplot(clean_data)
-boxplot(long_data$Results ~ long_data$Herbicide_groups)
-# f03 // get mean and confidence intervals for each group
+# f02A // get mean, confidence intervals for each group
 get_mean_ci <- function(df, category, continue_variable){
-  mean_ci <- df %>% 
+  ci <- df %>% 
     group_by(!! sym(category)) %>%
     summarise(
-      mean_herbicide = mean(!! sym(continue_variable)),
+      mean = mean(!! sym(continue_variable)),
       ci_lower = t.test(!! sym(continue_variable), conf.level = 0.95)$conf.int[1],
       ci_upper = t.test(!! sym(continue_variable), conf.level = 0.95)$conf.int[2]
-    ) %>% 
-  return(mean_ci)
+    )
+  return(ci)
 }
 
+# Plot Confidence Intervals
+ggplot(mean_ci, aes(x = Herbicide_groups, y = mean))+
+  # geom_line(aes(x = Herbicide_groups, y = mean))+
+  geom_point(aes(x = Herbicide_groups, y = mean), color = "black", size = 3)+
+  scale_color_manual(name = "Herbicide Groups", values=c(custom_green, custom_purple, custom_orange))+
+  geom_errorbar(aes(x = Herbicide_groups, ymin = ci_lower, ymax = ci_upper, 
+                    color = factor(Herbicide_groups)), size = 1.5, width = 0.4)+
+  geom_text(aes(y = ci_lower, label = round(ci_lower,1)), size = 4, vjust = 2, color = "black")+
+  geom_text(aes(y = ci_upper, label = round(ci_upper,1)), size = 4, vjust = -1, color = "black")+
+  
+  labs(title = "Chart with 95% Confidence Intervals")+
+  labs(x="Herbicide Groups", y="Yield Results")+
+  # scale_color_discrete()+
+  theme(legend.position="none")+
+  ylim(80, 95)+
+  theme_bw()
 
-# f04 // graph confidence intervals for each group
-plot_mean_ci <- function(mean_ci){
-  mean_ci%>% 
-    ggplot(aes(x = Herbicide_groups, y = Results, fill = factor(Herbicide_groups)))+
-    geom_bar(stat = "identity")+
-    stat_summary(y = mean_herbicide)
-    scale_fill_manual(values=c("#c2d4dd", "#b1cbbb", "#e4d1d1"))+
-    geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), size = 1.5, color = "#034f84", width = 0.4)+
-    geom_text(aes(y = ci_lower, label = round(ci_lower,1)), size = 4, vjust = 2, color = "black")+
-    geom_text(aes(y = ci_upper, label = round(ci_upper,1)), size = 4, vjust = -1, color = "black")+
-    labs(title = "Chart with 95% Confidence Intervals")+
-    labs(x="Herbicide Groups", y="Yield Results")+
-    ylim(0, 100)+
-    lims(colour = c("1", "2", "Control"))+
-    theme_bw()+
-    theme(legend.position="none")
-} 
-# plot_mean_ci(get_mean_ci(long_data, "Herbicide_groups", "Results"))
-
-# boxplot(get_mean_ci(long_data, "Herbicide_groups", "Results"))
 ```
 
 #### 3. Challenge! Why should we be cautious when using the individual CIs found in Q1 and displayed in Q2 to directly compare the three groups?
