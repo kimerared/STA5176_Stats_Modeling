@@ -105,7 +105,7 @@ Visually, the CI overlapping method fails to reject the null hypothesis more fre
 #### 4. Use the appropriate hypothesis test to show that there is a difference in the average yield between the three groups. Test at the $\alpha=0.05$ level.
 
 ```{r, echo=TRUE}
-# one-way ANOVA model
+# one-way ANOVA Hypothesis test
 module_data_anova <- aov(long_data$Results ~ long_data$Herbicide_groups)
 summary(module_data_anova)
 ```
@@ -127,14 +127,16 @@ Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest
 ##### a. Herbicide A vs. Herbicide B. Test at the $\alpha=0.05$ level.
 
 ```{r, echo=TRUE}
+# Post-hoc Testing: Linear Contrasts
 # check the order of the groups
 long_data$Herbicide_groups <- as.factor(long_data$Herbicide_groups)
 contrasts(long_data$Herbicide_groups)
+# adjust the alpha level
 # assigning specific values to the matrix depending on grouping
 contrasts(long_data$Herbicide_groups) <- cbind(c(0, -1, 1), 
                                                c(-1, 0.5, 0.5))
 ```
-After the Order Verification Process, I proceed with the ANOVA test
+After the Order Verification Process, proceed with the specific linear contrast.
 
 ```{r, echo=TRUE}
 # ANOVA test: A vs B
@@ -143,6 +145,12 @@ m1 <- aov(Results ~ Herbicide_groups,
 summary.aov(m1, split=list(Herbicide_groups=list("A vs. B"=1)))
 ```
 There is a difference between Herbicide A and B (p = 0.00825).
+
+Paiwise t-test with Bonferroni Correction
+```{r}
+pairwise.t.test(long_data$Results, long_data$Herbicide_groups, p.adjust.method = "bonferroni")
+```
+The only significant difference is between Herbicide A, and Herbicide B.
 
 ##### b. Herbicide A and Herbicide B vs. Control. Test at the $\alpha=0.05$ level.
 
