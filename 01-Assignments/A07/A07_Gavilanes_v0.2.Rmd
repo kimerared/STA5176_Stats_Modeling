@@ -163,7 +163,7 @@ The only significant difference with a p-value = 0.025 is between Herbicide A vs
 - $p = 0.00825$
 
 ## Conclusion
-Reject $H_0$ at the $\alpha$=0.05 ($\alpha_B$ = 0.025) level. There is sufficient evidence to suggest that there is a difference in the average yield between the three groups.
+Reject $H_0$ at the $\alpha$=0.05 ($\alpha_B$ = 0.025) level. There is sufficient evidence to suggest that there is a difference in the average yield between Herbicide A vs Herbicide B groups.
 
 ##### b. Herbicide A and Herbicide B vs. Control. Test at the $\alpha=0.05$ level.
 

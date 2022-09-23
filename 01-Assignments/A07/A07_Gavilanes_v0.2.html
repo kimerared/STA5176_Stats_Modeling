@@ -2687,7 +2687,7 @@ ci_upper
 <section id="use-the-appropriate-hypothesis-test-to-show-that-there-is-a-difference-in-the-average-yield-between-the-three-groups.-test-at-the-alpha0.05-level." class="level4">
 <h4 class="anchored" data-anchor-id="use-the-appropriate-hypothesis-test-to-show-that-there-is-a-difference-in-the-average-yield-between-the-three-groups.-test-at-the-alpha0.05-level.">4. Use the appropriate hypothesis test to show that there is a difference in the average yield between the three groups. Test at the <span class="math inline">\(\alpha=0.05\)</span> level.</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># one-way ANOVA model</span></span>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># one-way ANOVA Hypothesis test</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>module_data_anova <span class="ot">&lt;-</span> <span class="fu">aov</span>(long_data<span class="sc">$</span>Results <span class="sc">~</span> long_data<span class="sc">$</span>Herbicide_groups)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(module_data_anova)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -2702,7 +2702,7 @@ Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&
 <section id="hypothesis" class="level3">
 <h3 class="anchored" data-anchor-id="hypothesis">Hypothesis</h3>
 <ul>
-<li><span class="math inline">\(H_0\)</span>: <span class="math inline">\(\mu Control = \mu Herbicide1\ = \mu Herbicide2\)</span><br>
+<li><span class="math inline">\(H_0\)</span>: <span class="math inline">\(\mu Control = \mu HerbicideA\ = \mu HerbicideB\)</span><br>
 </li>
 <li><span class="math inline">\(H_1\)</span>: at least one is different</li>
 </ul>
@@ -2727,20 +2727,22 @@ Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&
 <section id="a.-herbicide-a-vs.-herbicide-b.-test-at-the-alpha0.05-level." class="level5">
 <h5 class="anchored" data-anchor-id="a.-herbicide-a-vs.-herbicide-b.-test-at-the-alpha0.05-level.">a. Herbicide A vs. Herbicide B. Test at the <span class="math inline">\(\alpha=0.05\)</span> level.</h5>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># check the order of the groups</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>long_data<span class="sc">$</span>Herbicide_groups <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(long_data<span class="sc">$</span>Herbicide_groups)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">contrasts</span>(long_data<span class="sc">$</span>Herbicide_groups)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Post-hoc Testing: Linear Contrasts</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># check the order of the groups</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>long_data<span class="sc">$</span>Herbicide_groups <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(long_data<span class="sc">$</span>Herbicide_groups)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">contrasts</span>(long_data<span class="sc">$</span>Herbicide_groups)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>           Herbicide1 Herbicide2
 Control             0          0
 Herbicide1          1          0
 Herbicide2          0          1</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># assigning specific values to the matrix depending on grouping</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">contrasts</span>(long_data<span class="sc">$</span>Herbicide_groups) <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>), </span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>                                               <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># adjust the alpha level</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co"># assigning specific values to the matrix depending on grouping</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">contrasts</span>(long_data<span class="sc">$</span>Herbicide_groups) <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>), </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                                               <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>After the Order Verification Process, I proceed with the ANOVA test</p>
+<p>After the Order Verification Process, proceed with the specific linear contrast.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ANOVA test: A vs B</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">aov</span>(Results <span class="sc">~</span> Herbicide_groups, </span>
@@ -2756,14 +2758,57 @@ Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&
 </div>
 </div>
 <p>There is a difference between Herbicide A and B (p = 0.00825).</p>
+<p>Paiwise t-test with Bonferroni Correction</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pairwise.t.test</span>(long_data<span class="sc">$</span>Results, long_data<span class="sc">$</span>Herbicide_groups, <span class="at">p.adjust.method =</span> <span class="st">&quot;bonferroni&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pairwise comparisons using t tests with pooled SD 
+
+data:  long_data$Results and long_data$Herbicide_groups 
+
+           Control Herbicide1
+Herbicide1 0.738   -         
+Herbicide2 0.385   0.025     
+
+P value adjustment method: bonferroni </code></pre>
+</div>
+</div>
+<p>The only significant difference with a p-value = 0.025 is between Herbicide A vs Herbicide B .</p>
 </section>
+</section>
+<section id="hypothesis---linear-contrasts" class="level3">
+<h3 class="anchored" data-anchor-id="hypothesis---linear-contrasts">Hypothesis - Linear Contrasts</h3>
+<ul>
+<li><span class="math inline">\(H_0\)</span>: <span class="math inline">\(\mu HerbicideA\ = \mu HerbicideB\)</span><br>
+</li>
+<li><span class="math inline">\(H_1\)</span>: <span class="math inline">\(\mu HerbicideA\ \ne \mu HerbicideB\)</span><br>
+</li>
+</ul>
+</section>
+<section id="test-statistic-1" class="level3">
+<h3 class="anchored" data-anchor-id="test-statistic-1">Test Statistic</h3>
+<ul>
+<li><span class="math inline">\(F_0 = 7.310\)</span></li>
+</ul>
+</section>
+<section id="p-value-1" class="level3">
+<h3 class="anchored" data-anchor-id="p-value-1">p-Value</h3>
+<ul>
+<li><span class="math inline">\(p = 0.00825\)</span></li>
+</ul>
+</section>
+</section>
+<section id="conclusion-1" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion-1">Conclusion</h2>
+<p>Reject <span class="math inline">\(H_0\)</span> at the <span class="math inline">\(\alpha\)</span>=0.05 (<span class="math inline">\(\alpha_B\)</span> = 0.025) level. There is sufficient evidence to suggest that there is a difference in the average yield between Herbicide A vs Herbicide B groups.</p>
 <section id="b.-herbicide-a-and-herbicide-b-vs.-control.-test-at-the-alpha0.05-level." class="level5">
 <h5 class="anchored" data-anchor-id="b.-herbicide-a-and-herbicide-b-vs.-control.-test-at-the-alpha0.05-level.">b. Herbicide A and Herbicide B vs. Control. Test at the <span class="math inline">\(\alpha=0.05\)</span> level.</h5>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ANOVA test: A + B vs Control</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">aov</span>(Results <span class="sc">~</span> Herbicide_groups, </span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">data =</span> long_data)</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary.aov</span>(m2, <span class="at">split=</span><span class="fu">list</span>(<span class="at">Herbicide_groups=</span><span class="fu">list</span>(<span class="st">&quot;A + B vs. Control.&quot;</span><span class="ot">=</span><span class="dv">2</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ANOVA test: A + B vs Control</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">aov</span>(Results <span class="sc">~</span> Herbicide_groups, </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">data =</span> long_data)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary.aov</span>(m2, <span class="at">split=</span><span class="fu">list</span>(<span class="at">Herbicide_groups=</span><span class="fu">list</span>(<span class="st">&quot;A + B vs. Control.&quot;</span><span class="ot">=</span><span class="dv">2</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                                       Df Sum Sq Mean Sq F value Pr(&gt;F)  
 Herbicide_groups                        2    373  186.40   3.677 0.0293 *
@@ -2775,11 +2820,35 @@ Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&
 </div>
 <p>No significant difference against the control group.</p>
 </section>
+<section id="hypothesis---linear-contrasts-1" class="level3">
+<h3 class="anchored" data-anchor-id="hypothesis---linear-contrasts-1">Hypothesis - Linear Contrasts</h3>
+<ul>
+<li><span class="math inline">\(H_0\)</span>: <span class="math inline">\(\mu HerbicideA\ + \mu HerbicideB\ = \mu Control\)</span><br>
+</li>
+<li><span class="math inline">\(H_1\)</span>: <span class="math inline">\(\mu HerbicideA\ + \mu HerbicideB\ \ne \mu Control\)</span><br>
+</li>
+</ul>
 </section>
+<section id="test-statistic-2" class="level3">
+<h3 class="anchored" data-anchor-id="test-statistic-2">Test Statistic</h3>
+<ul>
+<li><span class="math inline">\(F_0 = 0.045\)</span></li>
+</ul>
+</section>
+<section id="p-value-2" class="level3">
+<h3 class="anchored" data-anchor-id="p-value-2">p-Value</h3>
+<ul>
+<li><span class="math inline">\(p = 0.8322\)</span></li>
+</ul>
+</section>
+</section>
+<section id="conclusion-2" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion-2">Conclusion</h2>
+<p>Keep <span class="math inline">\(H_0\)</span> at the <span class="math inline">\(\alpha\)</span>=0.05 (<span class="math inline">\(\alpha_B\)</span> = 0.025) level. There is not sufficient evidence to suggest that the average yield between the Herbicide A and Herbicide B groups are different from the control group.</p>
 <section id="use-the-appropriate-posthoc-test-to-perform-all-pairwise-comparisons-of-yield.-test-at-the-alpha0.05-level." class="level4">
 <h4 class="anchored" data-anchor-id="use-the-appropriate-posthoc-test-to-perform-all-pairwise-comparisons-of-yield.-test-at-the-alpha0.05-level.">6. Use the appropriate posthoc test to perform all pairwise comparisons of yield. Test at the <span class="math inline">\(\alpha=0.05\)</span> level.</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">TukeyHSD</span>(m1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">TukeyHSD</span>(m1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  Tukey multiple comparisons of means
     95% family-wise confidence level
@@ -2798,9 +2867,9 @@ Herbicide2-Herbicide1  4.970000  0.5867134 9.353287 0.0222477</code></pre>
 <section id="use-the-appropriate-posthoc-test-to-only-compare-the-individual-herbicides-to-the-control.-test-at-the-alpha0.05-level." class="level4">
 <h4 class="anchored" data-anchor-id="use-the-appropriate-posthoc-test-to-only-compare-the-individual-herbicides-to-the-control.-test-at-the-alpha0.05-level.">7. Use the appropriate posthoc test to only compare the individual herbicides to the control. Test at the <span class="math inline">\(\alpha=0.05\)</span> level.</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">DunnettTest</span>(<span class="at">x =</span> long_data<span class="sc">$</span>Results,</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">g =</span> long_data<span class="sc">$</span>Herbicide_groups,</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">control =</span> <span class="st">&quot;Control&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">DunnettTest</span>(<span class="at">x =</span> long_data<span class="sc">$</span>Results,</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">g =</span> long_data<span class="sc">$</span>Herbicide_groups,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">control =</span> <span class="st">&quot;Control&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
   Dunnett&#39;s test for comparing several treatments with a control :  
