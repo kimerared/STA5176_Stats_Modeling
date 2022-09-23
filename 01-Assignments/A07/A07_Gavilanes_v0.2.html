@@ -2757,24 +2757,6 @@ Residuals                   87   4410    50.7
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 </div>
 </div>
-<p>There is a difference between Herbicide A and B (p = 0.00825).</p>
-<p>Paiwise t-test with Bonferroni Correction</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pairwise.t.test</span>(long_data<span class="sc">$</span>Results, long_data<span class="sc">$</span>Herbicide_groups, <span class="at">p.adjust.method =</span> <span class="st">&quot;bonferroni&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-    Pairwise comparisons using t tests with pooled SD 
-
-data:  long_data$Results and long_data$Herbicide_groups 
-
-           Control Herbicide1
-Herbicide1 0.738   -         
-Herbicide2 0.385   0.025     
-
-P value adjustment method: bonferroni </code></pre>
-</div>
-</div>
-<p>The only significant difference with a p-value = 0.025 is between Herbicide A vs Herbicide B .</p>
 </section>
 </section>
 <section id="hypothesis---linear-contrasts" class="level3">
@@ -2802,6 +2784,23 @@ P value adjustment method: bonferroni </code></pre>
 <section id="conclusion-1" class="level2">
 <h2 class="anchored" data-anchor-id="conclusion-1">Conclusion</h2>
 <p>Reject <span class="math inline">\(H_0\)</span> at the <span class="math inline">\(\alpha\)</span>=0.05 (<span class="math inline">\(\alpha_B\)</span> = 0.025) level. There is sufficient evidence to suggest that there is a difference in the average yield between Herbicide A vs Herbicide B groups.</p>
+<p>Moreover, a Paiwise t-test with Bonferroni Correction has been performed.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pairwise.t.test</span>(long_data<span class="sc">$</span>Results, long_data<span class="sc">$</span>Herbicide_groups, <span class="at">p.adjust.method =</span> <span class="st">&quot;bonferroni&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pairwise comparisons using t tests with pooled SD 
+
+data:  long_data$Results and long_data$Herbicide_groups 
+
+           Control Herbicide1
+Herbicide1 0.738   -         
+Herbicide2 0.385   0.025     
+
+P value adjustment method: bonferroni </code></pre>
+</div>
+</div>
+<p>The only significant difference with a p-value = 0.025 is between Herbicide A vs Herbicide B .</p>
 <section id="b.-herbicide-a-and-herbicide-b-vs.-control.-test-at-the-alpha0.05-level." class="level5">
 <h5 class="anchored" data-anchor-id="b.-herbicide-a-and-herbicide-b-vs.-control.-test-at-the-alpha0.05-level.">b. Herbicide A and Herbicide B vs. Control. Test at the <span class="math inline">\(\alpha=0.05\)</span> level.</h5>
 <div class="cell">
@@ -2818,7 +2817,6 @@ Residuals                              87   4410   50.69
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 </div>
 </div>
-<p>No significant difference against the control group.</p>
 </section>
 <section id="hypothesis---linear-contrasts-1" class="level3">
 <h3 class="anchored" data-anchor-id="hypothesis---linear-contrasts-1">Hypothesis - Linear Contrasts</h3>
