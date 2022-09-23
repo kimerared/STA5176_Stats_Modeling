@@ -110,7 +110,7 @@ module_data_anova <- aov(long_data$Results ~ long_data$Herbicide_groups)
 summary(module_data_anova)
 ```
 ### Hypothesis
-- $H_0$: $\mu Control = \mu Herbicide1\ = \mu Herbicide2$\
+- $H_0$: $\mu Control = \mu HerbicideA\ = \mu HerbicideB$\
 - $H_1$: at least one is different
 
 ### Test Statistic
@@ -150,7 +150,20 @@ Paiwise t-test with Bonferroni Correction
 ```{r}
 pairwise.t.test(long_data$Results, long_data$Herbicide_groups, p.adjust.method = "bonferroni")
 ```
-The only significant difference is between Herbicide A, and Herbicide B.
+The only significant difference with a p-value = 0.025 is between Herbicide A vs Herbicide B .
+
+### Hypothesis - Linear Contrasts
+- $H_0$: $\mu HerbicideA\ = \mu HerbicideB$\
+- $H_1$: $\mu HerbicideA\ \ne  \mu HerbicideB$\
+
+### Test Statistic
+- $F_0 = 7.310$
+
+### p-Value
+- $p = 0.00825$
+
+## Conclusion
+Reject $H_0$ at the $\alpha$=0.05 ($\alpha_B$ = 0.025) level. There is sufficient evidence to suggest that there is a difference in the average yield between the three groups.
 
 ##### b. Herbicide A and Herbicide B vs. Control. Test at the $\alpha=0.05$ level.
 
@@ -161,6 +174,19 @@ m2 <- aov(Results ~ Herbicide_groups,
 summary.aov(m2, split=list(Herbicide_groups=list("A + B vs. Control."=2)))
 ```
 No significant difference against the control group.
+
+### Hypothesis - Linear Contrasts
+- $H_0$: $\mu HerbicideA\ + \mu HerbicideB\ = \mu Control$\
+- $H_1$: $\mu HerbicideA\ +  \mu HerbicideB\ \ne \mu Control$\
+
+### Test Statistic
+- $F_0 = 0.045$
+
+### p-Value
+- $p = 0.8322$
+
+## Conclusion
+Keep $H_0$ at the $\alpha$=0.05 ($\alpha_B$ = 0.025) level. There is not sufficient evidence to suggest that the average yield between the Herbicide A and Herbicide B groups are different from the control group.
 
 #### 6. Use the appropriate posthoc test to perform all pairwise comparisons of yield. Test at the $\alpha=0.05$ level.
 
