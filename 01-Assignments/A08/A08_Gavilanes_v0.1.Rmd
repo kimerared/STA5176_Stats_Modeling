@@ -6,22 +6,88 @@ self-contained: true
 editor: source
 ---
 
+```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
+#install.packages(DescTools)
+library(tidyverse)
+library(gsheet)
+library(formattable)
+library(DescTools) # perform Dunnett Test
+```
+
 **Recall the agricultural data from the ANOVA activity available in the following [Google Sheet](https://docs.google.com/spreadsheets/d/1CFyuuWy-4YmVU3wkYuC8Uf3xW3qkpCnpF468NjBAhbY/edit#gid=0).**
 
+```{r}
+# clear environment
+rm(list = ls())
+
+# extract data
+data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1CFyuuWy-4YmVU3wkYuC8Uf3xW3qkpCnpF468NjBAhbY/edit#gid=0"))
+
+# transform data
+clean_data <- data %>% 
+  # delete empty rows
+  drop_na()
+# pivot to long data
+long_data <- clean_data %>% 
+  pivot_longer(cols = c("Herbicide1", "Herbicide2", "Control"),
+               names_to = "Herbicide_groups",
+               values_to = "Results")
+
+# ---Colors---
+custom_green = "#7FBD32"
+custom_purple = "#700CBC"
+custom_orange = "#FB8604"
+
+# ***FUNCTIONS***
+# f01 // change default table format
+change_table_format <- function(table_name){
+  formattable(
+  table_name, align =c("c","c", "c"),
+  list(area() ~ color_text("black", "#555888"))
+  )
+}
+```
+
 #### 1. State the ANOVA assumptions mathematically.
+```{r}
+# one-way ANOVA Hypothesis test
+module_data_anova <- aov(long_data$Results ~ long_data$Herbicide_groups)
+summary(module_data_anova)
+```
+### Hypothesis
+- $H_0$: $\mu Control = \mu HerbicideA\ = \mu HerbicideB$\
+- $H_1$: at least one is different
+
+### Test Statistic
+- $F_0 = 3.677$
+
+### p-Value
+- $p = 0.0293$
+
+## Conclusion
+Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in the average yield between the three groups.
 
 #### 2. Explain how to check the ANOVA assumptions.
 
-```{r, echo=TRUE}
+The one-way ANOVA hypothesis test indicates a difference between the groups. However, there is a need to determine which groups are different. Moreover, ANOVA assumptions do not check for the normal distribution of the data. 
 
-```
+In this case, QQ plots and histograms help to check visually for normality of residuals. 
+
+It is good practice to check the normal distribution from the continuous variable because of the chances of having false positive results increase. Thus, a formal statistical test like Kruskal-Wallis is a nonparametric alternative to one-way ANOVA to check for normality.
 
 #### 3. Assess the ANOVA assumptions for the agricultural data, graphically. In addition to providing the relevant graphs, you must provide an assessment for each assumption.
 
 ```{r, echo=TRUE}
-
+plot(module_data_anova)
 ```
 
+```{r}
+# histogram
+hist(resid(module_data_anova))
+```
+
+
+The QQ
 #### 4. Use the appropriate hypothesis test to assess the variance assumption. Test at the $\alpha=0.05$ level.
 
 ```{r, echo=TRUE}

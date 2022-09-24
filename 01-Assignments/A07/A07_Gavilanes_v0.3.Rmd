@@ -84,8 +84,8 @@ change_table_format(ci)
 mean_ci <- get_mean_ci(long_data, 'Herbicide_groups', 'Results')
 
 # Plot Confidence Intervals
-ggplot(mean_ci, aes(x = Herbicide_groups, y = mean))+
-  # geom_line(aes(x = Herbicide_groups, y = mean))+
+ggplot(mean_ci, aes(x = Herbicide_groups, y = mean, group = 1))+
+  geom_line(aes(x = Herbicide_groups, y = mean))+
   geom_point(aes(x = Herbicide_groups, y = mean), color = "black", size = 3)+
   scale_color_manual(name = "Herbicide Groups", values=c(custom_green, custom_purple, custom_orange))+
   geom_errorbar(aes(x = Herbicide_groups, ymin = ci_lower, ymax = ci_upper, 
@@ -101,6 +101,15 @@ ggplot(mean_ci, aes(x = Herbicide_groups, y = mean))+
 
 #### 3. Challenge! Why should we be cautious when using the individual CIs found in Q1 and displayed in Q2 to directly compare the three groups?
 Visually, the CI overlapping method fails to reject the null hypothesis more frequently than the corresponding hypothesis test. Using this method decreases the statistical power of an adequate assessment, potentially causing to miss differences.
+
+Perhaps, a density plot is more suitable to display the variances between different variables.
+```{r}
+# density plot
+density_plot <- long_data %>%  
+  ggplot(aes(Results, fill = factor(Herbicide_groups)))+
+  geom_density(alpha = 0.4)
+density_plot
+```
 
 #### 4. Use the appropriate hypothesis test to show that there is a difference in the average yield between the three groups. Test at the $\alpha=0.05$ level.
 
