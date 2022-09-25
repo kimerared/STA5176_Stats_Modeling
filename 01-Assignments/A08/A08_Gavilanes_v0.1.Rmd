@@ -148,10 +148,6 @@ Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest
 kruskalmc(long_data$Results ~ long_data$Herbicide_groups)
 ```
 - Only Herbicide A and B are significant different.
-```{r}
-kw.post(long_data$Results ~ long_data$Herbicide_groups)
-?KW.post
-```
 
 ANOVA and Kruskal-Wallis tests led to the same conclusion.
 
@@ -196,7 +192,8 @@ ggbetweenstats(
   p.adjust.method = "bonferroni",
   ylab = "Crop Yield of Tomatoes",
   xlab = "Herbicide Groups",
-  k = 0
+  k = 0,
+  bf.message = F
 )
 ```
 
