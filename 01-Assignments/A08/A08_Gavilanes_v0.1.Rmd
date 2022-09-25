@@ -8,10 +8,16 @@ editor: source
 
 ```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
 #install.packages(DescTools)
+#install.packages("pgirmess")
+#install.packages("ggstatsplot")
+#install.packages("ISLR")
 library(tidyverse)
 library(gsheet)
 library(formattable)
-library(DescTools) # perform Dunnett Test
+library(DescTools) # perform Dunnett, Levene Test
+library(pgirmess) # perform Kruskal-Wallis Post-hoc
+library(ggstatsplot)
+library(ISLR)
 ```
 
 **Recall the agricultural data from the ANOVA activity available in the following [Google Sheet](https://docs.google.com/spreadsheets/d/1CFyuuWy-4YmVU3wkYuC8Uf3xW3qkpCnpF468NjBAhbY/edit#gid=0).**
@@ -50,13 +56,59 @@ change_table_format <- function(table_name){
 
 #### 1. State the ANOVA assumptions mathematically.
 ```{r}
+# ANOVA model
+module_data_anova <- aov(long_data$Results ~ long_data$Herbicide_groups)
+summary(module_data_anova)
+
+sd_table <- long_data %>% 
+  drop_na() %>% 
+  group_by(Herbicide_groups) %>% 
+  summarise(sd(Results)) %>% 
+  ungroup()
+change_table_format(sd_table)
+
+# test for equality of variance, the Levene's default, median, provides a more robust test (Brown-Forsythe-Test)
+LeveneTest(long_data$Results ~ long_data$Herbicide_groups)
+
+# Data size among the groups
+long_data %>% 
+  group_by(Herbicide_groups) %>% 
+  summarise(count = length(Results))
+```
+
+
+#### 2. Explain how to check the ANOVA assumptions.
+
+The one-way ANOVA hypothesis test indicates a difference between the groups. However, there is a need to determine which groups are different. Moreover, ANOVA assumptions do not check for the normal distribution of the data. 
+
+In this case, QQ plots, or histograms help to check visually for normality of residuals. 
+
+It is good practice to check the normal distribution from the continuous variable because of the chances of having false positive results increase. If the assumption fails, a formal statistical test like Kruskal-Wallis is a nonparametric alternative to one-way ANOVA to check for normality.
+
+#### 3. Assess the ANOVA assumptions for the agricultural data, graphically. In addition to providing the relevant graphs, you must provide an assessment for each assumption.
+
+```{r, echo=TRUE}
+plot(module_data_anova)
+```
+The QQ plot displays normality of residuals. There are a few outliers towards the right tail. Nonetheless, the outliers do not represent a concern.
+
+```{r}
+# histogram
+hist(resid(module_data_anova))
+```
+
+The histogram is positively skewed; however, the data is relatively normal. Thus, the graph does not represent a cause for concern.
+
+#### 4. Use the appropriate hypothesis test to assess the variance assumption. Test at the $\alpha=0.05$ level.
+
+```{r}
 # one-way ANOVA Hypothesis test
 module_data_anova <- aov(long_data$Results ~ long_data$Herbicide_groups)
 summary(module_data_anova)
 ```
 ### Hypothesis
 - $H_0$: $\mu Control = \mu HerbicideA\ = \mu HerbicideB$\
-- $H_1$: at least one is different
+- $H_1$: at least one group is different
 
 ### Test Statistic
 - $F_0 = 3.677$
@@ -67,44 +119,91 @@ summary(module_data_anova)
 ## Conclusion
 Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in the average yield between the three groups.
 
-#### 2. Explain how to check the ANOVA assumptions.
+#### 5. Provide an overall assessment -- do we meet the assumptions to use ANOVA?
+Since there are no significant outliers, and the data is approximately normally distributed, it is adequate to use ANOVA.
 
-The one-way ANOVA hypothesis test indicates a difference between the groups. However, there is a need to determine which groups are different. Moreover, ANOVA assumptions do not check for the normal distribution of the data. 
 
-In this case, QQ plots and histograms help to check visually for normality of residuals. 
-
-It is good practice to check the normal distribution from the continuous variable because of the chances of having false positive results increase. Thus, a formal statistical test like Kruskal-Wallis is a nonparametric alternative to one-way ANOVA to check for normality.
-
-#### 3. Assess the ANOVA assumptions for the agricultural data, graphically. In addition to providing the relevant graphs, you must provide an assessment for each assumption.
+#### 6. Perform the Kruskal-Wallis to determine if there is a difference between the treatment groups. Test at the $\alpha=0.05$ level.
 
 ```{r, echo=TRUE}
-plot(module_data_anova)
+kruskal.test(long_data$Results ~ long_data$Herbicide_groups)
 ```
 
+### Hypothesis: Kruskal-Wallis
+- $H_0$: $M_{Control} = M_A = M_B$\
+- $H_1$: at least one group is different
+
+### Test Statistic
+- $H = 8.6303$
+
+### p-Value
+- $p = 0.01336$
+
+## Conclusion
+Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in the average yield between the three groups.
+
+#### 7. Perform the Kruskal-Wallis post-hoc test to determine what differences exist between groups. Test at the $\alpha=0.05$ level.
+```{r}
+# Kruskal-Wallis post-hoc
+kruskalmc(long_data$Results ~ long_data$Herbicide_groups)
+```
+- Only Herbicide A and B are significant different.
+```{r}
+kw.post(long_data$Results ~ long_data$Herbicide_groups)
+?KW.post
+```
+
+ANOVA and Kruskal-Wallis tests led to the same conclusion.
+
+#### 8. Challenge! Construct a graph (or multiple graphs) to aid in explaining this to the agricultural researcher.
+
+The following box-plot is useful to display the median, and data outliers. 
+```{r}
+# boxplot
+boxplot(long_data$Results ~ long_data$Herbicide_groups)
+```
+The following QQ plot displays how the values lie on the 45 degree line relatively well. The data is approximately normally distributed.
+```{r}
+# qq plot
+qqnorm(resid(module_data_anova))
+qqline(resid(module_data_anova))
+```
+
+The histogram quickly match the general appearance  of a normal distribution.
+The data is positively skewed; nonetheless, it does not represent a cause for concern.
 ```{r}
 # histogram
 hist(resid(module_data_anova))
 ```
 
-
-The QQ
-#### 4. Use the appropriate hypothesis test to assess the variance assumption. Test at the $\alpha=0.05$ level.
-
-```{r, echo=TRUE}
-
+The following density graph displays the variance among the three groups.
+```{r}
+# density plot
+density_plot <- long_data %>%  
+  ggplot(aes(Results, fill = factor(Herbicide_groups)))+
+  geom_density(alpha = 0.4)
+density_plot
 ```
-
-#### 5. Provide an overall assessment -- do we meet the assumptions to use ANOVA?
-
-#### 6. Perform the Kruskal-Wallis to determine if there is a difference between the treatment groups. Test at the $\alpha=0.05$ level.
-
-```{r, echo=TRUE}
-
+```{r}
+ggbetweenstats(
+  data = long_data,
+  x = Herbicide_groups,
+  y = Results,
+  plot.type = "box",
+  type = "p",
+  pairwise.display = "s",
+  var.equal = T,
+  p.adjust.method = "bonferroni",
+  ylab = "Crop Yield of Tomatoes",
+  xlab = "Herbicide Groups",
+  k = 0
+)
 ```
-
-#### 7. Perform the Kruskal-Wallis post-hoc test to determine what differences exist between groups. Test at the $\alpha=0.05$ level.
-
-#### 8. Challenge! Construct a graph (or multiple graphs) to aid in explaining this to the agricultural researcher.
 
 #### 9. Write a summary paragraph, appropriate for the agricultural researcher (i.e., not a statistician), using the results that are **appropriate for the data**. Hint: you will summarize either your ANOVA findings from the previous activity *or* your Kruskal-Wallis findings from this activity.
 
+Since there are no significant outliers, and the data is approximately normally distributed, it is reasonable to make the ANOVA assumptions.
+Our findings showed that there is no significant difference against the control group.
+However, there is a difference between Herbicide A and B. 
+
+To conclude, Herbicide B showed better performance on crop yields of tomatoes against the Tomato Hornworms.
