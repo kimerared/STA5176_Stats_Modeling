@@ -18,6 +18,7 @@ library(DescTools) # perform Dunnett, Levene Test
 library(pgirmess) # perform Kruskal-Wallis Post-hoc
 library(ggstatsplot)
 library(ISLR)
+library(patchwork)
 ```
 
 **Recall the agricultural data from the ANOVA activity available in the following [Google Sheet](https://docs.google.com/spreadsheets/d/1CFyuuWy-4YmVU3wkYuC8Uf3xW3qkpCnpF468NjBAhbY/edit#gid=0).**
@@ -40,26 +41,35 @@ long_data <- clean_data %>%
                values_to = "Results")
 
 # ---Colors---
+custom_gray = "#3D3D3D"
+custom_green_dark = "#71CA97"
+custom_green_light = "#DeF7E9"
 custom_green = "#7FBD32"
 custom_purple = "#700CBC"
 custom_orange = "#FB8604"
+custom_density_hue = c(custom_purple,custom_orange, custom_green)
 
 # ***FUNCTIONS***
-# f01 // change default table format
-change_table_format <- function(table_name){
-  formattable(
-  table_name, align =c("c","c", "c"),
-  list(area() ~ color_text("black", "#555888"))
-  )
+# f00 - Change default table format
+change_table_format <- function(data_table){
+  # local variables
+  first_column <- data_table[1]
+  dataframe_length <- NCOL(data_table)
+  # format
+  formattable(data_table, align = c("l",rep("c", dataframe_length - 1)),
+              list(first_column = formatter("span", style = ~ style(color = custom_gray, font.weight = "bold"))
+              )#/end list
+              )#/end formattable
 }
 ```
 
 #### 1. State the ANOVA assumptions mathematically.
 ```{r}
-# ANOVA model
+# ANOVA table
 module_data_anova <- aov(long_data$Results ~ long_data$Herbicide_groups)
 summary(module_data_anova)
 
+# Summary table
 sd_table <- long_data %>% 
   drop_na() %>% 
   group_by(Herbicide_groups) %>% 
@@ -67,23 +77,29 @@ sd_table <- long_data %>%
   ungroup()
 change_table_format(sd_table)
 
-# test for equality of variance, the Levene's default, median, provides a more robust test (Brown-Forsythe-Test)
+# Levene's test for equality of variance, 
+# default: median, provides a more robust test (Brown-Forsythe-Test)
 LeveneTest(long_data$Results ~ long_data$Herbicide_groups)
-
-# Data size among the groups
-long_data %>% 
-  group_by(Herbicide_groups) %>% 
-  summarise(count = length(Results))
 ```
 
 
 #### 2. Explain how to check the ANOVA assumptions.
 
-The one-way ANOVA hypothesis test indicates a difference between the groups. However, there is a need to determine which groups are different. Moreover, ANOVA assumptions do not check for the normal distribution of the data. 
+The one-way ANOVA hypothesis test indicates a difference between the groups. However, there is a need to determine which groups are different. Moreover, a residual analysis will check for the normal distribution of the data. 
 
-In this case, QQ plots, or histograms help to check visually for normality of residuals. 
+In this case, residual plots can be generated with QQ plots, or histograms to check visually for normality of residuals. 
 
-It is good practice to check the normal distribution from the continuous variable because of the chances of having false positive results increase. If the assumption fails, a formal statistical test like Kruskal-Wallis is a nonparametric alternative to one-way ANOVA to check for normality.
+It is good practice to check for normality from the continuous variable because of the chances of having false positive results increase. If the assumption fails, a formal statistical test like Kruskal-Wallis is a nonparametric alternative to one-way ANOVA.
+
+The one-way ANOVA assumptions are listed below.
+
+Normality: The variable under discussion is regularly distributed for each population.
+
+Sample independence: Each sample is drawn separately from the others.
+
+Variance equality: The data variance in each group is the same.
+
+Simple random samples: Simple random samples are samples taken from the populations under study.
 
 #### 3. Assess the ANOVA assumptions for the agricultural data, graphically. In addition to providing the relevant graphs, you must provide an assessment for each assumption.
 
@@ -153,23 +169,39 @@ ANOVA and Kruskal-Wallis tests led to the same conclusion.
 
 #### 8. Challenge! Construct a graph (or multiple graphs) to aid in explaining this to the agricultural researcher.
 
-The following box-plot is useful to display the median, and data outliers. 
-```{r}
-# boxplot
-boxplot(long_data$Results ~ long_data$Herbicide_groups)
-```
 The following QQ plot displays how the values lie on the 45 degree line relatively well. The data is approximately normally distributed.
 ```{r}
-# qq plot
-qqnorm(resid(module_data_anova))
-qqline(resid(module_data_anova))
+# QQ plot
+ggplot(module_data_anova, aes(sample = module_data_anova$residuals))+
+  geom_qq(size=3, alpha = 0.6, color = custom_orange)+
+  geom_qq_line()+
+  theme_bw() +
+  labs(title = "Normal Q-Q Plot")+
+  xlab("Theoretical Quantiles") +
+  ylab("Standarized Residuals")
 ```
 
 The histogram quickly match the general appearance  of a normal distribution.
-The data is positively skewed; nonetheless, it does not represent a cause for concern.
+The data is skewed; nonetheless, it does not represent a cause for concern.
 ```{r}
 # histogram
-hist(resid(module_data_anova))
+ggplot(lm(long_data$Results ~ long_data$Herbicide_groups)) + 
+  geom_histogram(aes(x=module_data_anova$residuals), 
+                 binwidth=3, fill=custom_green, color="#e9ecef", alpha=0.9)+
+  xlab("Standarized Residuals")+
+  ylab("Frequency")+
+  theme_bw()
+```
+The graph below shows the fitted vs residuals.
+The plot is used to detect non-linearity, unequal error variances, and outliers.
+```{r}
+# fitted vs residuals
+ggplot(lm(long_data$Results ~ long_data$Herbicide_groups)) + 
+  geom_point(aes(x=.fitted, y=.resid), 
+             size=3, alpha = 0.35, color = custom_purple)+
+  xlab("Fitted")+
+  ylab("Standarized Residuals")+
+  theme_bw()
 ```
 
 The following density graph displays the variance among the three groups.
@@ -177,9 +209,15 @@ The following density graph displays the variance among the three groups.
 # density plot
 density_plot <- long_data %>%  
   ggplot(aes(Results, fill = factor(Herbicide_groups)))+
-  geom_density(alpha = 0.4)
+  geom_density(alpha = 0.6)+
+  xlab("Herbicide Groups")+
+  theme_bw()+
+  scale_fill_manual(values = custom_density_hue)+
+  scale_color_manual(values = custom_density_hue)
 density_plot
 ```
+The following chart displays all three groups with a significant difference outlined between Herbicide A and B.
+The Bonferroni correction is used to reduce the chances of obtaining false-positive results.
 ```{r}
 ggbetweenstats(
   data = long_data,
@@ -203,4 +241,4 @@ Since there are no significant outliers, and the data is approximately normally 
 Our findings showed that there is no significant difference against the control group.
 However, there is a difference between Herbicide A and B. 
 
-To conclude, Herbicide B showed better performance on crop yields of tomatoes against the Tomato Hornworms.
+To conclude, Herbicide B showed consistent and better performance on crop yields of tomatoes against the Tomato Hornworms.
