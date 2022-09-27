@@ -7,10 +7,11 @@ editor: source
 ---
 
 ```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
-#install.packages(DescTools)
-#install.packages("pgirmess")
-#install.packages("ggstatsplot")
-#install.packages("ISLR")
+# install.packages("DescTools")
+# install.packages("pgirmess")
+# install.packages("ggstatsplot")
+# install.packages("ISLR")
+# install.packages("PMCMRplus")
 library(tidyverse)
 library(gsheet)
 library(formattable)
@@ -19,6 +20,7 @@ library(pgirmess) # perform Kruskal-Wallis Post-hoc
 library(ggstatsplot)
 library(ISLR)
 library(patchwork)
+library(PMCMRplus)
 ```
 
 **Recall the agricultural data from the ANOVA activity available in the following [Google Sheet](https://docs.google.com/spreadsheets/d/1CFyuuWy-4YmVU3wkYuC8Uf3xW3qkpCnpF468NjBAhbY/edit#gid=0).**
@@ -162,8 +164,13 @@ Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest
 ```{r}
 # Kruskal-Wallis post-hoc
 kruskalmc(long_data$Results ~ long_data$Herbicide_groups)
+
+# Multiple pairwise-comparison between groups
+pairwise.wilcox.test(long_data$Results, long_data$Herbicide_groups,
+                     p.adjust.method = "bonferroni",
+                     exact = FALSE)
 ```
-- Only Herbicide A and B are significant different.
+- Only Herbicide A and B are significant different with a $p-value = 0.015$.
 
 ANOVA and Kruskal-Wallis tests led to the same conclusion.
 
