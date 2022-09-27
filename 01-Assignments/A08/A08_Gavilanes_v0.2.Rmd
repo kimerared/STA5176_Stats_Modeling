@@ -1,0 +1,254 @@
+---
+title: "ANOVA Assumptions and the Kruskal-Wallis - Week 5, Lecture 2"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+
+```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
+# install.packages("DescTools")
+# install.packages("pgirmess")
+# install.packages("ggstatsplot")
+# install.packages("ISLR")
+# install.packages("PMCMRplus")
+library(tidyverse)
+library(gsheet)
+library(formattable)
+library(DescTools) # perform Dunnett, Levene Test
+library(pgirmess) # perform Kruskal-Wallis Post-hoc
+library(ggstatsplot)
+library(ISLR)
+library(patchwork)
+library(PMCMRplus)
+```
+
+**Recall the agricultural data from the ANOVA activity available in the following [Google Sheet](https://docs.google.com/spreadsheets/d/1CFyuuWy-4YmVU3wkYuC8Uf3xW3qkpCnpF468NjBAhbY/edit#gid=0).**
+
+```{r}
+# clear environment
+rm(list = ls())
+
+# extract data
+data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1CFyuuWy-4YmVU3wkYuC8Uf3xW3qkpCnpF468NjBAhbY/edit#gid=0"))
+
+# transform data
+clean_data <- data %>% 
+  # delete empty rows
+  drop_na()
+# pivot to long data
+long_data <- clean_data %>% 
+  pivot_longer(cols = c("Herbicide1", "Herbicide2", "Control"),
+               names_to = "Herbicide_groups",
+               values_to = "Results")
+
+# ---Colors---
+custom_gray = "#3D3D3D"
+custom_green_dark = "#71CA97"
+custom_green_light = "#DeF7E9"
+custom_green = "#7FBD32"
+custom_purple = "#700CBC"
+custom_orange = "#FB8604"
+custom_density_hue = c(custom_purple,custom_orange, custom_green)
+
+# ***FUNCTIONS***
+# f00 - Change default table format
+change_table_format <- function(data_table){
+  # local variables
+  first_column <- data_table[1]
+  dataframe_length <- NCOL(data_table)
+  # format
+  formattable(data_table, align = c("l",rep("c", dataframe_length - 1)),
+              list(first_column = formatter("span", style = ~ style(color = custom_gray, font.weight = "bold"))
+              )#/end list
+              )#/end formattable
+}
+```
+
+#### 1. State the ANOVA assumptions mathematically.
+```{r}
+# ANOVA table
+module_data_anova <- aov(long_data$Results ~ long_data$Herbicide_groups)
+summary(module_data_anova)
+
+# Summary table
+summary_table <- long_data %>% 
+  drop_na() %>% 
+  group_by(Herbicide_groups) %>% 
+  summarise(SD = sd(Results), AVG = mean(Results), Median = median(Results)) %>% 
+  ungroup()
+
+change_table_format(summary_table)
+
+# Levene's test for equality of variance, 
+# default: median, provides a more robust test (Brown-Forsythe-Test)
+LeveneTest(long_data$Results ~ long_data$Herbicide_groups)
+```
+The data failed the Levene's Test with a $p-value = 0.04688$. 
+
+#### 2. Explain how to check the ANOVA assumptions.
+
+The one-way ANOVA hypothesis test indicates a difference between the groups. However, there is a need to determine which groups are different. Moreover, a residual analysis will check for the normal distribution of the data. 
+
+In this case, residual plots can be generated with QQ plots, or histograms to check visually for normality of residuals. 
+
+It is good practice to check for normality from the continuous variable because of the chances of having false positive results increase. If the assumption fails, a formal statistical test like Kruskal-Wallis is a nonparametric alternative to one-way ANOVA.
+
+The one-way ANOVA assumptions are listed below.
+
+Normality: The variable under discussion is regularly distributed for each population.
+
+Sample independence: Each sample is drawn separately from the others.
+
+Variance equality: The data variance in each group is the same.
+
+Simple random samples: Simple random samples are samples taken from the populations under study.
+
+#### 3. Assess the ANOVA assumptions for the agricultural data, graphically. In addition to providing the relevant graphs, you must provide an assessment for each assumption.
+
+```{r, echo=TRUE}
+plot(module_data_anova)
+```
+The QQ plot displays normality of residuals. There are a few outliers towards the right tail. Nonetheless, the outliers do not represent a concern.
+
+```{r}
+# histogram
+hist(resid(module_data_anova))
+```
+
+The histogram is positively skewed; however, the data is relatively normal. Thus, the graph does not represent a cause for concern.
+
+#### 4. Use the appropriate hypothesis test to assess the variance assumption. Test at the $\alpha=0.05$ level.
+
+```{r}
+# one-way ANOVA Hypothesis test
+module_data_anova <- aov(long_data$Results ~ long_data$Herbicide_groups)
+summary(module_data_anova)
+```
+### Hypothesis
+- $H_0$: $\mu Control = \mu HerbicideA\ = \mu HerbicideB$\
+- $H_1$: at least one group is different
+
+### Test Statistic
+- $F_0 = 3.677$
+
+### p-Value
+- $p = 0.0293$
+
+## Conclusion
+Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in the average yield between the three groups.
+
+#### 5. Provide an overall assessment -- do we meet the assumptions to use ANOVA?
+Since there are no significant outliers, and the data is approximately normally distributed, it is adequate to use ANOVA.
+The data failed the Levene's Test with a $p-value = 0.04688$; however, I feel confident with the ANOVA assumptions.
+
+#### 6. Perform the Kruskal-Wallis to determine if there is a difference between the treatment groups. Test at the $\alpha=0.05$ level.
+
+```{r, echo=TRUE}
+kruskal.test(long_data$Results ~ long_data$Herbicide_groups)
+```
+
+### Hypothesis: Kruskal-Wallis
+- $H_0$: $M_{Control} = M_A = M_B$\
+- $H_1$: at least one group is different
+
+### Test Statistic
+- $H = 8.6303$
+
+### p-Value
+- $p = 0.01336$
+
+## Conclusion
+Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in the average yield between the three groups.
+
+#### 7. Perform the Kruskal-Wallis post-hoc test to determine what differences exist between groups. Test at the $\alpha=0.05$ level.
+```{r}
+# Kruskal-Wallis post-hoc
+kruskalmc(long_data$Results ~ long_data$Herbicide_groups)
+
+# Multiple pairwise-comparison between groups
+pairwise.wilcox.test(long_data$Results, long_data$Herbicide_groups,
+                     p.adjust.method = "bonferroni",
+                     exact = FALSE)
+```
+- Only Herbicide A and B are significant different with a $p-value = 0.015$.
+
+ANOVA and Kruskal-Wallis tests led to the same conclusion.
+
+#### 8. Challenge! Construct a graph (or multiple graphs) to aid in explaining this to the agricultural researcher.
+
+The following QQ plot displays how the values lie on the 45-degree line relatively well. The data is approximately normally distributed.
+```{r}
+# QQ plot
+ggplot(module_data_anova, aes(sample = module_data_anova$residuals))+
+  geom_qq(size=3, alpha = 0.6, color = custom_orange)+
+  geom_qq_line()+
+  theme_bw() +
+  labs(title = "Normal Q-Q Plot")+
+  xlab("Theoretical Quantiles") +
+  ylab("Standarized Residuals")
+```
+
+The histogram quickly matches the general appearance  of a normal distribution.
+The data is skewed; nonetheless, it does not represent a cause for concern.
+```{r}
+# histogram
+ggplot(lm(long_data$Results ~ long_data$Herbicide_groups)) + 
+  geom_histogram(aes(x=module_data_anova$residuals), 
+                 binwidth=3, fill=custom_green, color="#e9ecef", alpha=0.9)+
+  xlab("Standarized Residuals")+
+  ylab("Frequency")+
+  theme_bw()
+```
+The graph below shows the fitted vs residuals.
+The plot is used to detect non-linearity, unequal error variances, and outliers.
+```{r}
+# fitted vs residuals
+ggplot(lm(long_data$Results ~ long_data$Herbicide_groups)) + 
+  geom_point(aes(x=.fitted, y=.resid), 
+             size=3, alpha = 0.35, color = custom_purple)+
+  xlab("Fitted")+
+  ylab("Standarized Residuals")+
+  theme_bw()
+```
+
+The following density graph displays the variance among the three groups.
+```{r}
+# density plot
+density_plot <- long_data %>%  
+  ggplot(aes(Results, fill = factor(Herbicide_groups)))+
+  geom_density(alpha = 0.6)+
+  xlab("Herbicide Groups")+
+  theme_bw()+
+  scale_fill_manual(values = custom_density_hue)+
+  scale_color_manual(values = custom_density_hue)+
+  geom_vline(xintercept = summary_table$AVG, size = 1.5, color = custom_purple, alpha(0.55))+
+  geom_vline(xintercept = summary_table$Median, size = 1, color = "red", linetype="dashed")
+density_plot
+```
+The following chart displays all three groups with a significant difference outlined between Herbicide A and B.
+The Bonferroni correction is used to reduce the chances of obtaining false-positive results.
+```{r}
+ggbetweenstats(
+  data = long_data,
+  x = Herbicide_groups,
+  y = Results,
+  plot.type = "box",
+  type = "p",
+  pairwise.display = "s",
+  var.equal = T,
+  p.adjust.method = "bonferroni",
+  ylab = "Crop Yield of Tomatoes",
+  xlab = "Herbicide Groups",
+  k = 0,
+  bf.message = F
+)
+```
+
+#### 9. Write a summary paragraph, appropriate for the agricultural researcher (i.e., not a statistician), using the results that are **appropriate for the data**. Hint: you will summarize either your ANOVA findings from the previous activity *or* your Kruskal-Wallis findings from this activity.
+
+Since there are no significant outliers, and the data is approximately normally distributed, it is reasonable to make the ANOVA assumptions.
+Our findings showed that there is no significant difference against the control group.
+However, there is a difference between Herbicide A and B. 
+
+To conclude, Herbicide B showed consistent and better performance on crop yields of tomatoes against the Tomato Hornworms.
