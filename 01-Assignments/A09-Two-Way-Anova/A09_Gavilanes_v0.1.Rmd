@@ -1,11 +1,21 @@
 ---
 title: "Two-Way ANOVA - Week 6, Lecture 1"
-author: "Your Name Here"
+author: "Hector Gavilanes"
 format: html
 self-contained: true
 editor: source
 ---
-
+```{r, echo=FALSE}
+library(tidyverse)
+library(gsheet)
+library(formattable)
+library(DescTools) # perform Dunnett, Levene Test
+library(pgirmess) # perform Kruskal-Wallis Post-hoc
+# library(ggstatsplot)
+# library(ISLR)
+# # library(patchwork)
+# library(PMCMRplus)
+```
 ## Q1:
 
 **A large advertising firm specializes in creating television commercials for children's products. The firm wants to design a study to investigate factors that may affect the lengths of time a commercial is able to hold a child's attention. A preliminary study determines that two factors that may be important are the age of the child and the type of product being advertised. The firm wants to determine whether there were large differences in the mean length of time that the commercial is able to hold the child's attention depending on these two factors. If there proves to be a difference, the firm would then attempt to determine new types of commercials depending on the product and targeted age group.**
@@ -21,9 +31,53 @@ editor: source
 -   **P**<sub>**1**</sub>**: breakfast cereals,**
 -   **P**<sub>**2**</sub>**: video games**
 
+
 **A group of 30 children is recruited in each age group, and 10 are randomly assigned to watch a 60-second commercial for each of the two products. Researchers record their attention spans during the viewing of the commercial. The data are given here: [Google Sheet](https://docs.google.com/spreadsheets/d/16_HOSmIBDD9oYY1oBQ5Df6eFH9nT6GgO1UWcbMZNLUo/edit?usp=sharing).**
 
+```{r}
+# clear environment
+rm(list = ls())
+
+# extract data
+data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/16_HOSmIBDD9oYY1oBQ5Df6eFH9nT6GgO1UWcbMZNLUo/edit?usp=sharing"))
+
+# transform data
+clean_data <- data %>% 
+  # delete empty rows
+  drop_na() %>%
+  rename("cereal_5_6" = "A1-P1") %>% 
+  rename("cereal_7_8" = "A2-P1") %>% 
+  rename("cereal_9_10" = "A3-P1") %>% 
+  rename("games_5_6" = "A1-P2") %>% 
+  rename("games_7_8" = "A2-P2") %>% 
+  rename("games_9_10" = "A3-P2")
+# pivot to long data
+prelong_data <- clean_data %>%
+  pivot_longer(cols = c("cereal_5_6", "cereal_7_8", "cereal_9_10", "games_5_6", "games_7_8", "games_9_10"),
+               names_to = "age_groups",
+               values_to = "Results")
+long_data <- within(prelong_data, rm(Child))
+
+cereal <- clean_data %>% 
+  select(cereal_5_6, cereal_7_8, cereal_9_10)
+games <- clean_data %>% 
+  select(games_5_6, games_7_8, games_9_10)
+cereal_group <- cereal %>% 
+  unite(col = "Age_Groups", cereal_5_6:cereal_9_10, sep = " ")
+cereal_group
+
+
+
+
+
+
+
+```
+
 a.  Construct the two-way ANOVA table.
+```{r}
+
+```
 
 b.  Use the appropriate hypothesis test to show that the interaction between age and product is significant. Test at the $\alpha=0.05$ level.
 
