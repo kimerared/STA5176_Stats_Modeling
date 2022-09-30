@@ -1,0 +1,145 @@
+---
+title: "Two-Way ANOVA - Week 6, Lecture 2"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
+#install.packages("ggpubr")
+library(ggpubr)
+library(tidyverse)
+library(gsheet)
+```
+## Q1:
+
+**Recall the advertising data from the last activity; you showed that there was an interaction between age and product type.**
+
+```{r}
+# clear environment
+rm(list = ls())
+
+# extract data
+data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/16_HOSmIBDD9oYY1oBQ5Df6eFH9nT6GgO1UWcbMZNLUo/edit?usp=sharing"))
+
+# transform data
+clean_data <- data %>% 
+  # delete empty rows
+  drop_na() %>%
+  rename("cereal_5-6" = "A1-P1") %>% 
+  rename("cereal_7-8" = "A2-P1") %>% 
+  rename("cereal_9-10" = "A3-P1") %>% 
+  rename("games_5-6" = "A1-P2") %>% 
+  rename("games_7-8" = "A2-P2") %>% 
+  rename("games_9-10" = "A3-P2")
+
+# pivot to long data
+prelong_data <- clean_data %>%
+  pivot_longer(cols = c("cereal_5-6", "cereal_7-8", "cereal_9-10", "games_5-6", "games_7-8", "games_9-10"),
+               names_to = "product_&_age",
+               values_to = "Results")
+
+# separate product and age into independent columns
+separate_data <- prelong_data %>% 
+  separate(`product_&_age`, into = c("Product", "Age"), sep = "_")
+  
+# remove Child column
+long_data <- within(separate_data, rm(Child)) 
+```
+
+```{r}
+# interaction plot: Product, Age
+interaction.plot(long_data$Product, long_data$Age, long_data$Results)
+
+# interaction plot: Age, Product
+interaction.plot(long_data$Age, long_data$Product, long_data$Results)
+
+# Two-way interaction plot
+interaction.plot(x.factor = long_data$Age, trace.factor = long_data$Product, 
+                 response = long_data$Results, fun = mean, 
+                 type = "b", legend = TRUE, 
+                 xlab = "Age", ylab="Product",
+                 pch=c(1,19), col = c("#00AFBB", "#E7B800"))
+```
+
+a. Construct the profile plot for this data.
+```{r}
+# Reference: interaction plot: Age, Product
+# interaction.plot(long_data$Age, long_data$Product, long_data$Results)
+# profile plot
+h3 <- lm(long_data$Results ~ factor(long_data$Product) * factor(long_data$Age))
+anova(h3)
+means <- long_data %>%
+  drop_na() %>% 
+  group_by(Product, Age) %>% 
+  summarise(mean = mean(Results), .groups = "drop")
+
+means
+
+game <- means %>% filter(Product == "game") %>% rename(game = mean) %>% select(-Product)
+
+rename_mean <- function(category, filter_var){
+  means %>% 
+    filter(category == filter_var) %>% 
+    rename(game_A = mean) %>% 
+    select(-category)
+}
+
+ggline(long_data, x = "Age", y = "Results", color = "Product",
+       add = "mean")
+
+ggline(long_data, x = "Product", y = "Results", color = "Age",
+       add = "mean")
+```
+Test 2
+```{r}
+
+```
+
+b. (Challenge!) Perform Tukey's test to determine which treatment groups are significantly different. Test at the $\alpha=0.05$ level.
+```{r}
+# Two-way ANOVA
+# Null Hypothesis:TukeyHSD(h1_h2, "factor(long_data$Product)")
+# - H1: The means of observations grouped by Product are the same
+# - H2: The means of observations grouped by Age are the same
+# - H3: There is no interaction between Product and Age
+
+# h1_h2 <- aov(long_data$Results ~ long_data$Product + factor(long_data$Age))
+# summary(h1_h2)
+# 
+# # Tukey's test
+# TukeyHSD(aov(h1_h2))
+
+summary(h1_h2 <- aov(long_data$Results ~ factor(long_data$Product) + factor(long_data$Age)))
+# Product
+TukeyHSD(h1_h2, "factor(long_data$Product)")
+# Age
+TukeyHSD(h1_h2, "factor(long_data$Age)")
+
+# Tukey plots
+plot(TukeyHSD(h1_h2, "factor(long_data$Product)"))
+plot(TukeyHSD(h1_h2, "factor(long_data$Age)"))
+```
+
+c. Write a short paragraph to explain your results to the advertising researchers.
+
+d. Graphically assess the ANOVA assumptions -- is ANOVA appropriate here?
+```{r}
+h3 <- aov(long_data$Results ~ long_data$Product * factor(long_data$Age))
+plot(h3)
+```
+It is not appropriate to use ANOVA. Visually, the data does not meet normality.
+
+## Q2:
+
+**Recall the tomato data from the last activity; you showed that there was not an interaction between shading and phase of growth and that there was at least one main effect.**
+
+a.  (Challenge!) Construct the profile plot for this data.
+
+b. If there is a main effect of shading, perform Tukey's test to determine which levels of shading are significantly different. Test at the $\alpha=0.10$ level.
+
+c.  If there is a main effect of phase of growth, perform Tukey's test to determine which phases of growth are significantly different. Test at the $\alpha=0.10$ level.
+
+d. Write a short paragraph to explain your results to the horticulturist. 
+
+e. Graphically assess the ANOVA assumptions -- is ANOVA appropriate here?

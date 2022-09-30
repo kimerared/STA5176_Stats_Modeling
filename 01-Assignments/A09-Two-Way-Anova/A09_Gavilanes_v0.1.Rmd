@@ -5,16 +5,9 @@ format: html
 self-contained: true
 editor: source
 ---
-```{r, echo=FALSE}
+```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
 library(tidyverse)
 library(gsheet)
-library(formattable)
-library(DescTools) # perform Dunnett, Levene Test
-library(pgirmess) # perform Kruskal-Wallis Post-hoc
-# library(ggstatsplot)
-# library(ISLR)
-# # library(patchwork)
-# library(PMCMRplus)
 ```
 ## Q1:
 
@@ -45,52 +38,127 @@ data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/16_HOSmIBDD
 clean_data <- data %>% 
   # delete empty rows
   drop_na() %>%
-  rename("cereal_5_6" = "A1-P1") %>% 
-  rename("cereal_7_8" = "A2-P1") %>% 
-  rename("cereal_9_10" = "A3-P1") %>% 
-  rename("games_5_6" = "A1-P2") %>% 
-  rename("games_7_8" = "A2-P2") %>% 
-  rename("games_9_10" = "A3-P2")
+  rename("cereal_5-6" = "A1-P1") %>% 
+  rename("cereal_7-8" = "A2-P1") %>% 
+  rename("cereal_9-10" = "A3-P1") %>% 
+  rename("games_5-6" = "A1-P2") %>% 
+  rename("games_7-8" = "A2-P2") %>% 
+  rename("games_9-10" = "A3-P2")
+
 # pivot to long data
 prelong_data <- clean_data %>%
-  pivot_longer(cols = c("cereal_5_6", "cereal_7_8", "cereal_9_10", "games_5_6", "games_7_8", "games_9_10"),
-               names_to = "age_groups",
+  pivot_longer(cols = c("cereal_5-6", "cereal_7-8", "cereal_9-10", "games_5-6", "games_7-8", "games_9-10"),
+               names_to = "product_&_age",
                values_to = "Results")
-long_data <- within(prelong_data, rm(Child))
 
-cereal <- clean_data %>% 
-  select(cereal_5_6, cereal_7_8, cereal_9_10)
-games <- clean_data %>% 
-  select(games_5_6, games_7_8, games_9_10)
-cereal_group <- cereal %>% 
-  unite(col = "Age_Groups", cereal_5_6:cereal_9_10, sep = " ")
-cereal_group
-
-
-
-
-
-
+# separate product and age into independent columns
+separate_data <- prelong_data %>% 
+  separate(`product_&_age`, into = c("Product", "Age"), sep = "_")
+  
+# remove Child column
+long_data <- within(separate_data, rm(Child)) 
 
 ```
 
 a.  Construct the two-way ANOVA table.
 ```{r}
+# Two-way ANOVA
+# Null Hypothesis:
+# - H1: The means of observations grouped by Product are the same
+# - H2: The means of observations grouped by Age are the same
+# - H3: There is no interaction between Product and Age
 
+h3 <- aov(long_data$Results ~ long_data$Product * factor(long_data$Age))
+summary(h3)
 ```
 
 b.  Use the appropriate hypothesis test to show that the interaction between age and product is significant. Test at the $\alpha=0.05$ level.
+
+### Hypothesis
+- $H_0$: There is no interaction between Product and Age\
+- $H_1$: There is an interaction between Product and Age 
+
+### Test Statistic
+- $F_{ProductAge} = 4.705$
+
+### p-Value
+- $p = 0.0131$
+
+## Conclusion
+Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is an interaction between Product and Age.
 
 ## Q2:
 
 **A horticulturalist at a large research institution designs a study to evaluate the effect on tomato yields of water loss due to transpiration. She decides to examine four levels of shading of the tomato plants at three stages of the tomato plant's development. The four levels of shading (0, 25%, 50%, and 75%) were selected to reduce the solar exposure of the plants. The shading remained in place for 20 days during the early, middle, and late phases of the tomato plants' growth. There were four plots of tomatoes randomly assigned to each of the combinations of shading and growth stage. At the end of the study, the yields per plot in pounds were recorded. The data are given here: [Google Sheet](https://docs.google.com/spreadsheets/d/1kUxXje3cTl_PZFQcg8FvESo34UuGNwm1GrKGc4HN0_A/edit?usp=sharing).**
 
+```{r}
+# clear environment
+rm(list = ls())
+
+# extract data
+data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1kUxXje3cTl_PZFQcg8FvESo34UuGNwm1GrKGc4HN0_A/edit?usp=sharing"))
+```
+
 a.  Construct the two-way ANOVA table.
+```{r}
+# Null Hypothesis:
+# - H1: The means of observations grouped by Shading are the same
+# - H2: The means of observations grouped by Phase of Growth are the same
+# - H3: There is no interaction between Shading and Phase of Growth
+
+h3 <- aov(data$Yield ~ factor(data$Phase) * factor(data$PctShade))
+summary(h3)
+
+```
 
 b.  Use the appropriate hypothesis test to show that the interaction between shading and phase of growth is not significant. Test at the $\alpha=0.10$ level.
 
+### Hypothesis
+- $H_0$: There is no interaction between Shading and Phase\
+- $H_1$: There is an interaction between Shading and Phase 
+
+### Test Statistic
+- $F_{ShadingPhase} = 1.642$
+
+### p-Value
+- $p = 0.1726$
+
+## Conclusion
+Keep $H_0$ at the $\alpha$=0.01 level. There is sufficient evidence to suggest there is no interaction between Shading and Phase of growth.
+
 c.  Remove the interaction term and reconstruct the two-way ANOVA table.
+
+```{r}
+h1_h2 <- aov(data$Yield ~ factor(data$PctShade) + factor(data$Phase))
+summary(h1_h2)
+```
 
 d.  Use the appropriate hypothesis test to determine if there is a main effect of shading. Test at the $\alpha=0.10$ level.
 
+### Hypothesis
+- $H_0$: There is no main effect of Shading\
+- $H_1$: There is a main effect of Shading 
+
+### Test Statistic
+- $F_{shading} = 0.278$
+
+### p-Value
+- $p = 0.8407$
+
+## Conclusion
+Keep $H_0$ at the $\alpha$=0.10 level. There is no main effect of Shading.
+
 e.  Use the appropriate hypothesis test to determine if there is a main effect of phase of growth. Test at the $\alpha=0.10$ level.
+
+### Hypothesis
+- $H_0$: There is no main effect of Phase of Growth\
+- $H_1$: There is a main effect of Phase of Growth 
+
+### Test Statistic
+- $F_{phase} = 2.546$
+
+### p-Value
+- $p = 0.0932$
+
+## Conclusion
+Reject $H_0$ at the $\alpha$=0.10 level. There is sufficient evidence to suggest a main effect of Phase of Growth.
