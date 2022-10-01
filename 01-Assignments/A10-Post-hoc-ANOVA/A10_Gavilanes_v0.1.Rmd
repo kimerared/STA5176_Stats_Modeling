@@ -85,8 +85,16 @@ rename_mean <- function(category, filter_var){
     select(-category)
 }
 
-ggline(long_data, x = "Age", y = "Results", color = "Product",
-       add = "mean")
+profile <- ggline(long_data, x = "Age", y = "Results", color = "Product",
+       add = "mean",
+       show.line.label = TRUE,
+       label.rectangle = TRUE,
+       palette = c("gray", "magenta"),
+       ylab = "Product")
+profile_plot <- ggpar(profile, ylim = c(15, 50))
+profile_plot
+
+?ggpar
 
 ggline(long_data, x = "Product", y = "Results", color = "Age",
        add = "mean")
