@@ -7,13 +7,15 @@ editor: source
 ---
 ```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
 #install.packages("ggpubr")
-library(ggpubr)
+library(ggpubr) # interaction plot
 library(tidyverse)
 library(gsheet)
 ```
 ## Q1:
 
 **Recall the advertising data from the last activity; you showed that there was an interaction between age and product type.**
+
+**A large advertising firm specializes in creating television commercials for children's products. The firm wants to design a study to investigate factors that may affect the lengths of time a commercial is able to hold a child's attention. A preliminary study determines that two factors that may be important are the age of the child and the type of product being advertised. The firm wants to determine whether there were large differences in the mean length of time that the commercial is able to hold the child's attention depending on these two factors. If there proves to be a difference, the firm would then attempt to determine new types of commercials depending on the product and targeted age group.**
 
 ```{r}
 # clear environment
@@ -50,41 +52,18 @@ long_data <- within(separate_data, rm(Child))
 ```{r}
 # interaction plot: Product, Age
 interaction.plot(long_data$Product, long_data$Age, long_data$Results)
-
-# interaction plot: Age, Product
-interaction.plot(long_data$Age, long_data$Product, long_data$Results)
-
-# Two-way interaction plot
-interaction.plot(x.factor = long_data$Age, trace.factor = long_data$Product, 
-                 response = long_data$Results, fun = mean, 
-                 type = "b", legend = TRUE, 
-                 xlab = "Age", ylab="Product",
-                 pch=c(1,19), col = c("#00AFBB", "#E7B800"))
 ```
 
 a. Construct the profile plot for this data.
 ```{r}
-# Reference: interaction plot: Age, Product
-# interaction.plot(long_data$Age, long_data$Product, long_data$Results)
-# profile plot
-h3 <- lm(long_data$Results ~ factor(long_data$Product) * factor(long_data$Age))
-anova(h3)
-means <- long_data %>%
-  drop_na() %>% 
-  group_by(Product, Age) %>% 
-  summarise(mean = mean(Results), .groups = "drop")
+# Two-way interaction plot: Age, Product
+interaction.plot(x.factor = long_data$Age, trace.factor = long_data$Product, response = long_data$Results, 
+                 fun = mean, 
+                 type = "b", legend = TRUE, 
+                 xlab = "Age", ylab="Product",
+                 pch=c(1,19), col = c("#00AFBB", "#E7B800"))
 
-means
-
-game <- means %>% filter(Product == "game") %>% rename(game = mean) %>% select(-Product)
-
-rename_mean <- function(category, filter_var){
-  means %>% 
-    filter(category == filter_var) %>% 
-    rename(game_A = mean) %>% 
-    select(-category)
-}
-
+# profile plot using ggline
 profile <- ggline(long_data, x = "Age", y = "Results", color = "Product",
        add = "mean",
        show.line.label = TRUE,
@@ -94,60 +73,134 @@ profile <- ggline(long_data, x = "Age", y = "Results", color = "Product",
 profile_plot <- ggpar(profile, ylim = c(15, 50))
 profile_plot
 
-?ggpar
-
-ggline(long_data, x = "Product", y = "Results", color = "Age",
-       add = "mean")
 ```
-Test 2
-```{r}
-
-```
-
 b. (Challenge!) Perform Tukey's test to determine which treatment groups are significantly different. Test at the $\alpha=0.05$ level.
+
 ```{r}
 # Two-way ANOVA
-# Null Hypothesis:TukeyHSD(h1_h2, "factor(long_data$Product)")
+# Null Hypothesis:
 # - H1: The means of observations grouped by Product are the same
 # - H2: The means of observations grouped by Age are the same
 # - H3: There is no interaction between Product and Age
 
-# h1_h2 <- aov(long_data$Results ~ long_data$Product + factor(long_data$Age))
-# summary(h1_h2)
-# 
-# # Tukey's test
-# TukeyHSD(aov(h1_h2))
-
 summary(h1_h2 <- aov(long_data$Results ~ factor(long_data$Product) + factor(long_data$Age)))
 # Product
 TukeyHSD(h1_h2, "factor(long_data$Product)")
+```
+
+### Tukey's Test for Product
+There is sufficient evidence at the $\alpha = 0.05$ level to suggest that the means of observations grouped by cereal and video games are different.
+
+```{r}
 # Age
 TukeyHSD(h1_h2, "factor(long_data$Age)")
-
-# Tukey plots
-plot(TukeyHSD(h1_h2, "factor(long_data$Product)"))
 plot(TukeyHSD(h1_h2, "factor(long_data$Age)"))
 ```
+### Tukey's Test for Age groups
+There is sufficient evidence at the $\alpha = 0.05$ level to suggest that the means of observations grouped by age are different.
+Furthermore, the main difference is between the ages of (5 to 6) and (9 to 10).
 
 c. Write a short paragraph to explain your results to the advertising researchers.
 
+## Conclusion
+The kids spent more attention to advertisements for video games between the ages of 9 to 10.
+
 d. Graphically assess the ANOVA assumptions -- is ANOVA appropriate here?
+
+It is not appropriate to use ANOVA assumptions for this case. Visually, the data does not meet normality.
 ```{r}
 h3 <- aov(long_data$Results ~ long_data$Product * factor(long_data$Age))
 plot(h3)
 ```
-It is not appropriate to use ANOVA. Visually, the data does not meet normality.
+
 
 ## Q2:
 
 **Recall the tomato data from the last activity; you showed that there was not an interaction between shading and phase of growth and that there was at least one main effect.**
 
+**A horticulturalist at a large research institution designs a study to evaluate the effect on tomato yields of water loss due to transpiration. She decides to examine four levels of shading of the tomato plants at three stages of the tomato plant's development. The four levels of shading (0, 25%, 50%, and 75%) were selected to reduce the solar exposure of the plants. The shading remained in place for 20 days during the early, middle, and late phases of the tomato plants' growth. There were four plots of tomatoes randomly assigned to each of the combinations of shading and growth stage. At the end of the study, the yields per plot in pounds were recorded. The data are given here: [Google Sheet](https://docs.google.com/spreadsheets/d/1kUxXje3cTl_PZFQcg8FvESo34UuGNwm1GrKGc4HN0_A/edit?usp=sharing).**
+
+```{r}
+# clear environment
+rm(list = ls())
+
+# extract data
+data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1kUxXje3cTl_PZFQcg8FvESo34UuGNwm1GrKGc4HN0_A/edit?usp=sharing"))
+
+# transform data
+clean_data <- data %>% 
+  # delete empty rows
+  drop_na()
+```
+
 a.  (Challenge!) Construct the profile plot for this data.
 
+```{r}
+# Two-way interaction plot: Shade, Phase
+interaction.plot(x.factor = clean_data$PctShade, trace.factor = clean_data$Phase, response = clean_data$Yield, 
+                 fun = mean, 
+                 type = "b", legend = TRUE)
+
+# profile plot using ggline: Shade, Phase
+profile <- ggline(clean_data, x = "PctShade", y = "Yield", color = "Phase",
+       add = "mean",
+       show.line.label = TRUE,
+       label.rectangle = FALSE,
+       palette = c("grey", "grey", "magenta"),
+       xlab = "Levels of Shading",
+       ylab = "Yield")
+profile_plot <- ggpar(profile, ylim = c(45, 70))
+profile_plot
+```
+
 b. If there is a main effect of shading, perform Tukey's test to determine which levels of shading are significantly different. Test at the $\alpha=0.10$ level.
+```{r}
+# Two-way ANOVA
+# Null Hypothesis:
+# - H1: The means of observations grouped by Shade are the same
+# - H2: The means of observations grouped by Phase are the same
+# - H3: There is no interaction between Shade and Phase
+
+summary(h1_h2 <- aov(clean_data$Yield ~ factor(clean_data$PctShade) + factor(clean_data$Phase)))
+# Shade
+TukeyHSD(h1_h2, "factor(clean_data$PctShade)", conf.level = 0.90)
+```
+### Tukey's Test for Levels of Shading
+There is sufficient evidence at the $\alpha$=0.10 level to suggest that the means of observations grouped by levels of shading are the same.
 
 c.  If there is a main effect of phase of growth, perform Tukey's test to determine which phases of growth are significantly different. Test at the $\alpha=0.10$ level.
+```{r}
+# Phase
+TukeyHSD(h1_h2, "factor(clean_data$Phase)", conf.level = 0.90)
+```
+### Tukey's Test for Phases of Growth
+There is sufficient evidence at the $\alpha$=0.10 level to suggest a main effect between Early and Late phase.
 
 d. Write a short paragraph to explain your results to the horticulturist. 
 
+## Conclusion
+Our findings suggest that the best performance of tomato yields of water loss due to transpiration is a 75% shade level in the middle growth phase. 
+
 e. Graphically assess the ANOVA assumptions -- is ANOVA appropriate here?
+```{r}
+# density plot: Phase
+density_plot <- clean_data %>%  
+  ggplot(aes(Yield, fill = factor(Phase)))+
+  geom_density(alpha = 0.6)+
+  xlab("Phase")+
+  theme_bw()
+density_plot
+
+# density plot: Shade
+density_plot_shade <- clean_data %>%  
+  ggplot(aes(Yield, fill = factor(PctShade)))+
+  geom_density(alpha = 0.6)+
+  xlab("Level of Shades")+
+  theme_bw()
+density_plot_shade
+
+# plot 
+summary(two_anova <- aov(clean_data$Yield ~ factor(clean_data$PctShade) * factor(clean_data$Phase)))
+plot(two_anova)
+```
+ANOVA assumptions are not valid. Visually, the data does not meet normality.
