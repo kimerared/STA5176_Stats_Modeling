@@ -1,6 +1,6 @@
 ---
 title: "Two-Way ANOVA - Week 6, Lecture 1"
-author: "Your Name Here"
+author: "Hector Gavilanes"
 format: html
 self-contained: true
 editor: source
@@ -21,7 +21,44 @@ editor: source
 -   **P**<sub>**1**</sub>**: breakfast cereals,**
 -   **P**<sub>**2**</sub>**: video games**
 
+```{r, echo=FALSE}
+library(tidyverse)
+library(gsheet)
+library(formattable)
+library(DescTools) # perform Dunnett, Levene Test
+library(pgirmess) # perform Kruskal-Wallis Post-hoc
+library(ggstatsplot)
+library(ISLR)
+library(patchwork)
+library(PMCMRplus)
+```
+
 **A group of 30 children is recruited in each age group, and 10 are randomly assigned to watch a 60-second commercial for each of the two products. Researchers record their attention spans during the viewing of the commercial. The data are given here: [Google Sheet](https://docs.google.com/spreadsheets/d/16_HOSmIBDD9oYY1oBQ5Df6eFH9nT6GgO1UWcbMZNLUo/edit?usp=sharing).**
+
+```{r}
+# clear environment
+rm(list = ls())
+
+# extract data
+data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/16_HOSmIBDD9oYY1oBQ5Df6eFH9nT6GgO1UWcbMZNLUo/edit?usp=sharing"))
+
+# transform data
+clean_data <- data %>% 
+  # delete empty rows
+  drop_na() %>% 
+  rename("5-6_cereal" = "A1-P1") %>% 
+  rename("7-8_cereal" = "A2-P1") %>%
+  rename("9-10_cereal" = "A3-P1") %>%
+  rename("5-6_games" = "A1-P2") %>%
+  rename("7-8_games" = "A2-P2") %>%
+  rename("9-10_games" = "A3-P2")
+
+# pivot to long data
+long_data <- clean_data %>% 
+  pivot_longer(cols = c("5-6_cereal", "7-8_cereal", "9-10_cereal"),
+               names_to = "cereal",
+               values_to = "Results")
+```
 
 a.  Construct the two-way ANOVA table.
 
