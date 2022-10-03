@@ -84,7 +84,7 @@ change_table_format(summary_table)
 # default: median, provides a more robust test (Brown-Forsythe-Test)
 LeveneTest(long_data$Results ~ long_data$Herbicide_groups)
 ```
-The data failed the Levene's Test with a $p-value = 0.04688$. 
+The data failed the Levene's Test with $p-value = 0.04688$. 
 
 #### 2. Explain how to check the ANOVA assumptions.
 
@@ -139,8 +139,8 @@ summary(module_data_anova)
 Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in the average yield between the three groups.
 
 #### 5. Provide an overall assessment -- do we meet the assumptions to use ANOVA?
-Since there are no significant outliers, and the data is approximately normally distributed, it is adequate to use ANOVA.
-The data failed the Levene's Test with a $p-value = 0.04688$; however, I feel confident with the ANOVA assumptions.
+
+Even though there are no significant outliers, and the graphs appear to be approximately normally distributed, the data failed Levene's test with $p-value = 0.04688$. Thus, the report will use a nonparametric Kruskal-Wallis test.
 
 #### 6. Perform the Kruskal-Wallis to determine if there is a difference between the treatment groups. Test at the $\alpha=0.05$ level.
 
@@ -171,9 +171,9 @@ pairwise.wilcox.test(long_data$Results, long_data$Herbicide_groups,
                      p.adjust.method = "bonferroni",
                      exact = FALSE)
 ```
-- Only Herbicide A and B are significant different with a $p-value = 0.015$.
+- Only Herbicide A and B are significant different with $p-value = 0.015$.
 
-ANOVA and Kruskal-Wallis tests led to the same conclusion.
+Note: ANOVA and Kruskal-Wallis tests led to the same conclusion.
 
 #### 8. Challenge! Construct a graph (or multiple graphs) to aid in explaining this to the agricultural researcher.
 
@@ -189,7 +189,7 @@ ggplot(module_data_anova, aes(sample = module_data_anova$residuals))+
   ylab("Standarized Residuals")
 ```
 
-The histogram quickly matches the general appearance  of a normal distribution.
+The histogram matches the general appearance  of a normal distribution.
 The data is skewed; nonetheless, it does not represent a cause for concern.
 ```{r}
 # histogram
@@ -201,7 +201,9 @@ ggplot(lm(long_data$Results ~ long_data$Herbicide_groups)) +
   theme_bw()
 ```
 The graph below shows the fitted vs residuals.
-The plot is used to detect non-linearity, unequal error variances, and outliers.
+The plot detects non-linearity, unequal error variances, and outliers.
+The Herbicide B on the right is slightly smaller than the other two groups.
+Again, the graph does not represent a concern.
 ```{r}
 # fitted vs residuals
 ggplot(lm(long_data$Results ~ long_data$Herbicide_groups)) + 
@@ -213,6 +215,8 @@ ggplot(lm(long_data$Results ~ long_data$Herbicide_groups)) +
 ```
 
 The following density graph displays the variance among the three groups.
+
+Herbicide B shows consistent performance.
 ```{r}
 # density plot
 density_plot <- long_data %>%  
@@ -221,20 +225,19 @@ density_plot <- long_data %>%
   xlab("Herbicide Groups")+
   theme_bw()+
   scale_fill_manual(values = custom_density_hue)+
-  scale_color_manual(values = custom_density_hue)+
-  geom_vline(xintercept = summary_table$AVG, size = 1.5, color = custom_purple, alpha(0.55))+
-  geom_vline(xintercept = summary_table$Median, size = 1, color = "red", linetype="dashed")
+  scale_color_manual(values = custom_density_hue)
+  # geom_vline(xintercept = summary_table$Median, size = 1, color = "blue", linetype="dashed")
 density_plot
 ```
 The following chart displays all three groups with a significant difference outlined between Herbicide A and B.
-The Bonferroni correction is used to reduce the chances of obtaining false-positive results.
+The Bonferroni correction reduces the chances of obtaining false-positive results.
 ```{r}
 ggbetweenstats(
   data = long_data,
   x = Herbicide_groups,
   y = Results,
   plot.type = "box",
-  type = "p",
+  type = "np",
   pairwise.display = "s",
   var.equal = T,
   p.adjust.method = "bonferroni",
@@ -247,7 +250,8 @@ ggbetweenstats(
 
 #### 9. Write a summary paragraph, appropriate for the agricultural researcher (i.e., not a statistician), using the results that are **appropriate for the data**. Hint: you will summarize either your ANOVA findings from the previous activity *or* your Kruskal-Wallis findings from this activity.
 
-Since there are no significant outliers, and the data is approximately normally distributed, it is reasonable to make the ANOVA assumptions.
+Even though there are no significant outliers, and the graphs appear to be approximately normally distributed, the data failed Levene's test. Thus, the report will use a nonparametric  Kruskal-Wallis test.
+
 Our findings showed that there is no significant difference against the control group.
 However, there is a difference between Herbicide A and B. 
 
