@@ -10,6 +10,8 @@ editor: source
 library(tidyverse)
 library(gsheet)
 library(formattable)
+library(DescTools) # perform Dunnett, Levene Test
+library(pgirmess) # perform Kruskal-Wallis Post-hoc
 ```
 
 **1. Consider a sample of data from the [Jackson Heart Study](https://www.jacksonheartstudy.org/). In this problem, we will be examining body mass index (*BMI*; kg/m<sup>2</sup>) as a function of health as categorized by physical activity (*PA3cat*; Ideal Health, Intermediate Health, and Poor Health).**
@@ -21,7 +23,7 @@ rm(list = ls())
 data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1H3TP-2SBMGleriJLESOe1cdCjtSj2F76bUh5iBqC8tI/edit#gid=2142000894"))
 # clean data
 clean_data <- data %>% 
-  select(weight, height, BMI, BMI3cat) %>% 
+  select(BMI, BMI3cat) %>% 
   drop_na()
 
 # ---CUSTOM COLORS---
@@ -69,14 +71,45 @@ change_table_format(bmi_table)
 ```
 
 **b. Use ANOVA to determine if there is a difference in BMI between the three levels of health as categorized by physical activity. Test at the $\alpha=0.05$ level.**
+```{r}
+# One-way ANOVA
+# Null Hypothesis:
+# - H0: All means of observations grouped by BMI are the same
+# - H1: At least one category is different
+
+h1 <- aov(clean_data$BMI ~ clean_data$BMI3cat)
+summary(h1)
+
+```
 
 **c. Use the Kruskal-Wallis to determine if there is a difference in BMI between the three levels of health as categorized by physical activity (*PA3cat*; Ideal Health, Intermediate Health, and Poor Health). Test at the $\alpha=0.05$ level.**
+```{r}
+kruskal.test(clean_data$BMI ~ clean_data$BMI3cat)
+
+```
 
 **d. State/explain the ANOVA assumptions and assess them. Remember to state your conclusion (that you either meet the ANOVA assumptions or you do not).**
+```{r}
+# Do not assume ANOVA Assumptions
+plot(h1)
+
+# Levene's test for equality of variance
+LeveneTest(clean_data$BMI ~ clean_data$BMI3cat,
+           exact = FALSE)
+```
 
 **e. Based on your responses in part (d), which test's result are you going to present to the lead scientist at the JHS? (Hint: you will pick either (b) or (c)).**
-
+Nonparametric test, Kruskal-Wallis in this case.
 **f. Perform the appropriate posthoc test to determine pairwise differences between the three groups. Test at the $\alpha=0.05$ level.**
+```{r}
+# Kruskal-Wallis post-hoc
+kruskalmc(clean_data$BMI ~ clean_data$BMI3cat)
+
+# Multiple pairwise-comparison between groups
+pairwise.wilcox.test(clean_data$BMI, clean_data$BMI3cat,
+                     p.adjust.method = "bonferroni",
+                     exact = FALSE)
+```
 
 **g. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of your chosen hypothesis test from part (e), results of the posthoc test in part (f), and a graph to help convey the results.**
 
