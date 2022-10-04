@@ -2918,13 +2918,12 @@ Poor Health         &lt;2e-16       &lt;2e-16
 
 P value adjustment method: bonferroni </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co">#TukeyHSD(two_way, &quot;factor(blood_data$BMI3cat)&quot;)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="main-effects-for-smoking-health" class="level2">
 <h2 class="anchored" data-anchor-id="main-effects-for-smoking-health">Main Effects for Smoking Health</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kruskal.test</span>(blood_data<span class="sc">$</span>BMI <span class="sc">~</span> blood_data<span class="sc">$</span>everSmoker)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kruskal.test</span>(blood_data<span class="sc">$</span>BMI <span class="sc">~</span> blood_data<span class="sc">$</span>everSmoker)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
     Kruskal-Wallis rank sum test
@@ -2932,7 +2931,7 @@ P value adjustment method: bonferroni </code></pre>
 data:  blood_data$BMI by blood_data$everSmoker
 Kruskal-Wallis chi-squared = 20.194, df = 1, p-value = 6.996e-06</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kruskalmc</span>(blood_data<span class="sc">$</span>BMI <span class="sc">~</span> blood_data<span class="sc">$</span>everSmoker)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kruskalmc</span>(blood_data<span class="sc">$</span>BMI <span class="sc">~</span> blood_data<span class="sc">$</span>everSmoker)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Multiple comparison test after Kruskal-Wallis 
 p.value: 0.05 
@@ -2940,7 +2939,7 @@ Comparisons
         obs.dif critical.dif difference
 No-Yes 144.7716     63.14188       TRUE</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pairwise.wilcox.test</span>(blood_data<span class="sc">$</span>BMI, blood_data<span class="sc">$</span>everSmoker)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pairwise.wilcox.test</span>(blood_data<span class="sc">$</span>BMI, blood_data<span class="sc">$</span>everSmoker)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
     Pairwise comparisons using Wilcoxon rank sum test with continuity correction 
@@ -2951,17 +2950,6 @@ data:  blood_data$BMI and blood_data$everSmoker
 Yes 7e-06
 
 P value adjustment method: holm </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">TukeyHSD</span>(two_way, <span class="st">&quot;factor(blood_data$everSmoker)&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>  Tukey multiple comparisons of means
-    95% family-wise confidence level
-
-Fit: aov(formula = blood_data$BMI ~ factor(blood_data$BMI3cat) + factor(blood_data$everSmoker))
-
-$`factor(blood_data$everSmoker)`
-             diff       lwr        upr     p adj
-Yes-No -0.5937547 -0.959122 -0.2283874 0.0014565</code></pre>
 </div>
 </div>
 <p><strong>e. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of the hypothesis testing in part (b), results of the posthoc test in part (d), and the profile plot in part (c) to help convey the results.</strong></p>

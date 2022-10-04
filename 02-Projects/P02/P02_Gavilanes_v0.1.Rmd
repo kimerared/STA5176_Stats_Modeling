@@ -191,7 +191,6 @@ kruskalmc(blood_data$BMI ~ blood_data$BMI3cat)
 pairwise.wilcox.test(blood_data$BMI, blood_data$BMI3cat,
                      p.adjust.method = "bonferroni",
                      exact = FALSE)
-#TukeyHSD(two_way, "factor(blood_data$BMI3cat)")
 ```
 
 ## Main Effects for Smoking Health
@@ -199,7 +198,6 @@ pairwise.wilcox.test(blood_data$BMI, blood_data$BMI3cat,
 kruskal.test(blood_data$BMI ~ blood_data$everSmoker)
 kruskalmc(blood_data$BMI ~ blood_data$everSmoker)
 pairwise.wilcox.test(blood_data$BMI, blood_data$everSmoker)
-TukeyHSD(two_way, "factor(blood_data$everSmoker)")
 ```
 
 **e. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of the hypothesis testing in part (b), results of the posthoc test in part (d), and the profile plot in part (c) to help convey the results.**
