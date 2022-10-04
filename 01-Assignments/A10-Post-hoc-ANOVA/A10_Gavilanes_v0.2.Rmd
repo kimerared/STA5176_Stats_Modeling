@@ -10,6 +10,8 @@ editor: source
 library(ggpubr) # interaction plot
 library(tidyverse)
 library(gsheet)
+library(ggstatsplot)
+library(ISLR)
 ```
 ## Q1:
 
@@ -49,20 +51,9 @@ separate_data <- prelong_data %>%
 long_data <- within(separate_data, rm(Child)) 
 ```
 
-```{r}
-# interaction plot: Product, Age
-interaction.plot(long_data$Product, long_data$Age, long_data$Results)
-```
-
 a. Construct the profile plot for this data.
-```{r}
-# Two-way interaction plot: Age, Product
-interaction.plot(x.factor = long_data$Age, trace.factor = long_data$Product, response = long_data$Results, 
-                 fun = mean, 
-                 type = "b", legend = TRUE, 
-                 xlab = "Age", ylab="Product",
-                 pch=c(1,19), col = c("#00AFBB", "#E7B800"))
 
+```{r}
 # profile plot using ggline
 profile <- ggline(long_data, x = "Age", y = "Results", color = "Product",
        add = "mean",
@@ -94,20 +85,20 @@ There is sufficient evidence at the $\alpha = 0.05$ level to suggest that the me
 ```{r}
 # Age
 TukeyHSD(h1_h2, "factor(long_data$Age)")
-plot(TukeyHSD(h1_h2, "factor(long_data$Age)"))
+plot(TukeyHSD(h1_h2, "factor(long_data$Age)"), col = c(3,"magenta",4))
 ```
 ### Tukey's Test for Age groups
-There is sufficient evidence at the $\alpha = 0.05$ level to suggest that the means of observations grouped by age are different.
+There is sufficient evidence at the $\alpha = 0.05$ level to suggest differences in the age groups' means of observation.
 Furthermore, the main difference is between the ages of (5 to 6) and (9 to 10).
 
 c. Write a short paragraph to explain your results to the advertising researchers.
 
 ## Conclusion
-The kids spent more attention to advertisements for video games between the ages of 9 to 10.
+There is significant exponential interaction and main effects for both product and age groups. Our findings suggest that the kids spent more attention on advertisements for video games between the ages of 9 to 10.
 
 d. Graphically assess the ANOVA assumptions -- is ANOVA appropriate here?
 
-It is not appropriate to use ANOVA assumptions for this case. Visually, the data does not meet normality.
+We are unwilling to assume normality because we have found the assumption of normality invalid in diagnostic checks.
 ```{r}
 h3 <- aov(long_data$Results ~ long_data$Product * factor(long_data$Age))
 plot(h3)
@@ -136,17 +127,12 @@ clean_data <- data %>%
 a.  (Challenge!) Construct the profile plot for this data.
 
 ```{r}
-# Two-way interaction plot: Shade, Phase
-interaction.plot(x.factor = clean_data$PctShade, trace.factor = clean_data$Phase, response = clean_data$Yield, 
-                 fun = mean, 
-                 type = "b", legend = TRUE)
-
 # profile plot using ggline: Shade, Phase
 profile <- ggline(clean_data, x = "PctShade", y = "Yield", color = "Phase",
        add = "mean",
        show.line.label = TRUE,
        label.rectangle = FALSE,
-       palette = c("grey", "grey", "magenta"),
+       palette = c("grey", "magenta", "orange"),
        xlab = "Levels of Shading",
        ylab = "Yield")
 profile_plot <- ggpar(profile, ylim = c(45, 70))
@@ -163,10 +149,11 @@ b. If there is a main effect of shading, perform Tukey's test to determine which
 
 summary(h1_h2 <- aov(clean_data$Yield ~ factor(clean_data$PctShade) + factor(clean_data$Phase)))
 # Shade
-TukeyHSD(h1_h2, "factor(clean_data$PctShade)", conf.level = 0.90)
+#TukeyHSD(h1_h2, "factor(clean_data$PctShade)", conf.level = 0.90)
 ```
-### Tukey's Test for Levels of Shading
+### Levels of Shading
 There is sufficient evidence at the $\alpha$=0.10 level to suggest that the means of observations grouped by levels of shading are the same.
+In other words, there is no main effect by level of shading.
 
 c.  If there is a main effect of phase of growth, perform Tukey's test to determine which phases of growth are significantly different. Test at the $\alpha=0.10$ level.
 ```{r}
@@ -179,17 +166,23 @@ There is sufficient evidence at the $\alpha$=0.10 level to suggest a main effect
 d. Write a short paragraph to explain your results to the horticulturist. 
 
 ## Conclusion
-Our findings suggest that the best performance of tomato yields of water loss due to transpiration is a 75% shade level in the middle growth phase. 
+There is significant antagonist interaction and main effects for the early-late growth phase. Our findings suggest that the best performance of tomato yields of water loss due to transpiration is a 75% shade level in the middle growth phase due to an outlier. 
 
-e. Graphically assess the ANOVA assumptions -- is ANOVA appropriate here?
+However, our recommendation suggests consistent performance in the late phase with a 50% level of shade. 
+
+Below are additional graphs to support our suggestion.
+
 ```{r}
+# summary
+summary(clean_data$Yield)
+
 # density plot: Phase
-density_plot <- clean_data %>%  
+density_plot_phase <- clean_data %>%  
   ggplot(aes(Yield, fill = factor(Phase)))+
   geom_density(alpha = 0.6)+
   xlab("Phase")+
   theme_bw()
-density_plot
+density_plot_phase
 
 # density plot: Shade
 density_plot_shade <- clean_data %>%  
@@ -199,8 +192,21 @@ density_plot_shade <- clean_data %>%
   theme_bw()
 density_plot_shade
 
-# plot 
+# boxplot: Phase
+ggbetweenstats(clean_data, x = Phase, y = Yield,
+               plot.type = "box",
+               type = "np",
+               p.adjust.method = "bonferroni",
+               pairwise.comparisons = TRUE,
+               pairwise.display = "s")
+```
+
+e. Graphically assess the ANOVA assumptions -- is ANOVA appropriate here?
+
+We are unwilling to assume normality because we have found the assumption of normality invalid in diagnostic checks.
+```{r}
+# ANOVA summary  
 summary(two_anova <- aov(clean_data$Yield ~ factor(clean_data$PctShade) * factor(clean_data$Phase)))
+# plots
 plot(two_anova)
 ```
-ANOVA assumptions are not valid. Visually, the data does not meet normality.
