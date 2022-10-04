@@ -8,6 +8,13 @@ editor: source
 ```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
 library(tidyverse)
 library(gsheet)
+library(formattable)
+library(DescTools) # perform Dunnett, Levene Test
+library(pgirmess) # perform Kruskal-Wallis Post-hoc
+library(ggstatsplot)
+library(ISLR)
+library(patchwork)
+library(PMCMRplus)
 ```
 ## Q1:
 
@@ -24,7 +31,6 @@ library(gsheet)
 -   **P**<sub>**1**</sub>**: breakfast cereals,**
 -   **P**<sub>**2**</sub>**: video games**
 
-
 **A group of 30 children is recruited in each age group, and 10 are randomly assigned to watch a 60-second commercial for each of the two products. Researchers record their attention spans during the viewing of the commercial. The data are given here: [Google Sheet](https://docs.google.com/spreadsheets/d/16_HOSmIBDD9oYY1oBQ5Df6eFH9nT6GgO1UWcbMZNLUo/edit?usp=sharing).**
 
 ```{r}
@@ -37,6 +43,7 @@ data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/16_HOSmIBDD
 # transform data
 clean_data <- data %>% 
   # delete empty rows
+
   drop_na() %>%
   rename("cereal_5-6" = "A1-P1") %>% 
   rename("cereal_7-8" = "A2-P1") %>% 
