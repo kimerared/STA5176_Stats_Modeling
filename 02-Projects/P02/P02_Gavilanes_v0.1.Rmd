@@ -127,6 +127,7 @@ However, the residuals are not normally distributed; thus, we cannot assume norm
 ```{r}
 # 2. Normality check
 plot(h1)
+boxplot(clean_data$BMI ~ clean_data$BMI3cat)
 ```
 3. Equal Variance - the variances for each group are equal or approximately equal.
 Since the p-value < 0.001 which is lower than our 0.05 level of significance, we cannot assume equality of variances.
@@ -157,6 +158,14 @@ DunnTest(clean_data$BMI ~ clean_data$BMI3cat)
 ```
 
 **g. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of your chosen hypothesis test from part (e), results of the posthoc test in part (f), and a graph to help convey the results.**
+
+## Analisis
+A Kruskal-Wallis test was conducted to find a statistically significant difference in BMI between the three levels of health (poor, intermediate, ideal).
+Dunn's post-hoc test was performed which is the appropriate procedure following a Kruskal-Wallis test.
+All three level of health grouped by BMI are significant different from each other. Poor health is extremely dominant.
+Normality checks and Levene’s test were conducted to verify ANOVA assumptions; however, the assumptions we not met.
+
+
 
 **2. Again, consider the sample of data from the JHS. In this problem, we will be examining systolic blood pressure (*sbp*; mmHg) as a function of health as categorized by body mass index (*BMI3cat*; Ideal Health, Intermediate Health, and Poor Health), smoking status (*everSmoker*; 0=never smoker, 1=former or current smoker), and the interaction between health as categorized by body mass index and smoking status.**
 
