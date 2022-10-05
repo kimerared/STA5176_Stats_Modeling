@@ -197,6 +197,7 @@ pairwise.wilcox.test(blood_data$BMI, blood_data$BMI3cat,
                      p.adjust.method = "bonferroni",
                      exact = FALSE)
 DunnTest(blood_data$BMI ~ blood_data$BMI3cat)
+
 ```
 
 ## Main Effects for Smoking Health
