@@ -33,8 +33,10 @@ custom_green_light = "#DeF7E9"
 custom_gray = "#3D3D3D"
 custom_orange = "#FC7307"
 custom_purple = "#5A18C9"
-custom_tan_light = "#F7E3D4"
-custom_density_hue = c(custom_purple,custom_orange)
+# custom_tan_light = "#F7E3D4"
+custom_red_light = "#F7D0C7"
+custom_red_dark = "#F1917C"
+# custom_density_hue = c(custom_purple,custom_orange)
 # ---FUNCTIONS---
 # f00 - Change default table format
 change_table_format <- function(data_table){
@@ -44,7 +46,8 @@ change_table_format <- function(data_table){
   # format
   formattable(data_table, align = c("l",rep("c", dataframe_length - 1)),
               list(first_column = formatter("span", style = ~ style(color = custom_gray, font.weight = "bold")),
-              area(row = 1, col = 2:dataframe_length) ~ color_tile(custom_green_light, custom_green_dark)
+              area(row = 1, col = 2:dataframe_length) ~ color_tile(custom_green_light, custom_green_dark),
+              area(row = 3, col = 2:dataframe_length) ~ color_tile(custom_red_light, custom_red_dark)
               )#/end list
               )#/end formattable
 }
@@ -74,32 +77,72 @@ change_table_format(get_custom_summary(clean_data, "BMI3cat", "BMI"))
 ```{r}
 # One-way ANOVA
 # Null Hypothesis:
-# - H0: All means of observations grouped by BMI are the same
+# - H0: All means of observations grouped by BMI category are the same
 # - H1: At least one category is different
 
 h1 <- aov(clean_data$BMI ~ clean_data$BMI3cat)
 summary(h1)
 
 ```
+### Hypothesis
+- $H_0$: $\mu Ideal = \mu Intermediate\ = \mu Poor$\
+- $H_1$: at least one is different
+
+### Test Statistic
+- $F_0 = 1966$
+
+### p-Value
+- $p < 0.001$
+
+## Conclusion
+Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in BMI between the three levels of health.
 
 **c. Use the Kruskal-Wallis to determine if there is a difference in BMI between the three levels of health as categorized by physical activity (*PA3cat*; Ideal Health, Intermediate Health, and Poor Health). Test at the $\alpha=0.05$ level.**
 ```{r}
 kruskal.test(clean_data$BMI ~ clean_data$BMI3cat)
-
 ```
+### Hypothesis: Kruskal-Wallis
+- $H_0$: $M_{Ideal} = M_{Intermediate} = M_{Poor}$\
+- $H_1$: at least one group is different
+
+### Test Statistic
+- $H = 2129.4$
+
+### p-Value
+- $p < 0.001$
+
+## Conclusion
+Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in BMI between the three levels of health.
 
 **d. State/explain the ANOVA assumptions and assess them. Remember to state your conclusion (that you either meet the ANOVA assumptions or you do not).**
-```{r}
-# Do not assume ANOVA Assumptions
-plot(h1)
 
-# Levene's test for equality of variance
+We are unwilling to assume normality because we have found the assumption of normality invalid in diagnostic checks. We have performed the following ANOVA assumptions:
+
+1. Independence – the observations in each group need to be independent of each other.
+The data provided meets this requirement.
+
+2. Normality – the dependent variable should be approximately normally distributed for each combination of the groups.
+However, the residuals are not normally distributed; thus, we cannot assume normality.
+
+```{r}
+# 2. Normality check
+plot(h1)
+```
+3. Equal Variance - the variances for each group are equal or approximately equal.
+Since the p-value < 0.001 which is lower than our 0.05 level of significance, we cannot assume equality of variances.
+
+```{r}
+# 3. Levene's test for equality of variance
 LeveneTest(clean_data$BMI ~ clean_data$BMI3cat,
            exact = FALSE)
 ```
 
+
+
 **e. Based on your responses in part (d), which test's result are you going to present to the lead scientist at the JHS? (Hint: you will pick either (b) or (c)).**
-Nonparametric test, Kruskal-Wallis in this case.
+
+Nonparametric test, Kruskal-Wallis, in this case.
+
 **f. Perform the appropriate posthoc test to determine pairwise differences between the three groups. Test at the $\alpha=0.05$ level.**
 ```{r}
 # Kruskal-Wallis post-hoc
@@ -109,6 +152,8 @@ kruskalmc(clean_data$BMI ~ clean_data$BMI3cat)
 pairwise.wilcox.test(clean_data$BMI, clean_data$BMI3cat,
                      p.adjust.method = "bonferroni",
                      exact = FALSE)
+# nonparametric DunnTest
+DunnTest(clean_data$BMI ~ clean_data$BMI3cat)
 ```
 
 **g. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of your chosen hypothesis test from part (e), results of the posthoc test in part (f), and a graph to help convey the results.**
