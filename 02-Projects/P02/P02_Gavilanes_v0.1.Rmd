@@ -15,7 +15,6 @@ library(pgirmess) # perform Kruskal-Wallis Post-hoc
 library(ggpubr) # interaction plot
 library(ggstatsplot) # boxplot
 library(ISLR)
-options(scipen=999)
 ```
 
 **1. Consider a sample of data from the [Jackson Heart Study](https://www.jacksonheartstudy.org/). In this problem, we will be examining body mass index (*BMI*; kg/m<sup>2</sup>) as a function of health as categorized by physical activity (*PA3cat*; Ideal Health, Intermediate Health, and Poor Health).**
@@ -299,7 +298,8 @@ formattable(as.data.frame(smoke_mean))
 # - H2: The means of observations grouped by Smoking are the same
 # - H3: There is no interaction between Health Levels and Smoking
 
-summary(h3_interaction_blood <- aov(blood_data$sbp ~ blood_data$BMI3cat * factor(blood_data$everSmoker)))
+blood_model <- blood_data$sbp ~ blood_data$BMI3cat * factor(blood_data$everSmoker)
+summary(h3_interaction_blood <- aov(blood_model))
 ```
 ### Hypothesis
 - $H_0$: There is no interaction between Health levels and Smoking\
@@ -312,10 +312,10 @@ summary(h3_interaction_blood <- aov(blood_data$sbp ~ blood_data$BMI3cat * factor
 - $p = 0.01837$
 
 ## Conclusion
-Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is an interaction between Health Levels and Smoking.
+Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is an interaction between Health Levels (ideal, intermediate, and poor), and Smoking status.
 
-In other words, the relationship between Health Levels depends on the Smoking pattern.
-No further testing is required because there is an interaction between Health Levels and Smoking.
+In other words, the relationship between Health Levels depends on the Smoking status.
+No further testing is required because there is an interaction between Health Levels and Smoking status.
 
 **c. Construct a profile plot to help explain results of part (b).**
 
@@ -348,24 +348,27 @@ profile_smoke
 
 **d. Use the appropriate posthoc test to determine differences in main effects or the interaction term, whichever is appropriate for the results in part (b). Test at the $\alpha=0.05$ level.**
 
-## Levene's Test for Equality of Variances
-```{r}
-LeveneTest(blood_data$sbp ~ blood_data$BMI3cat * blood_data$everSmoker)
-```
 ## ANOVA Assumption
+### 1. Independece
+
+### 2. Normality
 ```{r}
 plot(h3_interaction_blood)
-boxplot(blood_data$sbp ~ blood_data$BMI3cat:blood_data$everSmoker)
 ```
-
+### 3. Equal Variance
+### Levene's Test for Equality of Variances
+```{r}
+LeveneTest(blood_model)
+```
+Since the p-value is lower than the significance level of 0.05, the ANOVA assumption is invalid.
 
 ## Main Effects for BMI Health
 ```{r}
 kruskal.test(blood_data$sbp ~ blood_data$BMI3cat)
-kruskalmc(blood_data$sbp ~ blood_data$BMI3cat)
-pairwise.wilcox.test(blood_data$sbp, blood_data$BMI3cat,
-                     p.adjust.method = "bonferroni",
-                     exact = FALSE)
+# kruskalmc(blood_data$sbp ~ blood_data$BMI3cat)
+# pairwise.wilcox.test(blood_data$sbp, blood_data$BMI3cat,
+#                      p.adjust.method = "bonferroni",
+#                      exact = FALSE)
 DunnTest(blood_data$sbp ~ blood_data$BMI3cat)
 
 ```
@@ -373,10 +376,10 @@ DunnTest(blood_data$sbp ~ blood_data$BMI3cat)
 ## Main Effects for Smoking Health
 ```{r}
 kruskal.test(blood_data$sbp ~ blood_data$everSmoker)
-kruskalmc(blood_data$sbp ~ blood_data$everSmoker)
-pairwise.wilcox.test(blood_data$sbp, blood_data$everSmoker,
-                     p.adjust.method = "bonferroni",
-                     exact = FALSE)
+# kruskalmc(blood_data$sbp ~ blood_data$everSmoker)
+# pairwise.wilcox.test(blood_data$sbp, blood_data$everSmoker,
+#                      p.adjust.method = "bonferroni",
+#                      exact = FALSE)
 DunnTest(blood_data$sbp ~ blood_data$everSmoker)
 ```
 
