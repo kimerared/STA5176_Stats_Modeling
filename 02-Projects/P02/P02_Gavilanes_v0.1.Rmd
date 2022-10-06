@@ -276,14 +276,14 @@ DunnTest(clean_data$BMI ~ clean_data$BMI3cat)
 
 ```{r}
 blood_data <- data %>% 
-  select(BMI3cat, BMI, everSmoker) %>% 
+  select(BMI3cat, sbp, everSmoker) %>% 
   drop_na()
 ```
 
 **a. Find the appropriate summary statistics to summarize the data.**
 ```{r}
 # change_table_format(get_custom_summary(blood_data, "everSmoker", "BMI"))
-bmi_smoke_mean <- tapply(blood_data$BMI, INDEX = list(blood_data$BMI3cat, blood_data$everSmoker), FUN = mean)
+bmi_smoke_mean <- tapply(blood_data$sbp, INDEX = list(blood_data$BMI3cat, blood_data$everSmoker), FUN = mean)
 formattable(bmi_smoke_mean)
 # attributes(bmi_smoke_mean)
 ```
@@ -296,23 +296,24 @@ formattable(bmi_smoke_mean)
 # - H2: The means of observations grouped by Smoking are the same
 # - H3: There is no interaction between BMI and Smoking
 
-summary(h3_interaction <- aov(blood_data$BMI ~ blood_data$BMI3cat * factor(blood_data$everSmoker)))
+summary(h3_interaction <- aov(blood_data$sbp ~ blood_data$BMI3cat * factor(blood_data$everSmoker)))
 ```
 Reject H1.
 Reject H2.
-Keep H3.
+Reject H3.
 
+No further test is required because there is an interaction.
 After removing the interaction term, the ANOVA table was reconstructed.
 ```{r}
 # Two-way ANOVA
-summary(two_way <- aov(blood_data$BMI ~ factor(blood_data$BMI3cat) + factor(blood_data$everSmoker)))
+summary(two_way <- aov(blood_data$sbp ~ factor(blood_data$BMI3cat) + factor(blood_data$everSmoker)))
 ```
 
 **c. Construct a profile plot to help explain results of part (b).**
 
 ```{r}
 # profile plot using ggline
-profile <- ggline(blood_data, x = "BMI3cat", y = "BMI", color = "everSmoker",
+profile <- ggline(blood_data, x = "BMI3cat", y = "sbp", color = "everSmoker",
        add = "mean",
        show.line.label = FALSE,
        palette = c("magenta", "gray"),
@@ -320,7 +321,7 @@ profile <- ggline(blood_data, x = "BMI3cat", y = "BMI", color = "everSmoker",
   theme_bw()
   
 interaction_plot <- ggpar(profile, 
-                      main = "Interaction Plot: \n BMI Health & Smoking Status",
+                      main = "Interaction Plot: \n Systolic Blood Pressure & Smoking Status",
                       legend.title = "Smoking Status",
                       legend = "right",
                       ylim = c(20, 40))
@@ -328,7 +329,7 @@ interaction_plot
 
 # smoke
 # profile plot using ggline
-profile <- ggline(blood_data, x = "everSmoker", y = "BMI", color = "BMI3cat",
+profile <- ggline(blood_data, x = "everSmoker", y = "sbp", color = "BMI3cat",
        add = "mean",
        show.line.label = FALSE,
        palette = c("magenta", "gray", "orange"),
