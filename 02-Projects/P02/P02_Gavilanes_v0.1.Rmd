@@ -164,8 +164,12 @@ DunnTest(clean_data$BMI ~ clean_data$BMI3cat)
 ## Analisis
 The ANOVA assumptions were invalid after normality checks and Levene’s test.
 Therefore, to find a statistically significant difference in BMI between the three levels of health (poor, intermediate, and ideal), a nonparametric Kruskal-Wallis test was conducted.
-The procedure following a Kruskal-Wallis test was to performed a Dunn's posthoc test.
-All three levels of health grouped by BMI were significantly different from each other. Poor health was the dominant group.
+The procedure following a Kruskal-Wallis test was to perform a Dunn's posthoc test.
+
+## Conclusion
+All three levels of health grouped by BMI were significantly different from each other. BMI and physical activity displayed an inverse correlation. People with the lowest BMI had a higher physical activity, categorized as ideal health. On the other hand, people with the highest BMI calculations had lower physical activity. 
+
+54% of the sample represented the dominant group with poor health levels of physical activity.
 
 
 ### Summary Statistics
@@ -179,13 +183,13 @@ change_table_format(get_custom_summary(clean_data, "BMI3cat", "BMI"))
 
 We were unwilling to assume normality because we have found the assumption of normality invalid in diagnostic checks. We have performed the following ANOVA assumptions:
 
-**1. Independence** – the observations in each group need to be independent of each other.
+* **1. Independence** – the observations in each group need to be independent of each other.
 The data provided met this requirement.
 
-**2. Normality** – the dependent variable should be approximately normally distributed for each combination of the groups.
+* **2. Normality** – the dependent variable should be approximately normally distributed for each combination of the groups.
 However, the residuals are not normally distributed; thus, normality was not assumed.
 
-The Fitted vs. Residuals graph showed how the scatterplots had differences in size among the groups.
+The *Fitted vs. Residuals* graph showed how the residuals had differences in size among the groups.
 
 ```{r, echo=FALSE}
 # 2. Normality check
@@ -201,7 +205,8 @@ ggplot(lm_model) +
   ylab("Standarized Residuals")+
   theme_bw()
 ```
-The QQ (quantile-quantile) plot  did not display the normality of residuals. The scatterplots did not follow the 45-degree line.
+
+The *QQ (quantile-quantile) plot*  did not display the normality of residuals. The residuals did not follow the 45-degree line.
 ```{r, echo=FALSE}
 # QQ plot
 ggplot(lm_model, aes(sample = lm_model$residuals))+
@@ -212,7 +217,8 @@ ggplot(lm_model, aes(sample = lm_model$residuals))+
   xlab("Theoretical Quantiles") +
   ylab("Standarized Residuals")
 ```
-Moreover, a boxplot displayed the distribution of BMI health for each group.
+
+Moreover, a *Boxplot* displayed the distribution of BMI health for each group with significant differences.
 ```{r, echo=FALSE}
 ggbetweenstats(
   data = clean_data,
@@ -229,7 +235,7 @@ ggbetweenstats(
   bf.message = F
 )
 ```
-**3. Equal Variance** - the variances for each group are equal or approximately equal.
+* **3. Equal Variance** - the variances for each group are equal or approximately equal.
 
 Since the p-value < 0.001 was lower than 0.05 level of significance, we did not assume equality of variances.
 
@@ -239,6 +245,7 @@ LeveneTest(clean_data$BMI ~ clean_data$BMI3cat,
            exact = FALSE)
 ```
 ### Kruskal-Wallis Test
+We used a nonparametric alternative, Kruskal-Wallis, to ANOVA test. 
 ```{r, echo=FALSE}
 kruskal.test(clean_data$BMI ~ clean_data$BMI3cat)
 ```
@@ -256,7 +263,9 @@ kruskal.test(clean_data$BMI ~ clean_data$BMI3cat)
 Reject $H_0$ at the $\alpha$=0.05 level. There was sufficient evidence to suggest that there was a difference in BMI between the three levels of health.
 
 ### Posthoc Dunn's Test
-All groups had significant variance among each other, with a p-value < 0.001 with a 0.05 level of significance.
+Dunn's test determined which groups were significantly different with comparisons between each independent group.
+
+All groups had significant variance among each other, with a p-value < 0.001 lower than 0.05 level of significance.
 ```{r, echo=FALSE}
 # nonparametric DunnTest
 DunnTest(clean_data$BMI ~ clean_data$BMI3cat)
