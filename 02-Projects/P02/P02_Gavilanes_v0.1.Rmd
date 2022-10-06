@@ -179,10 +179,10 @@ change_table_format(get_custom_summary(clean_data, "BMI3cat", "BMI"))
 
 We were unwilling to assume normality because we have found the assumption of normality invalid in diagnostic checks. We have performed the following ANOVA assumptions:
 
-1. Independence – the observations in each group need to be independent of each other.
+**1. Independence** – the observations in each group need to be independent of each other.
 The data provided met this requirement.
 
-2. Normality – the dependent variable should be approximately normally distributed for each combination of the groups.
+**2. Normality** – the dependent variable should be approximately normally distributed for each combination of the groups.
 However, the residuals are not normally distributed; thus, normality was not assumed.
 
 The Fitted vs. Residuals graph showed how the scatterplots had differences in size among the groups.
@@ -190,7 +190,7 @@ The Fitted vs. Residuals graph showed how the scatterplots had differences in si
 ```{r, echo=FALSE}
 # 2. Normality check
 lm_model = lm(clean_data$BMI ~ clean_data$BMI3cat)
-anova(lm_model)
+#anova(lm_model)
 
 # fitted vs residuals
 ggplot(lm_model) + 
@@ -229,6 +229,39 @@ ggbetweenstats(
   bf.message = F
 )
 ```
+**3. Equal Variance** - the variances for each group are equal or approximately equal.
+
+Since the p-value < 0.001 was lower than 0.05 level of significance, we did not assume equality of variances.
+
+```{r, echo=FALSE, warning=FALSE}
+# 3. Levene's test for equality of variance
+LeveneTest(clean_data$BMI ~ clean_data$BMI3cat,
+           exact = FALSE)
+```
+### Kruskal-Wallis Test
+```{r, echo=FALSE}
+kruskal.test(clean_data$BMI ~ clean_data$BMI3cat)
+```
+#### Hypothesis: 
+- $H_0$: $M_{Ideal} = M_{Intermediate} = M_{Poor}$\
+- $H_1$: at least one group is different
+
+#### Test Statistic
+- $H = 2129.4$
+
+#### p-Value
+- $p < 0.001$
+
+#### Conclusion
+Reject $H_0$ at the $\alpha$=0.05 level. There was sufficient evidence to suggest that there was a difference in BMI between the three levels of health.
+
+### Posthoc Dunn's Test
+All groups had significant variance among each other, with a p-value < 0.001 with a 0.05 level of significance.
+```{r, echo=FALSE}
+# nonparametric DunnTest
+DunnTest(clean_data$BMI ~ clean_data$BMI3cat)
+```
+
 
 **2. Again, consider the sample of data from the JHS. In this problem, we will be examining systolic blood pressure (*sbp*; mmHg) as a function of health as categorized by body mass index (*BMI3cat*; Ideal Health, Intermediate Health, and Poor Health), smoking status (*everSmoker*; 0=never smoker, 1=former or current smoker), and the interaction between health as categorized by body mass index and smoking status.**
 
