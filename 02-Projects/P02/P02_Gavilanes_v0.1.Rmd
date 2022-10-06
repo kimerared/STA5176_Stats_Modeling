@@ -15,6 +15,7 @@ library(pgirmess) # perform Kruskal-Wallis Post-hoc
 library(ggpubr) # interaction plot
 library(ggstatsplot) # boxplot
 library(ISLR)
+options(scipen=999)
 ```
 
 **1. Consider a sample of data from the [Jackson Heart Study](https://www.jacksonheartstudy.org/). In this problem, we will be examining body mass index (*BMI*; kg/m<sup>2</sup>) as a function of health as categorized by physical activity (*PA3cat*; Ideal Health, Intermediate Health, and Poor Health).**
@@ -282,32 +283,39 @@ blood_data <- data %>%
 
 **a. Find the appropriate summary statistics to summarize the data.**
 ```{r}
-# change_table_format(get_custom_summary(blood_data, "everSmoker", "BMI"))
-bmi_smoke_mean <- tapply(blood_data$sbp, INDEX = list(blood_data$BMI3cat, blood_data$everSmoker), FUN = mean)
-formattable(bmi_smoke_mean)
-# attributes(bmi_smoke_mean)
+# mean by BMI and Smoke
+smoke_mean <- tapply(blood_data$sbp,
+                     INDEX = list(blood_data$BMI3cat, blood_data$everSmoker), 
+                     FUN = mean)
+formattable(as.data.frame(smoke_mean))
+
 ```
 
 **b. Use ANOVA to determine if there is a difference in systolic blood pressure between health as categorized by body mass index, smoking status, and the interaction between health as categorized by body mass index and smoking status. Test at the $\alpha=0.05$ level. Remember to remove the interaction term if appropriate to do so.**
 ```{r}
 # Two-way ANOVA with Interaction
 # Null Hypothesis:
-# - H1: The means of observations grouped by BMI are the same
+# - H1: The means of observations grouped by Health Levels are the same
 # - H2: The means of observations grouped by Smoking are the same
-# - H3: There is no interaction between BMI and Smoking
+# - H3: There is no interaction between Health Levels and Smoking
 
-summary(h3_interaction <- aov(blood_data$sbp ~ blood_data$BMI3cat * factor(blood_data$everSmoker)))
+summary(h3_interaction_blood <- aov(blood_data$sbp ~ blood_data$BMI3cat * factor(blood_data$everSmoker)))
 ```
-Reject H1.
-Reject H2.
-Reject H3.
+### Hypothesis
+- $H_0$: There is no interaction between Health levels and Smoking\
+- $H_1$: There is an interaction between Health Levels and Smoking 
 
-No further test is required because there is an interaction.
-After removing the interaction term, the ANOVA table was reconstructed.
-```{r}
-# Two-way ANOVA
-summary(two_way <- aov(blood_data$sbp ~ factor(blood_data$BMI3cat) + factor(blood_data$everSmoker)))
-```
+### Test Statistic
+- $F_{Health-Smoking} = 4.003$
+
+### p-Value
+- $p = 0.01837$
+
+## Conclusion
+Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is an interaction between Health Levels and Smoking.
+
+In other words, the relationship between Health Levels depends on the Smoking pattern.
+No further testing is required because there is an interaction between Health Levels and Smoking.
 
 **c. Construct a profile plot to help explain results of part (b).**
 
@@ -323,51 +331,53 @@ profile <- ggline(blood_data, x = "BMI3cat", y = "sbp", color = "everSmoker",
 interaction_plot <- ggpar(profile, 
                       main = "Interaction Plot: \n Systolic Blood Pressure & Smoking Status",
                       legend.title = "Smoking Status",
-                      legend = "right",
-                      ylim = c(20, 40))
+                      legend = "right")
+                      
 interaction_plot
 
 # smoke
 # profile plot using ggline
-profile <- ggline(blood_data, x = "everSmoker", y = "sbp", color = "BMI3cat",
+profile_smoke <- ggline(blood_data, x = "everSmoker", y = "sbp", color = "BMI3cat",
        add = "mean",
        show.line.label = FALSE,
        palette = c("magenta", "gray", "orange"),
        xlab = "BMI Health Categories",)+
   theme_bw()
+profile_smoke
 ```
 
 **d. Use the appropriate posthoc test to determine differences in main effects or the interaction term, whichever is appropriate for the results in part (b). Test at the $\alpha=0.05$ level.**
 
 ## Levene's Test for Equality of Variances
 ```{r}
-LeveneTest(blood_data$BMI ~ blood_data$BMI3cat * blood_data$everSmoker)
+LeveneTest(blood_data$sbp ~ blood_data$BMI3cat * blood_data$everSmoker)
 ```
 ## ANOVA Assumption
 ```{r}
-plot(h3_interaction)
+plot(h3_interaction_blood)
+boxplot(blood_data$sbp ~ blood_data$BMI3cat:blood_data$everSmoker)
 ```
 
 
 ## Main Effects for BMI Health
 ```{r}
-kruskal.test(blood_data$BMI ~ blood_data$BMI3cat)
-kruskalmc(blood_data$BMI ~ blood_data$BMI3cat)
-pairwise.wilcox.test(blood_data$BMI, blood_data$BMI3cat,
+kruskal.test(blood_data$sbp ~ blood_data$BMI3cat)
+kruskalmc(blood_data$sbp ~ blood_data$BMI3cat)
+pairwise.wilcox.test(blood_data$sbp, blood_data$BMI3cat,
                      p.adjust.method = "bonferroni",
                      exact = FALSE)
-DunnTest(blood_data$BMI ~ blood_data$BMI3cat)
+DunnTest(blood_data$sbp ~ blood_data$BMI3cat)
 
 ```
 
 ## Main Effects for Smoking Health
 ```{r}
-kruskal.test(blood_data$BMI ~ blood_data$everSmoker)
-kruskalmc(blood_data$BMI ~ blood_data$everSmoker)
-pairwise.wilcox.test(blood_data$BMI, blood_data$everSmoker,
+kruskal.test(blood_data$sbp ~ blood_data$everSmoker)
+kruskalmc(blood_data$sbp ~ blood_data$everSmoker)
+pairwise.wilcox.test(blood_data$sbp, blood_data$everSmoker,
                      p.adjust.method = "bonferroni",
                      exact = FALSE)
-DunnTest(blood_data$BMI ~ blood_data$everSmoker)
+DunnTest(blood_data$sbp ~ blood_data$everSmoker)
 ```
 
 **e. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of the hypothesis testing in part (b), results of the posthoc test in part (d), and the profile plot in part (c) to help convey the results.**
