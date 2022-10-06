@@ -13,6 +13,8 @@ library(formattable)
 library(DescTools) # perform Dunnett, Levene Test
 library(pgirmess) # perform Kruskal-Wallis Post-hoc
 library(ggpubr) # interaction plot
+library(ggstatsplot) # boxplot
+library(ISLR)
 ```
 
 **1. Consider a sample of data from the [Jackson Heart Study](https://www.jacksonheartstudy.org/). In this problem, we will be examining body mass index (*BMI*; kg/m<sup>2</sup>) as a function of health as categorized by physical activity (*PA3cat*; Ideal Health, Intermediate Health, and Poor Health).**
@@ -160,12 +162,73 @@ DunnTest(clean_data$BMI ~ clean_data$BMI3cat)
 **g. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of your chosen hypothesis test from part (e), results of the posthoc test in part (f), and a graph to help convey the results.**
 
 ## Analisis
-A Kruskal-Wallis test was conducted to find a statistically significant difference in BMI between the three levels of health (poor, intermediate, ideal).
-Dunn's post-hoc test was performed which is the appropriate procedure following a Kruskal-Wallis test.
-All three level of health grouped by BMI are significant different from each other. Poor health is extremely dominant.
-Normality checks and Levene’s test were conducted to verify ANOVA assumptions; however, the assumptions we not met.
+The ANOVA assumptions were invalid after normality checks and Levene’s test.
+Therefore, to find a statistically significant difference in BMI between the three levels of health (poor, intermediate, and ideal), a nonparametric Kruskal-Wallis test was conducted.
+The procedure following a Kruskal-Wallis test was to performed a Dunn's posthoc test.
+All three levels of health grouped by BMI were significantly different from each other. Poor health was the dominant group.
 
 
+### Summary Statistics
+
+To better understood the data, we calculated the mean, median, and standard deviation.
+```{r, echo=FALSE}
+change_table_format(get_custom_summary(clean_data, "BMI3cat", "BMI"))
+```
+
+### ANOVA Assumptions
+
+We were unwilling to assume normality because we have found the assumption of normality invalid in diagnostic checks. We have performed the following ANOVA assumptions:
+
+1. Independence – the observations in each group need to be independent of each other.
+The data provided met this requirement.
+
+2. Normality – the dependent variable should be approximately normally distributed for each combination of the groups.
+However, the residuals are not normally distributed; thus, normality was not assumed.
+
+The Fitted vs. Residuals graph showed how the scatterplots had differences in size among the groups.
+
+```{r, echo=FALSE}
+# 2. Normality check
+lm_model = lm(clean_data$BMI ~ clean_data$BMI3cat)
+anova(lm_model)
+
+# fitted vs residuals
+ggplot(lm_model) + 
+  geom_point(aes(x=.fitted, y=.resid), 
+             size=3, alpha = 0.35, color = custom_purple)+
+  labs(title = "Fitted vs Residuals")+
+  xlab("Fitted")+
+  ylab("Standarized Residuals")+
+  theme_bw()
+```
+The QQ (quantile-quantile) plot  did not display the normality of residuals. The scatterplots did not follow the 45-degree line.
+```{r, echo=FALSE}
+# QQ plot
+ggplot(lm_model, aes(sample = lm_model$residuals))+
+  geom_qq(size=3, alpha = 0.6, color = custom_orange)+
+  geom_qq_line()+
+  theme_bw() +
+  labs(title = "Normal Q-Q Plot")+
+  xlab("Theoretical Quantiles") +
+  ylab("Standarized Residuals")
+```
+Moreover, a boxplot displayed the distribution of BMI health for each group.
+```{r, echo=FALSE}
+ggbetweenstats(
+  data = clean_data,
+  x = BMI3cat,
+  y = BMI,
+  plot.type = "box",
+  type = "np",
+  pairwise.display = "s",
+  var.equal = T,
+  p.adjust.method = "bonferroni",
+  ylab = "BMI",
+  xlab = "Health Levels",
+  k = 0,
+  bf.message = F
+)
+```
 
 **2. Again, consider the sample of data from the JHS. In this problem, we will be examining systolic blood pressure (*sbp*; mmHg) as a function of health as categorized by body mass index (*BMI3cat*; Ideal Health, Intermediate Health, and Poor Health), smoking status (*everSmoker*; 0=never smoker, 1=former or current smoker), and the interaction between health as categorized by body mass index and smoking status.**
 
