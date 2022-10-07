@@ -369,8 +369,10 @@ kruskal.test(blood_data$sbp ~ blood_data$BMI3cat)
 # pairwise.wilcox.test(blood_data$sbp, blood_data$BMI3cat,
 #                      p.adjust.method = "bonferroni",
 #                      exact = FALSE)
-DunnTest(blood_data$sbp ~ blood_data$BMI3cat)
-
+#DunnTest(blood_data$sbp ~ blood_data$BMI3cat)
+# Tukey
+model_factor <- aov(blood_data$sbp ~ factor(blood_data$BMI3cat) + factor(blood_data$everSmoker))
+TukeyHSD(model_factor, "factor(blood_data$BMI3cat)" )
 ```
 
 ## Main Effects for Smoking Health
@@ -380,7 +382,9 @@ kruskal.test(blood_data$sbp ~ blood_data$everSmoker)
 # pairwise.wilcox.test(blood_data$sbp, blood_data$everSmoker,
 #                      p.adjust.method = "bonferroni",
 #                      exact = FALSE)
-DunnTest(blood_data$sbp ~ blood_data$everSmoker)
+# DunnTest(blood_data$sbp ~ blood_data$everSmoker)
+# Tukey
+TukeyHSD(model_factor, "factor(blood_data$everSmoker)" )
 ```
 
 **e. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of the hypothesis testing in part (b), results of the posthoc test in part (d), and the profile plot in part (c) to help convey the results.**
