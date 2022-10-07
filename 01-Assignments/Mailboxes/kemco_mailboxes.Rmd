@@ -22,5 +22,11 @@ library(ISLR)
 rm(list = ls())
 # Import data
 data <- read.csv("10_5_2022 11_56_39 AM_kemco.com.csv")
+
+# transform
+data %>% 
+  select(Mailbox.Size.in.MB) %>%
+  drop_na() %>% 
+  mutate(GB = Mailbox.Size.in.MB / 100)
 ```
 

@@ -298,7 +298,7 @@ formattable(as.data.frame(smoke_mean))
 # - H2: The means of observations grouped by Smoking are the same
 # - H3: There is no interaction between Health Levels and Smoking
 
-blood_model <- blood_data$sbp ~ blood_data$BMI3cat * factor(blood_data$everSmoker)
+blood_model = blood_data$sbp ~ blood_data$BMI3cat * factor(blood_data$everSmoker)
 summary(h3_interaction_blood <- aov(blood_model))
 ```
 ### Hypothesis
@@ -329,7 +329,7 @@ profile <- ggline(blood_data, x = "BMI3cat", y = "sbp", color = "everSmoker",
   theme_bw()
   
 interaction_plot <- ggpar(profile, 
-                      main = "Interaction Plot: \n Systolic Blood Pressure & Smoking Status",
+                      main = "Interaction Plot: \nHealth Levels & Smoking Status",
                       legend.title = "Smoking Status",
                       legend = "right")
                       
@@ -362,6 +362,13 @@ LeveneTest(blood_model)
 ```
 Since the p-value is lower than the significance level of 0.05, the ANOVA assumption is invalid.
 
+## Interaction
+```{r}
+
+```
+
+
+
 ## Main Effects for BMI Health
 ```{r}
 kruskal.test(blood_data$sbp ~ blood_data$BMI3cat)
@@ -382,9 +389,14 @@ kruskal.test(blood_data$sbp ~ blood_data$everSmoker)
 # pairwise.wilcox.test(blood_data$sbp, blood_data$everSmoker,
 #                      p.adjust.method = "bonferroni",
 #                      exact = FALSE)
+<<<<<<< HEAD
 # DunnTest(blood_data$sbp ~ blood_data$everSmoker)
 # Tukey
 TukeyHSD(model_factor, "factor(blood_data$everSmoker)" )
+=======
+DunnTest(blood_data$sbp~ blood_data$everSmoker)
+?DunnettTest
+>>>>>>> 6761db5b866b46b38889f512982ab7510d890dfd
 ```
 
 **e. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of the hypothesis testing in part (b), results of the posthoc test in part (d), and the profile plot in part (c) to help convey the results.**
