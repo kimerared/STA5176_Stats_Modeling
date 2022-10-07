@@ -245,7 +245,7 @@ LeveneTest(clean_data$BMI ~ clean_data$BMI3cat,
            exact = FALSE)
 ```
 ### Kruskal-Wallis Test
-We used a nonparametric alternative, Kruskal-Wallis, to ANOVA test. 
+We used a nonparametric alternative to ANOVA test. 
 ```{r, echo=FALSE}
 kruskal.test(clean_data$BMI ~ clean_data$BMI3cat)
 ```
@@ -262,7 +262,7 @@ kruskal.test(clean_data$BMI ~ clean_data$BMI3cat)
 #### Conclusion
 Reject $H_0$ at the $\alpha$=0.05 level. There was sufficient evidence to suggest that there was a difference in BMI between the three levels of health.
 
-### Posthoc Dunn's Test
+### Post-hoc Dunn's Test
 Dunn's test determined which groups were significantly different with comparisons between each independent group.
 
 All groups had significant variance among each other, with a p-value < 0.001 lower than 0.05 level of significance.
@@ -300,6 +300,9 @@ formattable(as.data.frame(smoke_mean))
 
 blood_model = blood_data$sbp ~ blood_data$BMI3cat * factor(blood_data$everSmoker)
 summary(h3_interaction_blood <- aov(blood_model))
+
+blood_fit <- lm(blood_data$sbp ~ blood_data$BMI3cat * blood_data$everSmoker)
+summary(blood_fit)
 ```
 ### Hypothesis
 - $H_0$: There is no interaction between Health levels and Smoking\
