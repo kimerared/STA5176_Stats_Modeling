@@ -146,7 +146,7 @@ LeveneTest(clean_data$BMI ~ clean_data$BMI3cat,
 
 Nonparametric test, Kruskal-Wallis, in this case.
 
-**f. Perform the appropriate posthoc test to determine pairwise differences between the three groups. Test at the $\alpha=0.05$ level.**
+**f. Perform the appropriate post-hoc test to determine pairwise differences between the three groups. Test at the $\alpha=0.05$ level.**
 ```{r}
 # Kruskal-Wallis post-hoc
 kruskalmc(clean_data$BMI ~ clean_data$BMI3cat)
@@ -159,12 +159,12 @@ pairwise.wilcox.test(clean_data$BMI, clean_data$BMI3cat,
 DunnTest(clean_data$BMI ~ clean_data$BMI3cat)
 ```
 
-**g. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of your chosen hypothesis test from part (e), results of the posthoc test in part (f), and a graph to help convey the results.**
+**g. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of your chosen hypothesis test from part (e), results of the post-hoc test in part (f), and a graph to help convey the results.**
 
 ## Analisis
 The ANOVA assumptions were invalid after normality checks and Levene’s test.
 Therefore, to find a statistically significant difference in BMI between the three levels of health (poor, intermediate, and ideal), a nonparametric Kruskal-Wallis test was conducted.
-The procedure following a Kruskal-Wallis test was to perform a Dunn's posthoc test.
+The procedure following a Kruskal-Wallis test was to perform a Dunn's post-hoc test.
 
 ## Conclusion
 All three levels of health grouped by BMI were significantly different from each other. BMI and physical activity displayed an inverse correlation. People with the lowest BMI had a higher physical activity, categorized as ideal health. On the other hand, people with the highest BMI calculations had lower physical activity. 
@@ -271,6 +271,7 @@ All groups had significant variance among each other, with a p-value < 0.001 low
 DunnTest(clean_data$BMI ~ clean_data$BMI3cat)
 ```
 
+# Part 2
 
 **2. Again, consider the sample of data from the JHS. In this problem, we will be examining systolic blood pressure (*sbp*; mmHg) as a function of health as categorized by body mass index (*BMI3cat*; Ideal Health, Intermediate Health, and Poor Health), smoking status (*everSmoker*; 0=never smoker, 1=former or current smoker), and the interaction between health as categorized by body mass index and smoking status.**
 
@@ -282,13 +283,19 @@ blood_data <- data %>%
 
 **a. Find the appropriate summary statistics to summarize the data.**
 ```{r}
-# mean by BMI and Smoke
-smoke_mean <- tapply(blood_data$sbp,
+# means by BMI and Smoke
+means_summary <- tapply(blood_data$sbp,
                      INDEX = list(blood_data$BMI3cat, blood_data$everSmoker), 
                      FUN = mean)
-formattable(as.data.frame(smoke_mean))
-
+formattable(as.data.frame(means_summary))
 ```
+```{r}
+# Fitted model Summary
+blood_interaction = blood_data$sbp ~ factor(blood_data$BMI3cat) * factor(blood_data$everSmoker)
+lm_model_blood = lm(blood_interaction)
+summary(lm_model_blood)
+```
+
 
 **b. Use ANOVA to determine if there is a difference in systolic blood pressure between health as categorized by body mass index, smoking status, and the interaction between health as categorized by body mass index and smoking status. Test at the $\alpha=0.05$ level. Remember to remove the interaction term if appropriate to do so.**
 ```{r}
@@ -298,11 +305,7 @@ formattable(as.data.frame(smoke_mean))
 # - H2: The means of observations grouped by Smoking are the same
 # - H3: There is no interaction between Health Levels and Smoking
 
-blood_model = blood_data$sbp ~ blood_data$BMI3cat * factor(blood_data$everSmoker)
-summary(h3_interaction_blood <- aov(blood_model))
-
-blood_fit <- lm(blood_data$sbp ~ blood_data$BMI3cat * blood_data$everSmoker)
-summary(blood_fit)
+anova(lm_model_blood)
 ```
 ### Hypothesis
 - $H_0$: There is no interaction between Health levels and Smoking\
@@ -318,7 +321,7 @@ summary(blood_fit)
 Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is an interaction between Health Levels (ideal, intermediate, and poor), and Smoking status.
 
 In other words, the relationship between Health Levels depends on the Smoking status.
-No further testing is required because there is an interaction between Health Levels and Smoking status.
+No further hypothesis are required because there is an interaction between Health Levels and Smoking status.
 
 **c. Construct a profile plot to help explain results of part (b).**
 
@@ -349,27 +352,41 @@ profile_smoke <- ggline(blood_data, x = "everSmoker", y = "sbp", color = "BMI3ca
 profile_smoke
 ```
 
-**d. Use the appropriate posthoc test to determine differences in main effects or the interaction term, whichever is appropriate for the results in part (b). Test at the $\alpha=0.05$ level.**
+**d. Use the appropriate post-hoc test to determine differences in main effects or the interaction term, whichever is appropriate for the results in part (b). Test at the $\alpha=0.05$ level.**
 
 ## ANOVA Assumption
 ### 1. Independece
-
+The sample data are independent from each other.
 ### 2. Normality
 ```{r}
-plot(h3_interaction_blood)
+plot(lm_model_blood)
+# histogram
+hist(resid(lm_model_blood))
+# boxplot
+boxplot(blood_interaction)
 ```
+Visually, the data has some outliers; nonetheless, the data does not represent a concern to invalidate the normality assumption.
 ### 3. Equal Variance
 ### Levene's Test for Equality of Variances
 ```{r}
-LeveneTest(blood_model)
+LeveneTest(blood_data$sbp ~ factor(blood_data$BMI3cat))
+LeveneTest(blood_data$sbp ~ factor(blood_data$everSmoker))
 ```
-Since the p-value is lower than the significance level of 0.05, the ANOVA assumption is invalid.
+The ANOVA assumptions are valid.
 
-## Interaction
+### Post-hoc comparisons for main effects
+```{r, echo=FALSE, warning=FALSE}
+blood_fx = aov(blood_data$sbp ~ factor(blood_data$BMI3cat) + factor(blood_data$everSmoker))
+summary(blood_fx)
+```
+### Main effects for Health Levels
 ```{r}
-
+TukeyHSD(blood_fx, "factor(blood_data$BMI3cat)")
+```
+### Main effects for Smoking Status
+```{r}
+TukeyHSD(blood_fx, "factor(blood_data$everSmoker)")
 ```
 
-
-**e. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of the hypothesis testing in part (b), results of the posthoc test in part (d), and the profile plot in part (c) to help convey the results.**
+**e. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of the hypothesis testing in part (b), results of the post-hoc test in part (d), and the profile plot in part (c) to help convey the results.**
 
