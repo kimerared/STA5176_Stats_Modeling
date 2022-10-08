@@ -151,10 +151,6 @@ Nonparametric test, Kruskal-Wallis, in this case.
 # Kruskal-Wallis post-hoc
 kruskalmc(clean_data$BMI ~ clean_data$BMI3cat)
 
-# Multiple pairwise-comparison between groups
-pairwise.wilcox.test(clean_data$BMI, clean_data$BMI3cat,
-                     p.adjust.method = "bonferroni",
-                     exact = FALSE)
 # nonparametric DunnTest
 DunnTest(clean_data$BMI ~ clean_data$BMI3cat)
 ```
@@ -171,16 +167,15 @@ All three levels of health grouped by BMI were significantly different from each
 
 54% of the sample represented the dominant group with poor health levels of physical activity.
 
+It is recommended to increase physical activity to have a better BMI calculation.
 
 ### Summary Statistics
-
 To better understood the data, we calculated the mean, median, and standard deviation.
 ```{r, echo=FALSE}
 change_table_format(get_custom_summary(clean_data, "BMI3cat", "BMI"))
 ```
 
 ### ANOVA Assumptions
-
 We were unwilling to assume normality because we have found the assumption of normality invalid in diagnostic checks. We have performed the following ANOVA assumptions:
 
 * **1. Independence** – the observations in each group need to be independent of each other.
@@ -218,7 +213,7 @@ ggplot(lm_model, aes(sample = lm_model$residuals))+
   ylab("Standarized Residuals")
 ```
 
-Moreover, a *Boxplot* displayed the distribution of BMI health for each group with significant differences.
+Moreover, a *Boxplot* displayed the distribution of BMI health for each group with significant differences, and outliers.
 ```{r, echo=FALSE}
 ggbetweenstats(
   data = clean_data,
@@ -244,6 +239,8 @@ Since the p-value < 0.001 was lower than 0.05 level of significance, we did not 
 LeveneTest(clean_data$BMI ~ clean_data$BMI3cat,
            exact = FALSE)
 ```
+The ANOVA assumptions are invalid.
+
 ### Kruskal-Wallis Test
 We used a nonparametric alternative to ANOVA test. 
 ```{r, echo=FALSE}
@@ -271,7 +268,7 @@ All groups had significant variance among each other, with a p-value < 0.001 low
 DunnTest(clean_data$BMI ~ clean_data$BMI3cat)
 ```
 
-# Part 2
+## Part 2
 
 **2. Again, consider the sample of data from the JHS. In this problem, we will be examining systolic blood pressure (*sbp*; mmHg) as a function of health as categorized by body mass index (*BMI3cat*; Ideal Health, Intermediate Health, and Poor Health), smoking status (*everSmoker*; 0=never smoker, 1=former or current smoker), and the interaction between health as categorized by body mass index and smoking status.**
 
@@ -289,13 +286,6 @@ means_summary <- tapply(blood_data$sbp,
                      FUN = mean)
 formattable(as.data.frame(means_summary))
 ```
-```{r}
-# Fitted model Summary
-blood_interaction = blood_data$sbp ~ factor(blood_data$BMI3cat) * factor(blood_data$everSmoker)
-lm_model_blood = lm(blood_interaction)
-summary(lm_model_blood)
-```
-
 
 **b. Use ANOVA to determine if there is a difference in systolic blood pressure between health as categorized by body mass index, smoking status, and the interaction between health as categorized by body mass index and smoking status. Test at the $\alpha=0.05$ level. Remember to remove the interaction term if appropriate to do so.**
 ```{r}
@@ -305,11 +295,13 @@ summary(lm_model_blood)
 # - H2: The means of observations grouped by Smoking are the same
 # - H3: There is no interaction between Health Levels and Smoking
 
+blood_interaction = blood_data$sbp ~ factor(blood_data$BMI3cat) * factor(blood_data$everSmoker)
+lm_model_blood = lm(blood_interaction)
 anova(lm_model_blood)
 ```
 ### Hypothesis
-- $H_0$: There is no interaction between Health levels and Smoking\
-- $H_1$: There is an interaction between Health Levels and Smoking 
+- $H_0$: There is no interaction between Health levels and Smoking status\
+- $H_1$: There is an interaction between Health levels and Smoking status 
 
 ### Test Statistic
 - $F_{Health-Smoking} = 4.003$
@@ -317,39 +309,48 @@ anova(lm_model_blood)
 ### p-Value
 - $p = 0.01837$
 
-## Conclusion
-Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is an interaction between Health Levels (ideal, intermediate, and poor), and Smoking status.
+### Conclusion
+Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is an interaction between Health levels (ideal, intermediate, and poor), and Smoking status.
 
-In other words, the relationship between Health Levels depends on the Smoking status.
-No further hypothesis are required because there is an interaction between Health Levels and Smoking status.
+In other words, the relationship between blood pressure and Health Levels depends on the Smoking status.
+No further hypothesis are required because there is an interaction between Health levels and Smoking status.
 
 **c. Construct a profile plot to help explain results of part (b).**
 
 ```{r}
 # profile plot using ggline
+# health levels
 profile <- ggline(blood_data, x = "BMI3cat", y = "sbp", color = "everSmoker",
        add = "mean",
-       show.line.label = FALSE,
-       palette = c("magenta", "gray"),
+       size = 1.5,
+       palette = c(custom_orange, "gray"),
+       ylab = "Blood Pressure",
        xlab = "BMI Health Categories",)+
   theme_bw()
   
-interaction_plot <- ggpar(profile, 
-                      main = "Interaction Plot: \nHealth Levels & Smoking Status",
+interaction_health <- ggpar(profile, 
+                      main = "Blood Pressure - Interaction Plot",
+                      submain = "Health Levels & Smoking Status",
                       legend.title = "Smoking Status",
                       legend = "right")
-                      
-interaction_plot
+                
+interaction_health
 
-# smoke
-# profile plot using ggline
+# smoking status
 profile_smoke <- ggline(blood_data, x = "everSmoker", y = "sbp", color = "BMI3cat",
        add = "mean",
-       show.line.label = FALSE,
-       palette = c("magenta", "gray", "orange"),
-       xlab = "BMI Health Categories",)+
-  theme_bw()
-profile_smoke
+       show.line.label = TRUE,
+       label.rectangle = TRUE,
+       size = 1.5,
+       palette = c(custom_orange, "gray", "gray"),
+       xlab = "Smoking Status",)+
+  theme_minimal()
+interaction_smoke <- ggpar(profile_smoke, 
+                      main = "Interaction Plot",
+                      submain = "Smoking Status & Health Levels",
+                      legend = "none",
+                      ylim = c(120, 128))
+interaction_smoke
 ```
 
 **d. Use the appropriate post-hoc test to determine differences in main effects or the interaction term, whichever is appropriate for the results in part (b). Test at the $\alpha=0.05$ level.**
@@ -375,7 +376,7 @@ LeveneTest(blood_data$sbp ~ factor(blood_data$everSmoker))
 The ANOVA assumptions are valid.
 
 ### Post-hoc comparisons for main effects
-```{r, echo=FALSE, warning=FALSE}
+```{r}
 blood_fx = aov(blood_data$sbp ~ factor(blood_data$BMI3cat) + factor(blood_data$everSmoker))
 summary(blood_fx)
 ```
@@ -383,10 +384,89 @@ summary(blood_fx)
 ```{r}
 TukeyHSD(blood_fx, "factor(blood_data$BMI3cat)")
 ```
+With a p-value < 0.001, there is a significant difference between poor and ideal health levels.
+
 ### Main effects for Smoking Status
 ```{r}
 TukeyHSD(blood_fx, "factor(blood_data$everSmoker)")
 ```
+With a p-value = 0.02, there is a significant difference between smokers and non-smokers.
 
 **e. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of the hypothesis testing in part (b), results of the post-hoc test in part (d), and the profile plot in part (c) to help convey the results.**
 
+## Analisis
+The ANOVA assumptions were valid after normality inspections and Levene’s test.
+During the ANOVA test, there was an interaction between Health levels and Smoking status. 
+Therefore, a parametric Tukey's honest significance (HSD) post-hoc test found statistically significant differences in systolic blood pressure between the three levels of health (poor, intermediate, and ideal) and smoking status.
+
+## Conclusion
+There was a significant exponential difference between poor and ideal health levels. Furthermore, there was a significant difference between smokers and non-smokers.
+People who smoke scored higher in blood pressure results regardless of their health level. On the other hand, non-smokers had better blood pressure than the poor health group. 
+The ideal health level group showcased that non-smokers with great physical activity had better blood pressure.
+
+It is recommended to limit the consumption of cigarettes and increase physical activity to improve blood pressure.
+
+### Summary Statistics
+To better understood the data, we calculated the mean for all groups.
+```{r, echo=FALSE}
+# means by BMI and Smoke
+means_summary <- tapply(blood_data$sbp,
+                     INDEX = list(blood_data$BMI3cat, blood_data$everSmoker), 
+                     FUN = mean)
+formattable(as.data.frame(means_summary))
+```
+
+### Two-way ANOVA Model
+```{r, echo=FALSE}
+anova(lm_model_blood)
+```
+### Hypothesis
+- $H_0$: There is no interaction between Health levels and Smoking status\
+- $H_1$: There is an interaction between Health levels and Smoking status 
+
+### Test Statistic
+- $F_{Health-Smoking} = 4.003$
+
+### p-Value
+- $p = 0.01837$
+
+### Conclusion
+Reject $H_0$ at the $\alpha$=0.05 level. There was sufficient evidence to suggest that there was an interaction between Health levels (ideal, intermediate, and poor), and Smoking status.
+
+In other words, the relationship between blood pressure and Health Levels depended on the Smoking status.
+
+### Interaction Plot
+```{r, echo=FALSE}
+# profile plot using ggline
+# health levels
+profile <- ggline(blood_data, x = "BMI3cat", y = "sbp", color = "everSmoker",
+       add = "mean",
+       size = 1.5,
+       palette = c(custom_orange, "gray"),
+       ylab = "Blood Pressure",
+       xlab = "BMI Health Categories",)+
+  theme_bw()
+  
+interaction_health <- ggpar(profile, 
+                      main = "Blood Pressure - Interaction Plot",
+                      submain = "Health Levels & Smoking Status",
+                      legend.title = "Smoking Status",
+                      legend = "right")
+                
+interaction_health
+```
+
+### Post-hoc comparisons for main effects
+We used the parametric Tukey's honest significance (HSD) post-hoc test.
+
+### Main effects for Health Levels
+```{r, echo=FALSE}
+TukeyHSD(blood_fx, "factor(blood_data$BMI3cat)")
+```
+With a p-value < 0.001, there was a significant difference between poor and ideal health levels.
+
+### Main effects for Smoking Status
+```{r, echo=FALSE}
+TukeyHSD(blood_fx, "factor(blood_data$everSmoker)")
+```
+With a p-value = 0.02, there was a significant difference between smokers and non-smokers.
