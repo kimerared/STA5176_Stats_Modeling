@@ -183,7 +183,7 @@ We were unwilling to assume normality because we have found the assumption of no
 The data provided met this requirement.
 
 * **2. Normality** – the dependent variable should be approximately normally distributed for each combination of the groups.
-However, the residuals are not normally distributed; thus, normality was not assumed.
+However, the residuals were not normally distributed; thus, normality was not assumed.
 
 The *Fitted vs. Residuals* graph showed how the residuals had differences in size among the groups.
 
@@ -362,6 +362,7 @@ interaction_smoke
 ## ANOVA Assumption
 ### 1. Independece
 The sample data are independent from each other.
+
 ### 2. Normality
 ```{r}
 plot(lm_model_blood)
@@ -371,8 +372,9 @@ hist(resid(lm_model_blood))
 boxplot(blood_interaction)
 ```
 Visually, the data has some outliers; nonetheless, the data does not represent a concern to invalidate the normality assumption.
-### 3. Equal Variance
-### Levene's Test for Equality of Variances
+
+### 3. Equal Variance: Levene's Test for Equality of Variances
+
 ```{r}
 LeveneTest(blood_data$sbp ~ factor(blood_data$BMI3cat))
 LeveneTest(blood_data$sbp ~ factor(blood_data$everSmoker))
@@ -424,7 +426,7 @@ anova_model
 - $p = 0.01837$
 
 ### Conclusion
-Reject $H_0$ at the $\alpha$=0.05 level. There was sufficient evidence to suggest that there was an interaction between Health levels (ideal, intermediate, and poor), and Smoking status.
+Rejected $H_0$ at the $\alpha$=0.05 level. There was sufficient evidence to suggest that there was an interaction between Health levels (ideal, intermediate, and poor), and Smoking status.
 
 In other words, the relationship between blood pressure and Health Levels depended on the Smoking status.
 
@@ -466,7 +468,7 @@ kable(interaction_table)
 health_table <- posthoc_interaction$`factor(blood_data$BMI3cat)` %>% 
   as_tibble(rownames = "Health Levels") %>% 
   filter(`p adj` < 0.05)
-# print p-values < 0.05
+
 kable(health_table)
 ```
 ### Smoking Status
@@ -474,8 +476,6 @@ kable(health_table)
 smoking_table <- posthoc_interaction$`factor(blood_data$everSmoker)` %>% 
   as_tibble(rownames = "Smoking Status") %>% 
   filter(`p adj` < 0.05)
-# print p-values < 0.05
+
 kable(smoking_table)
 ```
-
-
