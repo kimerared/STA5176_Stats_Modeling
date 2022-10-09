@@ -258,7 +258,7 @@ kruskal.test(clean_data$BMI ~ clean_data$BMI3cat)
 - $p < 0.001$
 
 #### Conclusion
-Reject $H_0$ at the $\alpha$=0.05 level. There was sufficient evidence to suggest that there was a difference in BMI between the three levels of health.
+Rejected $H_0$ at the $\alpha$=0.05 level. There was sufficient evidence to suggest that there was a difference in BMI between the three levels of health.
 
 ### Post-hoc Dunn's Test
 Dunn's test determined which groups were significantly different with comparisons between each independent group.
