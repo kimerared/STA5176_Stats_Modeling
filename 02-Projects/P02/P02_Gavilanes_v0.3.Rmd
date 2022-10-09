@@ -461,7 +461,7 @@ interaction_table <- posthoc_interaction$`factor(blood_data$BMI3cat):factor(bloo
 # print p-values < 0.05
 kable(interaction_table)
 ```
-### Health Level Post-hoc
+### Health Levels
 ```{r, echo=FALSE}
 health_table <- posthoc_interaction$`factor(blood_data$BMI3cat)` %>% 
   as_tibble(rownames = "Health Levels") %>% 
