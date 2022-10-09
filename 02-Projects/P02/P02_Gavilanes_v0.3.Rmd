@@ -15,6 +15,7 @@ library(pgirmess) # perform Kruskal-Wallis Post-hoc
 library(ggpubr) # interaction plot
 library(ggstatsplot) # boxplot
 library(ISLR)
+library(knitr) #table format
 ```
 
 **1. Consider a sample of data from the [Jackson Heart Study](https://www.jacksonheartstudy.org/). In this problem, we will be examining body mass index (*BMI*; kg/m<sup>2</sup>) as a function of health as categorized by physical activity (*PA3cat*; Ideal Health, Intermediate Health, and Poor Health).**
@@ -297,7 +298,10 @@ formattable(as.data.frame(means_summary))
 
 blood_interaction = blood_data$sbp ~ factor(blood_data$BMI3cat) * factor(blood_data$everSmoker)
 lm_model_blood = lm(blood_interaction)
-anova(lm_model_blood)
+
+# ANOVA Model
+anova_model <- summary(two_way <- aov(sbp ~ BMI3cat * everSmoker, data = blood_data))  
+anova_model
 ```
 ### Hypothesis
 - $H_0$: There is no interaction between Health levels and Smoking status\
@@ -407,7 +411,7 @@ formattable(as.data.frame(means_summary))
 
 ### Two-way ANOVA Model
 ```{r, echo=FALSE}
-anova(lm_model_blood)
+anova_model
 ```
 ### Hypothesis
 - $H_0$: There is no interaction between Health levels and Smoking status\
@@ -445,32 +449,33 @@ interaction_health <- ggpar(profile,
 interaction_health
 ```
 
-### Interaction Post-hoc
-For the following results, only p-values < 0.05 were selected. 
+## Post-hoc 
+### Health Levels & Smoking Status Interactions
+For the following significant results, only p-values < 0.05 were selected. 
 ```{r, echo=FALSE}
 posthoc_interaction <- TukeyHSD(aov(blood_interaction))
-# select the interaction table
+# select the interaction factors
 interaction_table <- posthoc_interaction$`factor(blood_data$BMI3cat):factor(blood_data$everSmoker)` %>%
-    as_tibble(rownames = "Interactions")
-# print p-values < 0.05
-formattable(interaction_table) %>% 
+  as_tibble(rownames = "Interactions") %>% 
   filter(`p adj` < 0.05)
+# print p-values < 0.05
+kable(interaction_table)
 ```
 ### Health Level Post-hoc
 ```{r, echo=FALSE}
 health_table <- posthoc_interaction$`factor(blood_data$BMI3cat)` %>% 
   as_tibble(rownames = "Health Levels") %>% 
   filter(`p adj` < 0.05)
-
-formattable(health_table)
+# print p-values < 0.05
+kable(health_table)
 ```
 ### Smoking Status
 ```{r, echo=FALSE}
 smoking_table <- posthoc_interaction$`factor(blood_data$everSmoker)` %>% 
   as_tibble(rownames = "Smoking Status") %>% 
   filter(`p adj` < 0.05)
-
-formattable(smoking_table)
+# print p-values < 0.05
+kable(smoking_table)
 ```
 
 
