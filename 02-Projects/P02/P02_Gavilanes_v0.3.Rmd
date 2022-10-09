@@ -375,22 +375,11 @@ LeveneTest(blood_data$sbp ~ factor(blood_data$everSmoker))
 ```
 The ANOVA assumptions are valid.
 
-### Post-hoc comparisons for main effects
+### Interaction Post-hoc
 ```{r}
-blood_fx = aov(blood_data$sbp ~ factor(blood_data$BMI3cat) + factor(blood_data$everSmoker))
-summary(blood_fx)
+TukeyHSD(aov(blood_interaction))
 ```
-### Main effects for Health Levels
-```{r}
-TukeyHSD(blood_fx, "factor(blood_data$BMI3cat)")
-```
-With a p-value < 0.001, there is a significant difference between poor and ideal health levels.
 
-### Main effects for Smoking Status
-```{r}
-TukeyHSD(blood_fx, "factor(blood_data$everSmoker)")
-```
-With a p-value = 0.02, there is a significant difference between smokers and non-smokers.
 
 **e. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of the hypothesis testing in part (b), results of the post-hoc test in part (d), and the profile plot in part (c) to help convey the results.**
 
@@ -401,8 +390,8 @@ Therefore, a parametric Tukey's honest significance (HSD) post-hoc test found st
 
 ## Conclusion
 There was a significant exponential difference between poor and ideal health levels. Furthermore, there was a significant difference between smokers and non-smokers.
-People who smoke scored higher in blood pressure results regardless of their health level. On the other hand, non-smokers had better blood pressure than the poor health group. 
-The ideal health level group showcased that non-smokers with great physical activity had better blood pressure.
+People who smoke scored higher in blood pressure results regardless of their health level. On the other hand, non-smokers from intermediate and ideal health groups had better blood pressure than the poor health group. 
+The ideal health level group showcased that non-smokers with great physical activity had the best blood pressure.
 
 It is recommended to limit the consumption of cigarettes and increase physical activity to improve blood pressure.
 
@@ -456,17 +445,32 @@ interaction_health <- ggpar(profile,
 interaction_health
 ```
 
-### Post-hoc comparisons for main effects
-We used the parametric Tukey's honest significance (HSD) post-hoc test.
-
-### Main effects for Health Levels
+### Interaction Post-hoc
+For the following results, only p-values < 0.05 were selected. 
 ```{r, echo=FALSE}
-TukeyHSD(blood_fx, "factor(blood_data$BMI3cat)")
+posthoc_interaction <- TukeyHSD(aov(blood_interaction))
+# select the interaction table
+interaction_table <- posthoc_interaction$`factor(blood_data$BMI3cat):factor(blood_data$everSmoker)` %>%
+    as_tibble(rownames = "Interactions")
+# print p-values < 0.05
+formattable(interaction_table) %>% 
+  filter(`p adj` < 0.05)
 ```
-With a p-value < 0.001, there was a significant difference between poor and ideal health levels.
-
-### Main effects for Smoking Status
+### Health Level Post-hoc
 ```{r, echo=FALSE}
-TukeyHSD(blood_fx, "factor(blood_data$everSmoker)")
+health_table <- posthoc_interaction$`factor(blood_data$BMI3cat)` %>% 
+  as_tibble(rownames = "Health Levels") %>% 
+  filter(`p adj` < 0.05)
+
+formattable(health_table)
 ```
-With a p-value = 0.02, there was a significant difference between smokers and non-smokers.
+### Smoking Status
+```{r, echo=FALSE}
+smoking_table <- posthoc_interaction$`factor(blood_data$everSmoker)` %>% 
+  as_tibble(rownames = "Smoking Status") %>% 
+  filter(`p adj` < 0.05)
+
+formattable(smoking_table)
+```
+
+
