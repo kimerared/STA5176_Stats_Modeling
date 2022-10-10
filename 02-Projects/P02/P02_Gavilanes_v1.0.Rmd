@@ -423,8 +423,9 @@ During the ANOVA test, there was an interaction between Health levels and Smokin
 Therefore, a parametric Tukey's honest significance (HSD) post-hoc test found statistically significant differences in systolic blood pressure between the three levels of health (poor, intermediate, and ideal) and smoking status.
 
 ## Conclusion
-There was a significant exponential difference between poor and ideal health levels. Furthermore, there was a significant difference between smokers and non-smokers.
-People who smoke scored higher in blood pressure results regardless of their health level. On the other hand, non-smokers from intermediate and ideal health groups had better blood pressure than the poor health group. 
+There was a significant exponential difference between poor and ideal health levels depended among smokers and non-smokers.
+People who smoke scored higher in blood pressure results regardless of their health level. On the other hand, non-smokers from intermediate and ideal health groups had better blood pressure than the poor health group. Interestingly enough, there was an antagonist interaction between ideal and intermediate health groups depended on the smoking status.
+
 The ideal health level group showcased that non-smokers with great physical activity had the best blood pressure.
 
 It is recommended to limit the consumption of cigarettes and increase physical activity to improve blood pressure.
