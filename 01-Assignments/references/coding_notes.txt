@@ -1,0 +1,6 @@
+Rstudio
+
+-- select p-values < 0.05 --
+
+
+data %>% mutate(flag = ifelse([pvalname] < 0.05, 1, 0))
