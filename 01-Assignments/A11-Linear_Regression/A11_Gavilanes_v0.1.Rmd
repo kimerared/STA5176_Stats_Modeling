@@ -8,11 +8,14 @@ editor: source
 
 **An online retailer needs to manage the amount of time needed to select the ordered items and assemble them for shipping. In order to assess the amount of time (Time) his assemblers devote to this task, the retailer takes a random sample of 100 orders and records the number of items in each order (Noltems) and the time needed to assemble the shipment. The data are given here: [Google Sheet](https://docs.google.com/spreadsheets/d/1xAsE0KmspC0dP4Uuyym33uU1G8ahI6z7wPVwts7BTRM/edit?usp=sharing).**
 
+## Libraries
 ```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
 library(tidyverse)
 library(gsheet)
+library(DescTools) # perform Dunnett, Levene Test
 ```
 
+## Data
 ```{r}
 # clear environment
 rm(list = ls())
@@ -22,14 +25,47 @@ data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1xAsE0KmspC
 ```
 
 1. Summarize the data using appropriate summary statistics.
+```{r}
+summary(data$Time)
+```
 
 2. Model the amount of time as a function of the number of items in the order.
+```{r}
+m1 = data$Time ~ data$NoItems
+time_model <- lm(m1)
+summary(time_model)
+```
 
 3. Find the 95% confidence interval for $\beta_1$.
+```{r}
+confint(time_model)
+```
+The 95% CI for $\beta_1$ is (0.98, 1.15)
 
 4. Use the appropriate hypothesis test to determine if the number of items in the order is a significant predictor of the amount of time to pick and ship the order. Test at the $\alpha=0.05$ level.
 
+**Hypotheses**
+
+- $H_0: \beta_1 = \beta_1^{(0)}$
+- $H_1: \beta_1 \ne \beta_1^{(0)}$
+
+### Test Statistic
+- $F_{Time} = 661$
+
+### p-Value
+- $p < 0.001$
+
+## Conclusion
+Reject $H_0$ at $\alpha = 0.05$. There is a significant difference in the number of items in the order is a significant predictor of the amount of time to pick and ship the order.
+
+
 5. State and assess the assumptions of linear regression. Is our model valid?
+```{r}
+plot(time_model)
+hist(time_model$residuals)
+LeveneTest(data$Time ~ factor(data$NoItems))
+```
+
 
 6. Find Pearson's correlation between the amount of time and the number of items and the corresponding 95% confidence interval.
 
