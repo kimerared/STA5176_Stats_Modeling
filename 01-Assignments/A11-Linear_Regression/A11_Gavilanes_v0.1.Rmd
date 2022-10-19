@@ -68,8 +68,17 @@ LeveneTest(data$Time ~ factor(data$NoItems))
 
 
 6. Find Pearson's correlation between the amount of time and the number of items and the corresponding 95% confidence interval.
+```{r}
+cor.test(data$Time, data$NoItems,
+         use = "complete.obs")
+```
 
 7. Find Spearman's correlation between the amount of time and the number of items and the corresponding 95% confidence interval.
+```{r}
+cor(data$Time, data$NoItems,
+    use = "complete.obs",
+    method = "spearman")
+```
 
 8. State and assess the assumptions for Pearson's correlation. Is Pearson's correlation valid for this data?
 
