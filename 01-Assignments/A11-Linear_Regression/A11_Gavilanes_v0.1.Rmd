@@ -82,4 +82,30 @@ cor(data$Time, data$NoItems,
 
 8. State and assess the assumptions for Pearson's correlation. Is Pearson's correlation valid for this data?
 
+The Q-Q plot has a better alignment. Even though, the histogram is negatively shifted, it is not a concern. Therefore, we can suggest that the assumptions for Pearson's correlation have been met.
+
 9. Construct a visualization for the model. At the very least, you should have a scatterplot with a regression line overlaid.
+
+```{r}
+data %>%
+  ggplot(aes(x = NoItems, y = Time))+
+  geom_point(size=2, alpha=0.55, colour="orange")+
+  geom_smooth(formula = y ~ x, method=lm, se=FALSE)+
+  theme_bw()+
+  labs(title = "Linear Regression",
+       x = "Number of Items per Order")
+?geom_smooth
+```
+```{r}
+time_coef <- time_model$coefficients
+time_coef
+
+data <- data %>% 
+  mutate(y_hat = time_coef[1] + time_coef[2] * data$NoItems)
+
+data %>% 
+  ggplot(aes(x = NoItems, y = Time))+
+  geom_point(size=2, alpha=0.55, colour="orange")+
+  geom_line(aes(y = y_hat))+
+  theme_bw()
+```
