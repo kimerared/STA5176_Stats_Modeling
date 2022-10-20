@@ -12,7 +12,6 @@ editor: source
 ```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
 library(tidyverse)
 library(gsheet)
-library(DescTools) # perform Dunnett, Levene Test
 ```
 
 ## Data
@@ -36,7 +35,7 @@ time_model <- lm(m1)
 summary(time_model)
 ```
 ## Model formula:
-$$\hat{y} = 14.59 + 1.07 x$$
+$$\hat{y} = 14.59 items + 1.07 time$$
 ### Interpretation
 - Before considering number of items, we expect the shipment time to be at 14.59 minutes.
 - For every item, we expect shipment time to increase by 1.07 minutes.
