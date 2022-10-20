@@ -35,8 +35,12 @@ m1 = data$Time ~ data$NoItems
 time_model <- lm(m1)
 summary(time_model)
 ```
-Model formula:
+## Model formula:
 $$\hat{y} = 14.59 + 1.07 x$$
+### Interpretation
+Before considering number of items, we expect the time to be at 14.59 minutes.
+For every item, we expect shipment time to increase by 1.07 minutes.
+
 
 3. Find the 95% confidence interval for $\beta_1$.
 ```{r}
