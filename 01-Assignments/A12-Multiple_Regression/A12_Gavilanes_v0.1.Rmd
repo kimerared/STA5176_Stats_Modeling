@@ -29,7 +29,6 @@ data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/10ZN0jMYdVs
 summary(data)
 ```
 
-
 2. Construct the correlation matrix for revenue, distance, and population. 
 ```{r}
 # calculate Pearson's correlation
@@ -69,12 +68,92 @@ confint(airport_model)
 
 7. Use the appropriate hypothesis test to determine if distance is a significant predictor of revenue. Test at the $\alpha=0.05$ level.
 
+**Hypotheses**
+
+- $H_0: \beta_{\text{distance}} = 0$
+- $H_1: \beta_{\text{distance}} \ne 0$
+
+**Test Statistic and *p*-value**
+
+- $t_0 = 1.114$
+
+- $p = 0.27916$
+
+**Conclusion/Interpretation**
+
+- Fail to reject $H_0$ at the $\alpha=0.05$ level. After adjusting for revenue, there is sufficient evidence to suggest that distance is not a significant predictor.
+
 8. Use the appropriate hypothesis test to determine if population is a significant predictor of revenue. Test at the $\alpha=0.05$ level.
 
+**Hypotheses**
+
+- $H_0: \beta_{\text{population}} = 0$
+- $H_1: \beta_{\text{population}} \ne 0$
+
+**Test Statistic and *p*-value**
+
+- $t_0 = 5.411$
+
+- $p < 0.001$ 
+
+**Conclusion/Interpretation**
+
+- Reject $H_0$ at the $\alpha=0.05$ level. After adjusting for revenue, there is sufficient evidence to suggest that population is a significant predictor.
+
+
 9. Use the appropriate hypothesis test to determine if this is a significant regression line. Test at the $\alpha=0.05$ level.
+
+**Hypotheses**
+
+- $H_0: \beta_{distance} = \beta_{population} = 0$
+- $H_1:$ at least one $\beta_i$ is different.
+
+**Test Statistic and *p*-value**
+
+- $F_0 = 14.65$
+
+- $p < 0.001$ 
+
+**Conclusion/Interpretation**
+
+- Reject $H_0$ at the $\alpha=0.05$ level. There is sufficient evidence to suggest that at least one variable is a significant predictor of revenue.
 
 10. Find the $R^2_{\text{adj}}$ value and provide an interpretation.
 
 - $R^2_{adj}$ is 0.5653 - 56.53% of the revenue is explained by the model with distance and population.
 
-11. Construct a visualization for the model. At the very least, you should have a scatterplot with a regression line overlaid.
+11. Construct a visualization for the model. At the very least, you should have a scatter plot with a regression line overlaid.
+
+```{r}
+gg_regression <- ggplot(data,aes(x=Population,y=Revenue, color=factor(Distance)))+
+                          geom_point(size=2)+
+                          geom_smooth(formula= y~x, method=lm,se=FALSE,fullrange=TRUE)+
+                          theme_bw()
+gg_regression
+
+# ggplt <- ggplot(data,aes(x=Population,y=Revenue,shape=Distance))+
+#   geom_point()+
+#   scale_shape_identity()+
+#   theme_classic()
+#   
+# ggplt
+
+```
+
+```{r}
+gg_population <- ggplot(data,aes(x=Population,y=Revenue))+
+  scale_shape_identity()+
+  geom_point(size=2, color = "darkgray")+
+  geom_smooth(formula = y ~ x, method=lm,se=FALSE,fullrange=TRUE)+
+  theme_classic()
+gg_population
+
+gg_distance <- ggplot(data,aes(x=Distance,y=Revenue))+
+  scale_shape_identity()+
+  geom_point(size=2, color = "darkgray")+
+  geom_smooth(formula = y ~ x, method=lm,se=FALSE,fullrange=TRUE)+
+  theme_classic()
+gg_distance
+```
+
+
