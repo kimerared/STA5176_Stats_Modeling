@@ -115,14 +115,10 @@ cor(data$Time, data$NoItems,
 
 8. State and assess the assumptions for Pearson's correlation. Is Pearson's correlation valid for this data?
 
-### Correlation
-
-- $\rho$ = 0.931 indicates a very strong correlation.
-- It is a positive correlation; as *Number of Items* increases, *Shipping Time* increases
-
 ### Pearson's Correlation Assumptions  
 
-- The Pearson's correlation assumptions have not been met. Thus, the nonparametric Spearman's correlation test should be reported.
+The assumption on Pearson’s correlation is that both variables are normally distributed.
+
 ```{r}
 # QQ plot: Time
 qq_time <- data %>% 
@@ -147,6 +143,13 @@ qq_items <- data %>%
 # Combine both graphs
 grid.arrange(qq_time, qq_items, nrow=1, top = "QQ Plot of Time by Items")
 ```
+
+- The Pearson's correlation assumptions have not been met. The *Number of Items* variable is not normally distributed. Thus, the nonparametric Spearman's correlation test should be reported.
+
+### Spearman's Correlation
+
+- $\rho$ = 0.931 indicates a very strong correlation.
+- It is a positive correlation; as *Number of Items* increases, *Shipping Time* increases
 
 9. Construct a visualization for the model. At the very least, you should have a scatterplot with a regression line overlaid.
 
