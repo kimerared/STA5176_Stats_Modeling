@@ -1,0 +1,176 @@
+---
+title: "Simple Linear Regression - Week 9, Lecture 1"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+
+**An online retailer needs to manage the amount of time needed to select the ordered items and assemble them for shipping. In order to assess the amount of time (Time) his assemblers devote to this task, the retailer takes a random sample of 100 orders and records the number of items in each order (Noltems) and the time needed to assemble the shipment. The data are given here: [Google Sheet](https://docs.google.com/spreadsheets/d/1xAsE0KmspC0dP4Uuyym33uU1G8ahI6z7wPVwts7BTRM/edit?usp=sharing).**
+
+## Libraries
+```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
+library(tidyverse)
+library(gsheet)
+library(car)
+library(gridExtra)
+```
+
+## Data
+```{r}
+# clear environment
+rm(list = ls())
+
+# extract data
+data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1xAsE0KmspC0dP4Uuyym33uU1G8ahI6z7wPVwts7BTRM/edit?usp=sharing"))
+```
+
+1. Summarize the data using appropriate summary statistics.
+```{r}
+summary(data$Time)
+```
+
+2. Model the amount of time as a function of the number of items in the order.
+```{r}
+m1 = data$Time ~ data$NoItems
+time_model <- lm(m1)
+summary(time_model)
+```
+## Model formula:
+$$\hat{y} = 14.59 + 1.07{\text{ items}}$$
+### Interpretation
+- Before considering number of items, we expect the shipment time to be at 14.59 minutes.
+- For every item, we expect shipment time to increase by 1.07 minutes.
+- For every 10 items, we expect shipment time to increase by 11.17 minutes.
+
+
+3. Find the 95% confidence interval for $\beta_1$.
+```{r}
+confint(time_model)
+```
+The 95% CI for $\beta_{items}$ is (0.98, 1.15)
+
+4. Use the appropriate hypothesis test to determine if the number of items in the order is a significant predictor of the amount of time to pick and ship the order. Test at the $\alpha=0.05$ level.
+
+### Hypotheses
+
+- $H_0: \beta_{items} = 0$
+- $H_1: \beta_{items} \ne 0$
+
+### Test Statistic
+
+- $t_{0} = 25.71$
+
+### p-Value
+
+- $p < 0.001$
+
+## Conclusion
+
+Reject $H_0$ at $\alpha = 0.05$. There is sufficient evidence to suggest that the number of items is a significant predictor for shipment time.
+
+5. State and assess the assumptions of linear regression. Is our model valid?
+
+### Assumptions
+
+$\varepsilon \overset{\text{iid}}{\sim} N(0, \sigma^2)$
+
+The <u>**residuals**</u> follow a normal distribution.
+
+  - Normality is checked with the histogram and/or qq plot.
+    
+    - Mean $\mu=0$
+
+  - Variance is checked with the scatter plot and/or the Brown-Forsythe-Levene.
+    
+    - Common variance $\sigma^2$
+
+### Assessment
+```{r}
+# Assessment of Residuals
+plot(time_model)
+# histogram residuals
+hist(time_model$residuals)
+```
+The model is valid.
+The Q-Q plot displays normality of residuals. Even though, the histogram is negatively shifted, it does not represent a concern. The residuals are relatively normal distributed.
+
+However, the variance test is not suitable for this case because both are continuous variables.  
+
+6. Find Pearson's correlation between the amount of time and the number of items and the corresponding 95% confidence interval.
+```{r}
+# parametric correlation method to find coefficient
+cor.test(data$Time, data$NoItems,
+         use = "complete.obs")
+```
+- The 95% CI for $\rho$ is (0.90, 0.95).
+
+7. Find Spearman's correlation between the amount of time and the number of items and the corresponding 95% confidence interval.
+```{r}
+# nonparametric correlation method to find coefficient
+cor(data$Time, data$NoItems,
+    use = "complete.obs",
+    method = "spearman")
+```
+
+8. State and assess the assumptions for Pearson's correlation. Is Pearson's correlation valid for this data?
+
+### Correlation
+
+- $\rho$ = 0.931 indicates a very strong correlation.
+- It is a positive correlation; as *Number of Items* increases, *Shipping Time* increases
+
+### Pearson's Correlation Assumptions  
+
+- The Pearson's correlation assumptions have not been met. Thus, the nonparametric Spearman's correlation test should be reported.
+```{r}
+# QQ plot: Time
+qq_time <- data %>% 
+  ggplot(aes(sample = Time)) +
+    stat_qq(size=3) +
+    stat_qq_line() +
+    theme_minimal() +
+    xlab("Theoretical") +
+    ylab("Sample")+
+  labs(title = "Time")
+
+# QQ plot: Items
+qq_items <- data %>% 
+  ggplot(aes(sample = NoItems)) +
+    stat_qq(size=3) +
+    stat_qq_line() +
+    theme_minimal() +
+    xlab("Theoretical") +
+    ylab("Sample")+
+  labs(title = "Number of Items")
+
+# Combine both graphs
+grid.arrange(qq_time, qq_items, nrow=1, top = "QQ Plot of Time by Items")
+```
+
+9. Construct a visualization for the model. At the very least, you should have a scatterplot with a regression line overlaid.
+
+```{r}
+data %>%
+  ggplot(aes(x = NoItems, y = Time))+
+  geom_point(size=2, alpha=0.55, colour="orange")+
+  geom_smooth(formula = y ~ x, method=lm, se=FALSE)+
+  theme_bw()+
+  labs(title = "Linear Regression",
+       x = "Number of Items per Order")
+```
+```{r}
+time_coef <- time_model$coefficients
+time_coef
+
+data <- data %>% 
+  mutate(y_hat = time_coef[1] + time_coef[2] * data$NoItems)
+
+data %>% 
+  ggplot(aes(x = NoItems, y = Time))+
+  geom_point(size=2, alpha=0.55, colour="darkgray")+
+  geom_line(aes(y = y_hat))+
+  theme_bw()+
+  labs(title = "Linear Regression",
+       x = "Number of Items per Order")
+```
