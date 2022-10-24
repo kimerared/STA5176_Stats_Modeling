@@ -31,9 +31,9 @@ summary(data)
 
 2. Construct the correlation matrix for revenue, distance, and population. 
 ```{r}
-# calculate Pearson's correlation matrix
+# calculate Spearman's correlation matrix
 cor(data,
-    method = "pearson",
+    method = "spearman",
     use = "complete.obs")
 ```
 

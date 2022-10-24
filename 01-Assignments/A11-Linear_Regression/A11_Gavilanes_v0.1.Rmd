@@ -12,6 +12,8 @@ editor: source
 ```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
 library(tidyverse)
 library(gsheet)
+library(car)
+library(gridExtra)
 ```
 
 ## Data
@@ -35,7 +37,7 @@ time_model <- lm(m1)
 summary(time_model)
 ```
 ## Model formula:
-$$\hat{y} = 14.59 items + 1.07 time$$
+$$\hat{y} = 14.59 + 1.07 items$$
 ### Interpretation
 - Before considering number of items, we expect the shipment time to be at 14.59 minutes.
 - For every item, we expect shipment time to increase by 1.07 minutes.
@@ -46,31 +48,70 @@ $$\hat{y} = 14.59 items + 1.07 time$$
 ```{r}
 confint(time_model)
 ```
-The 95% CI for $\beta_1$ is (0.98, 1.15)
+The 95% CI for $\beta_{items}$ is (0.98, 1.15)
 
 4. Use the appropriate hypothesis test to determine if the number of items in the order is a significant predictor of the amount of time to pick and ship the order. Test at the $\alpha=0.05$ level.
 
 ### Hypotheses
 
-- $H_0: \beta_1 = 0$
-- $H_1: \beta_1 \ne 0$
+- $H_0: \beta_{items} = 0$
+- $H_1: \beta_{items} \ne 0$
 
 ### Test Statistic
+
 - $t_{0} = 25.71$
 
 ### p-Value
+
 - $p < 0.001$
 
 ## Conclusion
+
 Reject $H_0$ at $\alpha = 0.05$. There is sufficient evidence to suggest that the number of items is a significant predictor for shipment time.
 
 5. State and assess the assumptions of linear regression. Is our model valid?
+
+### Assumptions
+
+$\varepsilon \overset{\text{iid}}{\sim} N(0, \sigma^2)$
+
+- The <u>**residuals**</u> follow a normal distribution
+
+  -Normality is checked with the histogram and/or qq plot.
+    - Mean $\mu=0$
+
+  -Variance is checked with the scatterplot and/or the Brown-Forsythe-Levene.
+    - Common variance $\sigma^2$
+
+### Assessment
 ```{r}
+# Assessment of Residuals
 plot(time_model)
+# histogram residuals
 hist(time_model$residuals)
 ```
-The Q-Q plot displays normality of residuals. Even though, the histogram is negatively shifted, it does not represent a concern. The residuals are relatively normal distributed; therefore, we can suggest that the assumptions have been met and the model is valid.
+The Q-Q plot displays normality of residuals. Even though, the histogram is negatively shifted, it does not represent a concern. The residuals are relatively normal distributed.
 
+However, the variance graph does not look correct. Thus, a Brown-Forsythe-Levene test will be performed.
+
+### Brown-Forsythe-Levene test
+```{r}
+leveneTest(Time ~ factor(data$NoItems), data = data, center = median)
+```
+
+**Hypotheses**
+
+- $H_0: \sigma^2_{time} = \sigma^2_{items}$
+- $H_1:$ at least one $\sigma^2_i$ is different.
+
+**Test Statistic and *p*-Value**
+
+- $F_0=0.674$
+- $p = 0.8919$
+
+**Conclusion/Interpretation**
+
+- Keep $H_0$ at the $\alpha=0.05$ level. There is sufficient evidence to suggest that all variances are equal. Thus, we have met the variance assumption.
 
 6. Find Pearson's correlation between the amount of time and the number of items and the corresponding 95% confidence interval.
 ```{r}
@@ -89,20 +130,39 @@ cor(data$Time, data$NoItems,
 ```
 
 8. State and assess the assumptions for Pearson's correlation. Is Pearson's correlation valid for this data?
-<!-- - Correlation $\in$ [-1, 1] -->
 
-<!--     - The closer to +/- 1, the stronger the relationship. -->
-<!--     - $\rho>0$: positive correlation; as *x* increases, *y* increases -->
-<!--     - $\rho<0$: negative correlation; as *x* increases, *y* decreases -->
-<!--     - $\rho=0$: no correlation; as *x* increases, *y* is constant -->
+### Correlation
 
-- Correlation $\in$ [-1, 1]
+- $\rho$ = 0.93; which indicates a very strong correlation.
+- It is a valid and positive correlation; as *Number of Items* increases, *Shipping Time* increases
 
-    - $\rho$ = 0.93
-    - It is a valid and positive correlation; as *Number of Items* increases, *Shipping Time* increases
-    
-    
+### Pearson's Correlation Assumptions  
 
+- The assumptions have not been met. Thus, the nonparametric Spearman's correlation test should be reported.
+```{r}
+# QQ plot: Time
+qq_time <- data %>% 
+  ggplot(aes(sample = Time)) +
+    stat_qq(size=3) +
+    stat_qq_line() +
+    theme_minimal() +
+    xlab("Theoretical") +
+    ylab("Sample")+
+  labs(title = "Time")
+
+# QQ plot: Items
+qq_items <- data %>% 
+  ggplot(aes(sample = NoItems)) +
+    stat_qq(size=3) +
+    stat_qq_line() +
+    theme_minimal() +
+    xlab("Theoretical") +
+    ylab("Sample")+
+  labs(title = "Number of Items")
+
+# Combine both graphs
+grid.arrange(qq_time, qq_items, nrow=1, top = "QQ Plot of Time by Items")
+```
 
 9. Construct a visualization for the model. At the very least, you should have a scatterplot with a regression line overlaid.
 
@@ -124,7 +184,9 @@ data <- data %>%
 
 data %>% 
   ggplot(aes(x = NoItems, y = Time))+
-  geom_point(size=2, alpha=0.55, colour="orange")+
+  geom_point(size=2, alpha=0.55, colour="darkgray")+
   geom_line(aes(y = y_hat))+
-  theme_bw()
+  theme_bw()+
+  labs(title = "Linear Regression",
+       x = "Number of Items per Order")
 ```
