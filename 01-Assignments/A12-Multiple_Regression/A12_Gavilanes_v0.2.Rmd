@@ -48,7 +48,7 @@ airport_model <- lm(data$Revenue ~ data$Population + data$Distance)
 summary(airport_model)
 ```
 ## Model formula:
-$$\hat{y} = 144.39 + 1.09_{population} + 0.17_{distance} $$
+$$\hat{y} = 144.39 + 1.09{\text{ population}} + 0.17{\text{ distance}} $$
 
 
 5. Provide appropriate interpretations for the model coefficients.
