@@ -15,6 +15,7 @@ library(gsheet)
 library(lindia) # Influence & Leverage: gg_cooksd()
 library(car) #multicollinearity: vif()
 library(olsrr) #multicollinearity: vif()
+library(ggpubr) #side-by-side graphs
 ```
 
 ## Data
@@ -65,9 +66,9 @@ data %>% ggplot(aes(x = Population, y = Revenue)) +
   geom_line(aes(y = p150), color = "orange") +
   geom_line(aes(y = p211), color = "magenta") +
   geom_line(aes(y = p300), color = "blue") +
-  geom_text(aes(x =260, y = 460, label = "15,000 persons")) +
-  geom_text(aes(x = 262, y = 445, label = "7,400 persons")) +
-  geom_text(aes(x = 262, y = 430, label = "5,500 persons")) +
+  geom_text(aes(x =262, y = 440, label = "30,000 persons")) +
+  geom_text(aes(x = 264, y = 400, label = "21,100 persons")) +
+  geom_text(aes(x = 264, y = 380, label = "15,000 persons")) +
   labs(title = "Multiple Linear Regression",
        subtitle = "Predictor: Population",
        x = "Population",
@@ -83,9 +84,9 @@ data %>% ggplot(aes(x = Distance, y = Revenue)) +
   geom_line(aes(y = d55), color = "orange") +
   geom_line(aes(y = d74), color = "magenta") +
   geom_line(aes(y = d150), color = "blue") +
-  geom_text(aes(x = 352, y = 370, label = "150 miles")) +
-  geom_text(aes(x = 352, y = 290, label = "74 miles")) +
-  geom_text(aes(x = 352, y = 270, label = "55 miles")) +
+  geom_text(aes(x = 354, y = 370, label = "150 miles")) +
+  geom_text(aes(x = 354, y = 287, label = "74 miles")) +
+  geom_text(aes(x = 354, y = 265, label = "55 miles")) +
   labs(title = "Multiple Linear Regression",
        subtitle = "Predictor: Distance",
        x = "Distance",
@@ -144,7 +145,7 @@ $$\hat{y} = 128.89 + 0.83{\text{ population}} + 0.35{\text{ distance}} $$
 - The regression model is significant with $p = 0.0343$
 
 7. Reconstruct the data visualization from last week, but using the new model's results.
-#### Graph the Multiple Linear Model
+#### Graph the Sensitivity Multiple Linear Model
 
 #### Visualizing Distance
 ```{r}
@@ -152,7 +153,7 @@ $$\hat{y} = 128.89 + 0.83{\text{ population}} + 0.35{\text{ distance}} $$
 c1 <- coefficients(sensitivity_model)
 # Distance on the X-axis
 quantile(sensitivity_df$Population, na.rm = TRUE)
-# create lines graph for Distance of 55, 74, 150
+# create lines graph for Distance of 55, 73, 95
 sensitivity_df <- sensitivity_df %>%
   mutate(d55 = c1[1] + c1[2]*55 + c1[3]*Distance,
          d73 = c1[1] + c1[2]*73 + c1[3]*Distance,
@@ -163,41 +164,45 @@ sensitivity_df %>% ggplot(aes(x = Distance, y = Revenue)) +
   geom_line(aes(y = d55), color = "orange") +
   geom_line(aes(y = d73), color = "magenta") +
   geom_line(aes(y = d95), color = "blue") +
-  # geom_text(aes(x = 352, y = 370, label = "150 miles")) +
-  # geom_text(aes(x = 352, y = 290, label = "74 miles")) +
-  # geom_text(aes(x = 352, y = 270, label = "55 miles")) +
-  labs(title = "Multiple Linear Regression",
+  geom_text(aes(x = 253, y = 295, label = "95 miles")) +
+  geom_text(aes(x = 253, y = 275, label = "73 miles")) +
+  geom_text(aes(x = 253, y = 260, label = "55 miles")) +
+  labs(title = "Sensitivity Multiple Linear Regression",
        subtitle = "Predictor: Distance",
        x = "Distance",
        y = "Revenue") +
-  # xlim(c(120, 365))+
   theme_bw()
 ```
+#### Visualizing Population
 ```{r}
 # Population on the X-axis
 quantile(sensitivity_df$Distance, na.rm = TRUE)
-# create lines graph for Population of 150, 211, 300
+# create lines graph for Population of 150, 209, 240
 sensitivity_df <- sensitivity_df %>%
   mutate(p150 = c1[1] + c1[2]*Population + c1[3]*150,
-         p211 = c1[1] + c1[2]*Population + c1[3]*211,
-         p300 = c1[1] + c1[2]*Population + c1[3]*300)
+         p209 = c1[1] + c1[2]*Population + c1[3]*209,
+         p240 = c1[1] + c1[2]*Population + c1[3]*240)
 # ggplot graph
 sensitivity_df %>% ggplot(aes(x = Population, y = Revenue)) +
   geom_point(size=3, color = "darkgray") + 
   geom_line(aes(y = p150), color = "orange") +
-  geom_line(aes(y = p211), color = "magenta") +
-  geom_line(aes(y = p300), color = "blue") +
-  # geom_text(aes(x =260, y = 460, label = "15,000 persons")) +
-  # geom_text(aes(x = 262, y = 445, label = "7,400 persons")) +
-  # geom_text(aes(x = 262, y = 430, label = "5,500 persons")) +
+  geom_line(aes(y = p209), color = "magenta") +
+  geom_line(aes(y = p240), color = "blue") +
+  geom_text(aes(x =106, y = 296, label = "24,000 persons")) +
+  geom_text(aes(x = 106, y = 285, label = "20,900 persons")) +
+  geom_text(aes(x = 106, y = 265, label = "15,000 persons")) +
   labs(title = "Multiple Linear Regression",
        subtitle = "Predictor: Population",
        x = "Population",
        y = "Revenue") +
-  xlim(c(50, 275))+
+  xlim(c(50, 110))+
   theme_bw()
 ```
 8. Put the graphs from last week and Q7 side by side (hint: use `ggpubr`).
+#### Graphs Comparison
+```{r}
+
+```
 
 9. Compare and contrast the modeling results and the graphs that are side by side in Q8.
 
