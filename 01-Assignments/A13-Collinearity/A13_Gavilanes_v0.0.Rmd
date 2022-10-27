@@ -38,48 +38,52 @@ $$\hat{y} = 144.39 + 1.09{\text{ population}} + 0.17{\text{ distance}} $$
 After adjusted for revenue, there was sufficient evidence to suggest that population was a significant predictor with a $p < 0.001$.
 
 #### Graph the Multiple Linear Model
+
+#### Visualizing Population
 ```{r}
 # get coefficients
 c1 <- coefficients(airport_model)
 c1
-# Distance on the X-axis
-quantile(data$Population, na.rm = TRUE)
-# create lines graph for Distance of 55, 74, 150
-data <- data %>%
-  mutate(d55 = c1[1] + c1[2]*55 + c1[3]*Distance,
-         d74 = c1[1] + c1[2]*74 + c1[3]*Distance,
-         d150 = c1[1] + c1[2]*150 + c1[3]*Distance)
-```
 
-#### Visualizing Population
-```{r}
 # Population on the X-axis
 quantile(data$Distance, na.rm = TRUE)
+
 # create lines graph for Population of 150, 211, 300
 data <- data %>%
   mutate(p150 = c1[1] + c1[2]*Population + c1[3]*150,
          p211 = c1[1] + c1[2]*Population + c1[3]*211,
          p300 = c1[1] + c1[2]*Population + c1[3]*300)
-# ggplot graph
-data %>% ggplot(aes(x = Population, y = Revenue)) +
+
+# Population ggplot 
+gg_population <- data %>% ggplot(aes(x = Population, y = Revenue)) +
   geom_point(size=3, color = "darkgray") + 
   geom_line(aes(y = p150), color = "orange") +
   geom_line(aes(y = p211), color = "magenta") +
   geom_line(aes(y = p300), color = "blue") +
-  geom_text(aes(x =262, y = 440, label = "30,000 persons")) +
-  geom_text(aes(x = 264, y = 400, label = "21,100 persons")) +
-  geom_text(aes(x = 264, y = 380, label = "15,000 persons")) +
+  geom_text(aes(x =264, y = 460, label = "30,000 persons")) +
+  geom_text(aes(x = 264, y = 445, label = "21,100 persons")) +
+  geom_text(aes(x = 264, y = 430, label = "15,000 persons")) +
   labs(title = "Multiple Linear Regression",
        subtitle = "Predictor: Population",
        x = "Population",
        y = "Revenue") +
   xlim(c(50, 275))+
   theme_bw()
+gg_population
 ```
 #### Visualizing Distance
 ```{r}
-# ggplot graph
-data %>% ggplot(aes(x = Distance, y = Revenue)) +
+# Distance on the X-axis
+quantile(data$Population, na.rm = TRUE)
+
+# create lines graph for Distance of 55, 74, 150
+data <- data %>%
+  mutate(d55 = c1[1] + c1[2]*55 + c1[3]*Distance,
+         d74 = c1[1] + c1[2]*74 + c1[3]*Distance,
+         d150 = c1[1] + c1[2]*150 + c1[3]*Distance)
+
+# Distance ggplot 
+gg_distance <- data %>% ggplot(aes(x = Distance, y = Revenue)) +
   geom_point(size=3, color = "darkgray") + 
   geom_line(aes(y = d55), color = "orange") +
   geom_line(aes(y = d74), color = "magenta") +
@@ -93,6 +97,7 @@ data %>% ggplot(aes(x = Distance, y = Revenue)) +
        y = "Revenue") +
   xlim(c(120, 365))+
   theme_bw()
+gg_distance
 ```
 
 
@@ -151,15 +156,18 @@ $$\hat{y} = 128.89 + 0.83{\text{ population}} + 0.35{\text{ distance}} $$
 ```{r}
 # get coefficients
 c1 <- coefficients(sensitivity_model)
+
 # Distance on the X-axis
 quantile(sensitivity_df$Population, na.rm = TRUE)
+
 # create lines graph for Distance of 55, 73, 95
 sensitivity_df <- sensitivity_df %>%
   mutate(d55 = c1[1] + c1[2]*55 + c1[3]*Distance,
          d73 = c1[1] + c1[2]*73 + c1[3]*Distance,
          d95 = c1[1] + c1[2]*95 + c1[3]*Distance)
-# ggplot graph
-sensitivity_df %>% ggplot(aes(x = Distance, y = Revenue)) +
+
+# Distance sensitivity ggplot 
+gg_sensitivity_distance <- sensitivity_df %>% ggplot(aes(x = Distance, y = Revenue)) +
   geom_point(size=3, color = "darkgray") + 
   geom_line(aes(y = d55), color = "orange") +
   geom_line(aes(y = d73), color = "magenta") +
@@ -172,36 +180,41 @@ sensitivity_df %>% ggplot(aes(x = Distance, y = Revenue)) +
        x = "Distance",
        y = "Revenue") +
   theme_bw()
+gg_sensitivity_distance
 ```
 #### Visualizing Population
 ```{r}
 # Population on the X-axis
 quantile(sensitivity_df$Distance, na.rm = TRUE)
+
 # create lines graph for Population of 150, 209, 240
 sensitivity_df <- sensitivity_df %>%
   mutate(p150 = c1[1] + c1[2]*Population + c1[3]*150,
          p209 = c1[1] + c1[2]*Population + c1[3]*209,
          p240 = c1[1] + c1[2]*Population + c1[3]*240)
-# ggplot graph
-sensitivity_df %>% ggplot(aes(x = Population, y = Revenue)) +
+
+# Sensitivity Population ggplot
+gg_sensitivity_population <- sensitivity_df %>% ggplot(aes(x = Population, y = Revenue)) +
   geom_point(size=3, color = "darkgray") + 
   geom_line(aes(y = p150), color = "orange") +
   geom_line(aes(y = p209), color = "magenta") +
   geom_line(aes(y = p240), color = "blue") +
-  geom_text(aes(x =106, y = 296, label = "24,000 persons")) +
-  geom_text(aes(x = 106, y = 285, label = "20,900 persons")) +
-  geom_text(aes(x = 106, y = 265, label = "15,000 persons")) +
+  geom_text(aes(x =106, y = 298, label = "24,000 persons")) +
+  geom_text(aes(x = 106, y = 290, label = "20,900 persons")) +
+  geom_text(aes(x = 106, y = 280, label = "15,000 persons")) +
   labs(title = "Multiple Linear Regression",
        subtitle = "Predictor: Population",
        x = "Population",
        y = "Revenue") +
   xlim(c(50, 110))+
   theme_bw()
+gg_sensitivity_population
 ```
 8. Put the graphs from last week and Q7 side by side (hint: use `ggpubr`).
 #### Graphs Comparison
 ```{r}
-
+ggarrange(gg_sensitivity_distance, gg_distance, ncol = 2, nrow = 1)
+ggarrange(gg_sensitivity_population, gg_population, ncol = 2, nrow = 1)
 ```
 
 9. Compare and contrast the modeling results and the graphs that are side by side in Q8.
