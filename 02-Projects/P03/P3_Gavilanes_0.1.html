@@ -2534,8 +2534,7 @@ vertical-align: -.125em;
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(formattable)                                   </span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lindia) <span class="co"># Influence &amp; Leverage: gg_cooksd()</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(car) <span class="co">#multicollinearity: vif()</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(olsrr) <span class="co">#multicollinearity: ols_vif_tol()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(olsrr) <span class="co">#multicollinearity: ols_vif_tol()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><strong>Consider the insurance cost data availabile <a href="https://github.com/stedy/Machine-Learning-with-R-datasets/blob/master/insurance.csv">here</a>.</strong></p>
 <p><strong>1. Import the data. Extra credit will be given to students that figure out how to directly import from GitHub.</strong></p>
@@ -2765,7 +2764,8 @@ data$children     36.26142  1049.4679</code></pre>
 <section id="determine-if-children-is-a-significant-predictor-of-insurance-charges" class="level5">
 <h5 class="anchored" data-anchor-id="determine-if-children-is-a-significant-predictor-of-insurance-charges">Determine if Children is a significant predictor of insurance charges</h5>
 <ul>
-<li>Reject <span class="math inline">\(H_0\)</span> at the <span class="math inline">\(\alpha=0.05\)</span> level. After adjusting for insurance charges, there is sufficient evidence to suggest that <em>Children</em> is a significant predictor with a <span class="math inline">\(p = 0.0357\)</span>.</li>
+<li><p>Reject <span class="math inline">\(H_0\)</span> at the <span class="math inline">\(\alpha=0.05\)</span> level. After adjusting for insurance charges, there is sufficient evidence to suggest that <em>Children</em> is a significant predictor with a <span class="math inline">\(p = 0.0357\)</span>.</p></li>
+<li><p>Age, BMI, and Children variables are significant predictors.</p></li>
 </ul>
 <p><strong>7. Use the appropriate hypothesis test to determine if this is a significant regression line. Test at the <span class="math inline">\(\alpha=0.05\)</span> level.</strong></p>
 <p><strong>Hypotheses</strong></p>
@@ -3128,6 +3128,7 @@ TRUE
 3 data$children 0.9981297 1.001874</code></pre>
 </div>
 </div>
+<p>-No multicollinearity is present.</p>
 <p><strong>12. Construct a graph to aid with explanation of the regression model. Create lines for 0, 2, and 4 children. You pick what goes on the <em>x</em>-axis and what is plugged in for the remaining variable. Extra credit if you make the outlier dots a different color than the non-outlier dots.</strong></p>
 <div class="cell">
 

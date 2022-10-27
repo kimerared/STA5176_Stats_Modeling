@@ -106,6 +106,8 @@ confint(insurance_model)
 ##### Determine if Children is a significant predictor of insurance charges
 - Reject $H_0$ at the $\alpha=0.05$ level. After adjusting for insurance charges, there is sufficient evidence to suggest that *Children* is a significant predictor with a $p = 0.0357$.
 
+- Age, BMI, and Children variables are significant predictors.
+
 **7. Use the appropriate hypothesis test to determine if this is a significant regression line. Test at the $\alpha=0.05$ level.**
 
 **Hypotheses**
