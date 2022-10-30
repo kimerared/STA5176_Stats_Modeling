@@ -246,3 +246,7 @@ $$\hat{y} = 128.89 + 0.83{\text{ population}} + 0.35{\text{ distance}} $$
 - The regression model is significant with $p = 0.0343$
 
 10. Why do you think I assigned this particular dataset for analysis? What are you taking away from this assignment?
+
+The data has outliers with high influence and high leverage. After removing three outliers, our model is different from the original one.
+Further investigation is needed to determine possible problems.
+
