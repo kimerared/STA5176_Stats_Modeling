@@ -28,6 +28,29 @@ data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/10ZN0jMYdVs
 ```
 
 1. Summarize your findings from last week. What was the resulting model, which were significant predictors of revenue (no formal hypothesis test needed - just state with appropriate evidence)? Also include the graph constructed to visualize the model.
+
+#### Summary
+```{r}
+# Summary
+data %>% 
+  select(Revenue, Distance, Population) %>% 
+  summary(data)
+data %>% 
+  select(Population) %>% 
+  summarise(sd = sd(Population))
+```
+
+
+#### Correlation
+```{r}
+# calculate Pearson's correlation matrix
+cor(data,
+    method = "pearson",
+    use = "complete.obs")
+```
+
+There is a correlation between Revenue and Population which is 0.762.
+
 ```{r}
 airport_model <- lm(data$Revenue ~ data$Population + data$Distance)
 summary(airport_model)
@@ -247,6 +270,8 @@ $$\hat{y} = 128.89 + 0.83{\text{ population}} + 0.35{\text{ distance}} $$
 
 10. Why do you think I assigned this particular dataset for analysis? What are you taking away from this assignment?
 
-The data has outliers with high influence and high leverage. After removing three outliers, our model is different from the original one.
+In this particular assignment, the data has outliers with high influence and high leverage. After removing three outliers, our model is different from the original one.
 Further investigation is needed to determine possible problems.
+
+Some true outliers represent natural variations, and they should be left intact in the dataset. Other outliers are problematic, and should be removed because they represent measurement errors, data entry or processing errors, or poor sampling.
 

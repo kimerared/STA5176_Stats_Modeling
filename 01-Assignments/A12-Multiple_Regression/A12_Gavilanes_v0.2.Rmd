@@ -168,9 +168,9 @@ data %>% ggplot(aes(x = Population, y = Revenue)) +
   geom_line(aes(y = p150), color = "orange") +
   geom_line(aes(y = p211), color = "magenta") +
   geom_line(aes(y = p300), color = "blue") +
-  geom_text(aes(x =260, y = 460, label = "15,000 persons")) +
-  geom_text(aes(x = 262, y = 445, label = "7,400 persons")) +
-  geom_text(aes(x = 262, y = 430, label = "5,500 persons")) +
+  geom_text(aes(x =260, y = 460, label = "30,000 persons")) +
+  geom_text(aes(x = 262, y = 445, label = "21,000 persons")) +
+  geom_text(aes(x = 262, y = 430, label = "15,000 persons")) +
   labs(title = "Multiple Linear Regression",
        x = "Population",
        y = "Revenue") +
