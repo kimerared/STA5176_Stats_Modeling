@@ -163,6 +163,7 @@ formattable(positive_outlier) %>%
 
 ```{r, echo = TRUE}
 gg_cooksd(insurance_model) + theme_bw()
+ols_plot_resid_lev(insurance_model)
 ```
 - Points 544, 1048 need further investigation.
 
