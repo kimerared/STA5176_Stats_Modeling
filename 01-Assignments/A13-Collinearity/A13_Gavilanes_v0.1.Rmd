@@ -40,17 +40,6 @@ $$\hat{y} = 144.39 + 1.09{\text{ population}} + 0.17{\text{ distance}} $$
 - The regression model is significant with $p < 0.001$
 
 #### Graph the Multiple Linear Model
-```{r}
-data %>%
-  mutate(predicted = predict(airport_model, data)) %>%
-  ggplot(aes(x = Population, y = Revenue))+
-  geom_smooth(formula = "y~x", method = "lm", se = FALSE, color = "magenta")+
-  geom_abline(intercept = 144.3885, slope = 1.0942, color = "orange", lwd = 1.5)+
-  geom_point(alpha = 0.45, size = 2.5)+
-  theme_bw()
-avPlots(airport_model)
-# ?avPlots
-```
 
 #### Visualizing Population
 ```{r}
@@ -113,8 +102,6 @@ gg_distance <- data %>% ggplot(aes(x = Distance, y = Revenue)) +
   ylim(c(200, 450))+
   theme_bw()
 gg_distance
-
-  
 ```
 
 
@@ -142,7 +129,7 @@ ols_plot_resid_lev(airport_model)
 
 4. Is there evidence of multicollinearity? 
 ```{r}
-vif(airport_model)
+# vif(airport_model)
 ols_vif_tol(airport_model)
 ```
 - No multicollinearity is present.
@@ -201,6 +188,7 @@ distance_comparison <- gg_sensitivity_distance +
   xlim(c(120, 365))+
   ylim(c(200, 450))
 ```
+
 #### Visualizing Population
 ```{r}
 # Population on the X-axis
@@ -233,7 +221,9 @@ population_comparison <- gg_sensitivity_population +
   xlim(c(50, 275))+
   ylim(c(200, 480))
 ```
+
 8. Put the graphs from last week and Q7 side by side (hint: use `ggpubr`).
+
 #### Population Comparison
 ```{r}
 ggarrange(distance_comparison, gg_distance, ncol = 2, nrow = 1)
@@ -254,14 +244,5 @@ $$\hat{y} = 128.89 + 0.83{\text{ population}} + 0.35{\text{ distance}} $$
 - Population is a significant predictor with $p = 0.0310$.
 - Distance is a significant predictor with $p = 0.0347$.
 - The regression model is significant with $p = 0.0343$
-
-```{r}
-influence.measures(airport_model)
-ols_plot_cooksd_chart(airport_model)+theme_minimal()
-ols_plot_dfbetas(airport_model)
-ols_plot_dffits(airport_model)
-ols_plot_resid_stand(airport_model)
-
-```
 
 10. Why do you think I assigned this particular dataset for analysis? What are you taking away from this assignment?
