@@ -16,6 +16,7 @@ library(lindia) # Influence & Leverage: gg_cooksd()
 library(car) #multicollinearity: vif()
 library(olsrr) #multicollinearity: vif()
 library(ggpubr) #side-by-side graphs
+library(formattable)
 ```
 
 ## Data
@@ -141,9 +142,10 @@ outlier_df <- data %>%
   select(Revenue, Distance, Population, Outlier) %>% 
   drop_na() %>% 
   mutate(obs = row_number()) 
-outlier_df %>% 
+formattable(outlier_df) %>% 
   filter(Outlier == TRUE)
 ```
+- From our test, observation 22 is an outlier.
 
 3. Determine if there are any influence and leverage points in this model. Be sure to count and list the observations that are considered influential and leverage.
 ```{r}
