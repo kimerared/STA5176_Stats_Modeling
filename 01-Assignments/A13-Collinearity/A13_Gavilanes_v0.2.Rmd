@@ -1,0 +1,303 @@
+---
+title: "Multiple Regression: Diagnostics - Week 10, Lecture 1"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+
+**Recall the airline data from last week; we modeled revenue as a function of distance and population. The data are given here: [Google Sheet](https://docs.google.com/spreadsheets/d/10ZN0jMYdVsG2ucIJFSTquVRW916Jj-JmZIGQuqSQhy0/edit?usp=sharing).**
+
+## Libraries
+```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
+library(tidyverse)
+library(gsheet)
+library(lindia) # Influence & Leverage: gg_cooksd()
+library(car) #multicollinearity: vif()
+library(olsrr) #multicollinearity: vif()
+library(ggpubr) #side-by-side graphs
+library(formattable)
+```
+
+## Data
+```{r}
+# clear environment
+rm(list = ls())
+
+# extract data
+data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/10ZN0jMYdVsG2ucIJFSTquVRW916Jj-JmZIGQuqSQhy0/edit?usp=sharing"))
+```
+
+1. Summarize your findings from last week. What was the resulting model, which were significant predictors of revenue (no formal hypothesis test needed - just state with appropriate evidence)? Also include the graph constructed to visualize the model.
+
+#### Summary
+Previously, we detected the Distance's median was higher than the mean; thus, the graph was left-skewed.
+Moreover, the Population's maximum value was higher than the other variables.
+A large difference between the Population's 75th percentile and the maximum value indicated the presence of potential outliers.
+Indeed, the Population graph displayed a potential outlier. 
+
+```{r}
+# Summary
+data %>% 
+  select(Revenue, Distance, Population) %>% 
+  summary(data)
+```
+
+
+#### Correlation
+```{r}
+# calculate Pearson's correlation matrix
+cor(data,
+    method = "pearson",
+    use = "complete.obs")
+```
+
+There is a correlation between Revenue and Population which is 0.762.
+
+```{r}
+airport_model <- lm(data$Revenue ~ data$Population + data$Distance)
+summary(airport_model)
+```
+
+## Model formula:
+$$\hat{y} = 144.39 + 1.09{\text{ population}} + 0.17{\text{ distance}} $$
+- Population is a significant predictor with $p < 0.001$.
+- Distance is not a significant predictor with $p = 0.279$.
+- The regression model is significant with $p < 0.001$
+
+#### Graph the Multiple Linear Model
+
+#### Visualizing Population
+```{r}
+# get coefficients
+c1 <- coefficients(airport_model)
+c1
+
+# Population on the X-axis
+quantile(data$Distance, na.rm = TRUE)
+
+# create lines graph for Population of 150, 211, 300
+data <- data %>%
+  mutate(p150 = c1[1] + c1[2]*Population + c1[3]*150,
+         p211 = c1[1] + c1[2]*Population + c1[3]*211,
+         p300 = c1[1] + c1[2]*Population + c1[3]*300)
+
+# Basic population plot
+gg_population_min <- data %>% ggplot(aes(x = Population, y = Revenue)) +
+  geom_point(size=3, color = "darkgray") + 
+  geom_line(aes(y = p150), color = "orange") +
+  geom_line(aes(y = p211), color = "magenta") +
+  geom_line(aes(y = p300), color = "blue") +
+  labs(title = "Multiple Linear Regression",
+       subtitle = "Predictor: Population",
+       x = "Population",
+       y = "Revenue") +
+  theme_bw()
+
+# Population ggplot 
+gg_population <- gg_population_min +
+  geom_text(aes(x =264, y = 460, label = "30,000 persons")) +
+  geom_text(aes(x = 264, y = 445, label = "21,100 persons")) +
+  geom_text(aes(x = 264, y = 430, label = "15,000 persons")) +
+  xlim(c(50, 275))+
+  ylim(c(200, 460))
+
+gg_population
+```
+#### Visualizing Distance
+```{r}
+# Distance on the X-axis
+quantile(data$Population, na.rm = TRUE)
+
+# create lines graph for Distance of 55, 74, 150
+data <- data %>%
+  mutate(d55 = c1[1] + c1[2]*55 + c1[3]*Distance,
+         d74 = c1[1] + c1[2]*74 + c1[3]*Distance,
+         d150 = c1[1] + c1[2]*150 + c1[3]*Distance)
+
+# Basic Distance plot
+gg_distance_min <- data %>% ggplot(aes(x = Distance, y = Revenue)) +
+  geom_point(size=3, color = "darkgray") + 
+  geom_line(aes(y = d55), color = "orange") +
+  geom_line(aes(y = d74), color = "magenta") +
+  geom_line(aes(y = d150), color = "blue") +
+  labs(title = "Multiple Linear Regression",
+       subtitle = "Predictor: Distance",
+       x = "Distance",
+       y = "Revenue") +
+  # xlim(c(120, 365))+
+  # ylim(c(200, 450))+
+  theme_bw()
+
+# Distance ggplot 
+gg_distance <- gg_distance_min +
+  geom_text(aes(x = 354, y = 370, label = "150 miles")) +
+  geom_text(aes(x = 354, y = 287, label = "74 miles")) +
+  geom_text(aes(x = 354, y = 265, label = "55 miles"))+
+  xlim(c(120, 365))
+  
+gg_distance
+```
+
+
+2. Determine if there are outliers in this model. Be sure to count and list the observations that are outliers.
+```{r}
+n = 2.5
+data <- data %>% 
+  mutate(Outlier = abs(rstandard(airport_model)) > n)
+data %>% count(Outlier)
+
+outlier_df <- data %>% 
+  select(Revenue, Distance, Population, Outlier) %>% 
+  drop_na() %>% 
+  mutate(obs = row_number()) 
+formattable(outlier_df) %>% 
+  filter(Outlier == TRUE)
+```
+- From our test, observation 22 is an outlier.
+
+3. Determine if there are any influence and leverage points in this model. Be sure to count and list the observations that are considered influential and leverage.
+```{r}
+gg_cooksd(airport_model) + theme_bw()
+ols_plot_resid_lev(airport_model)
+```
+- Points 20, 21, 22 need further investigation.
+
+4. Is there evidence of multicollinearity? 
+```{r}
+# vif(airport_model)
+ols_vif_tol(airport_model)
+```
+- No multicollinearity is present.
+
+5. Perform a sensitivity analysis: remove the data points identified as potential offenders in Q2 and Q3 and reconstruct the model. Be sure to state the resulting model.
+```{r}
+sensitivity_df <- outlier_df %>% 
+  filter(Outlier == FALSE & !obs %in% c(20, 21, 22))
+# data$Revenue ~ data$Population + data$Distance
+sensitivity_model <- lm(sensitivity_df$Revenue ~ sensitivity_df$Population + sensitivity_df$Distance)
+summary(sensitivity_model)
+```
+## Sensitivity Model formula:
+$$\hat{y} = 128.89 + 0.83{\text{ population}} + 0.35{\text{ distance}} $$
+6. Using the model in Q5, are there any significant predictors of revenue?
+
+- Population is a significant predictor with $p = 0.0310$.
+- Distance is a significant predictor with $p = 0.0347$.
+- The regression model is significant with $p = 0.0343$
+
+7. Reconstruct the data visualization from last week, but using the new model's results.
+#### Sensitivity Analysis Graphs
+
+#### Visualizing Distance
+```{r}
+# get coefficients
+c1 <- coefficients(sensitivity_model)
+
+# Distance on the X-axis
+quantile(sensitivity_df$Population, na.rm = TRUE)
+
+# create lines graph for Distance of 55, 73, 95
+sensitivity_df <- sensitivity_df %>%
+  mutate(d55 = c1[1] + c1[2]*55 + c1[3]*Distance,
+         d73 = c1[1] + c1[2]*73 + c1[3]*Distance,
+         d95 = c1[1] + c1[2]*95 + c1[3]*Distance)
+
+# Basic Distance sensitivity plot
+gg_sensitivity_min <- sensitivity_df %>% ggplot(aes(x = Distance, y = Revenue)) +
+  geom_point(size=3, color = "darkgray") + 
+  geom_line(aes(y = d55), color = "orange") +
+  geom_line(aes(y = d73), color = "magenta") +
+  geom_line(aes(y = d95), color = "blue") +
+  labs(title = "Sensitivity Analysis",
+       subtitle = "Predictor: Distance",
+       x = "Distance",
+       y = "Revenue") +
+  theme_bw()
+
+# Distance sensitivity ggplot 
+gg_sensitivity_distance <- gg_sensitivity_min +
+  geom_text(aes(x = 253, y = 295, label = "95 miles")) +
+  geom_text(aes(x = 253, y = 275, label = "73 miles")) +
+  geom_text(aes(x = 253, y = 260, label = "55 miles")) 
+  
+gg_sensitivity_distance
+
+distance_comparison <- gg_sensitivity_min +
+  xlim(c(120, 365))+
+  ylim(c(200, 450))
+```
+
+#### Visualizing Population
+```{r}
+# Population on the X-axis
+quantile(sensitivity_df$Distance, na.rm = TRUE)
+
+# create lines graph for Population of 150, 209, 240
+sensitivity_df <- sensitivity_df %>%
+  mutate(p150 = c1[1] + c1[2]*Population + c1[3]*150,
+         p209 = c1[1] + c1[2]*Population + c1[3]*209,
+         p240 = c1[1] + c1[2]*Population + c1[3]*240)
+
+# Basic Population sensitivity plot
+gg_sensitivity_population_min <- sensitivity_df %>% ggplot(aes(x = Population, y = Revenue)) +
+  geom_point(size=3, color = "darkgray") + 
+  geom_line(aes(y = p150), color = "orange") +
+  geom_line(aes(y = p209), color = "magenta") +
+  geom_line(aes(y = p240), color = "blue") +
+  labs(title = "Sensitivity Analysis",
+       subtitle = "Predictor: Population",
+       x = "Population",
+       y = "Revenue") +
+  theme_bw()
+
+# Sensitivity Population ggplot
+gg_sensitivity_population <- gg_sensitivity_population_min +
+  geom_text(aes(x =106, y = 298, label = "24,000 persons")) +
+  geom_text(aes(x = 106, y = 286, label = "20,900 persons")) +
+  geom_text(aes(x = 106, y = 265, label = "15,000 persons")) +
+  xlim(c(50, 115))
+
+gg_sensitivity_population
+
+population_comparison <- gg_sensitivity_population_min + 
+  xlim(c(50, 275))+
+  ylim(c(200, 460))
+
+```
+
+8. Put the graphs from last week and Q7 side by side (hint: use `ggpubr`).
+
+#### Population Comparison
+```{r}
+ggarrange(population_comparison, gg_population_min, ncol = 2, nrow = 1)
+```
+#### Distance Comparison
+```{r}
+ggarrange(distance_comparison, gg_distance_min, ncol = 2, nrow = 1)
+```
+
+
+
+9. Compare and contrast the modeling results and the graphs that are side by side in Q8.
+
+## Sensitivity Analysis
+$$\hat{y} = 144.39 + 1.09{\text{ population}} + 0.17{\text{ distance}} $$
+- Population is a significant predictor with $p < 0.001$.
+- Distance is not a significant predictor with $p = 0.279$.
+- The regression model is significant with $p < 0.001$
+
+$$\hat{y} = 128.89 + 0.83{\text{ population}} + 0.35{\text{ distance}} $$
+
+- Population is a significant predictor with $p = 0.0310$.
+- Distance is a significant predictor with $p = 0.0347$.
+- The regression model is significant with $p = 0.0343$
+
+10. Why do you think I assigned this particular dataset for analysis? What are you taking away from this assignment?
+
+In this particular assignment, the data has outliers with high influence and high leverage. After removing three outliers, our model is different from the original one.
+Further investigation is needed to determine possible data collection problems.
+
+Some true outliers represent natural variations, and they should be left intact in the dataset. Other outliers are problematic, and should be removed because they represent measurement errors, data entry or processing errors, or poor sampling.
+All statistical models depends on excellent data collection to produce reliable results.
+
