@@ -93,7 +93,7 @@ $$\hat{y} = -6916.24 + 240{\text{ age}} + 332.08{\text{ bmi}} + 542.9{\text{ chi
 - As BMI increase by 1 point, the insurance charges increases by $332.08, after controlling for Age, and Children.
 - As Children increase by 1 kid, the insurance charges increases by $542.9, after controlling for BMI, and Age.
 
-- Moreover, the performance of the model, $R^2$, is very low with a 12.01%.
+- $R^2_{adj}$ is 0.1181 - 11.81% of the variability in insurance charges are explained by the model with age, bmi, and number of children.
 
 **5. Fill in the following table:**
 
@@ -193,39 +193,83 @@ ols_vif_tol(insurance_model)
 
 **12. Construct a graph to aid with explanation of the regression model. Create lines for 0, 2, and 4 children. You pick what goes on the *x*-axis and what is plugged in for the remaining variable. Extra credit if you make the outlier dots a different color than the non-outlier dots.**
 
+#### Added-Variable Plots
+
+The Added-Variable plots allow us to observe the relationship between each individual predictor variable and the response variable while holding other predictor variables constant.
+
 ```{r}
 avPlots(insurance_model)
 ```
+- The points that are labeled in each plot represent the observations with the largest residuals and the observations with the largest partial leverage.
+
+#### Visualization with GGPlot
 
 ```{r, echo = TRUE}
-# insurance_model <- lm(data$charges ~ data$age + data$bmi  + data$children)
+# insurance_model <- lm(charges ~ age + bmi  + children)
+
+# check for specific outliers observations
+outlier_color <- positive_outlier %>% 
+  filter(obs == 544 | obs == 1048)
+outlier_color
+
 # get coefficients
 c1 <- coefficients(insurance_model)
 c1
 
-# Age on the X-axis. Plug in for Children
+# Plug in for Children
 quantile(data$children, na.rm = TRUE)
 
 # create lines graph for Children of 0, 2, 4
+# Age on the X-axis
 gg_data <- data %>%
-  mutate(c0 = c1[1] + c1[2]*age + c1[3], + c1[4]*0,
-         c2 = c1[1] + c1[2]*age + c1[3], + c1[4]*2,
-         c4 = c1[1] + c1[2]*age + c1[3], + c1[4]*4)
+  mutate(c0 = c1[1] + c1[2]*data$age + c1[3], + c1[4]*0,
+         c2 = c1[1] + c1[2]*data$age + c1[3], + c1[4]*2,
+         c4 = c1[1] + c1[2]*data$age + c1[3], + c1[4]*4)
 
 # ggplot graph
 gg_data %>% ggplot(aes(x = age, y = charges)) +
-  geom_point(size=3, color = "darkgray") + 
+  geom_point(color = "darkgray", size=3, alpha = 0.4) + 
+  geom_point(data = outlier_color, color = "magenta", size = 3) +
   geom_line(aes(y = c0), color = "orange") +
-  geom_line(aes(y = c2), color = "magenta") +
-  geom_line(aes(y = c4), color = "blue") +
-  # geom_text(aes(x = 352, y = 370, label = "150 miles")) +
-  # geom_text(aes(x = 352, y = 290, label = "74 miles")) +
-  # geom_text(aes(x = 352, y = 270, label = "55 miles")) +
+  geom_line(aes(y = c2), color = "cyan") +
+  geom_line(aes(y = c4), color = "magenta", size = 1.5) +
   labs(title = "Multiple Linear Regression",
-       x = "Children",
+       x = "Age",
        y = "Insurance Charges") +
-  # xlim(c(120, 365))+
   theme_bw()
+
+# create lines graph for Children of 0, 2, 4
+# bmi on the x-axis
+gg_data <- data %>%
+  mutate(c0 = c1[1] + c1[2] + c1[3]*data$bmi, + c1[4]*0,
+         c2 = c1[1] + c1[2] + c1[3]*data$bmi, + c1[4]*2,
+         c4 = c1[1] + c1[2] + c1[3]*data$bmi, + c1[4]*4)
+
+# ggplot graph
+gg_data %>% ggplot(aes(x = bmi, y = charges)) +
+  geom_point(color = "darkgray", size=3, alpha = 0.4) + 
+  geom_point(data = outlier_color, color = "magenta", size = 3) +
+  geom_line(aes(y = c0), color = "orange") +
+  geom_line(aes(y = c2), color = "cyan") +
+  geom_line(aes(y = c4), color = "magenta", size = 1.5) +
+  labs(title = "Multiple Linear Regression",
+       x = "BMI",
+       y = "Insurance Charges") +
+  theme_bw()
+?geom_line
 ```
 
 **13. Write a short paragraph to accompany your results, appropriate for your supervisor who is not a statistician or data scientist. Outline your modeling technique as well as the summary of the data (i.e., the first table) and results.**
+
+## Conclusion
+
+The model did not fit well. We have detected and investigated points: 544 and 1048. However, there are more outliers that caused issues for the model. Therefore, we suggest to explore the other categorical predictors such as sex, region, or smoking status to find relevant data that can help to create a more robust model.
+
+```{r}
+tribble(
+  ~Variables, ~Categories, ~Mean,
+  "a", 2,  3.6,
+  "b", 1,  8.5
+)
+```
+
