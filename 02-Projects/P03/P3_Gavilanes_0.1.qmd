@@ -256,7 +256,6 @@ gg_data %>% ggplot(aes(x = bmi, y = charges)) +
        x = "BMI",
        y = "Insurance Charges") +
   theme_bw()
-?geom_line
 ```
 
 **13. Write a short paragraph to accompany your results, appropriate for your supervisor who is not a statistician or data scientist. Outline your modeling technique as well as the summary of the data (i.e., the first table) and results.**
@@ -265,11 +264,5 @@ gg_data %>% ggplot(aes(x = bmi, y = charges)) +
 
 The model did not fit well. We have detected and investigated points: 544 and 1048. However, there are more outliers that caused issues for the model. Therefore, we suggest to explore the other categorical predictors such as sex, region, or smoking status to find relevant data that can help to create a more robust model.
 
-```{r}
-tribble(
-  ~Variables, ~Categories, ~Mean,
-  "a", 2,  3.6,
-  "b", 1,  8.5
-)
-```
+
 
