@@ -181,7 +181,7 @@ gg_cooksd(insurance_model) + theme_bw()
 ols_plot_resid_lev(insurance_model)
 ```
 - Points 544, 1048 need further investigation.
-- However, there are more outliers that can represent issues for the model.
+- However, there are more outliers that could represent potential issues for the model.
 
 **11. Check for multicollinearity. Do the results surprise you?**
 
@@ -264,5 +264,34 @@ gg_data %>% ggplot(aes(x = bmi, y = charges)) +
 
 The model did not fit well. We have detected and investigated points: 544 and 1048. However, there are more outliers that caused issues for the model. Therefore, we suggest to explore the other categorical predictors such as sex, region, or smoking status to find relevant data that can help to create a more robust model.
 
+#### Summary Statistics
+|                    |        | Mean (Standard Deviation) or Number (Percent) |
+|--------------------|--------|-----------------------------------------------|
+| Charges            |        |   SD = 12,110.01  Mean = 13,270.42            |
+| Age                |        |   SD = 14.04996   Mean = 39.20703             |
+| BMI                |        |   SD = 6.098      Mean = 30.663               |
+| Sex                | Male   |   Count = 676     Percent = 50.52%            |
+|                    | Female |   Count = 662     Percent = 49.48%            |
+| Smoking Status     | Yes    |   Count = 274     Percent = 20.48%            |
+|                    | No     |   Count = 1064    Percent = 79.52%            |
+| Number of Children | 0      |   Count = 574     Percent = 42.9%             |
+|                    | 1      |   Count = 324     Percent = 24.22%            |
+|                    | 2      |   Count = 240     Percent = 17.94%            |
+|                    | 3      |   Count = 157     Percent = 11.73%            |  
+|                    | 4      |   Count = 25      Percent = 1.87%             |
+|                    | 5      |   Count = 18      Percent = 1.35%             |
 
+- A significant difference between the insurance charges' 75th percentile and the maximum value indicated the presence of potential outliers. Moreover, the difference represented 283.23% growth.
+- Furthermore, a high Standard Deviation for Insurance charges, Age, and BMI indicated the data points were more spread out above the mean.
+
+#### Model formula:
+$$\hat{y} = -6916.24 + 240{\text{ age}} + 332.08{\text{ bmi}} + 542.9{\text{ children}} $$
+
+#### Model Interpretation
+- When Age, BMI, and Children are 0, we expect insurance charges to be at ($6,916.24).
+- As Age increase by 1 year, the insurance charges increases by $240, after controlling for BMI, and Children.
+- As BMI increase by 1 point, the insurance charges increases by $332.08, after controlling for Age, and Children.
+- As Children increase by 1 kid, the insurance charges increases by $542.9, after controlling for BMI, and Age.
+
+- $R^2_{adj}$ is 0.1181 - 11.81% of the variability in insurance charges are explained by the model with age, bmi, and number of children.
 
