@@ -1,0 +1,77 @@
+---
+title: "One and Two Proportions - Week 10, Lecture 1"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+
+1. Consider the Jackson Heart Study dataset.
+
+```{r}
+# clear environment
+rm(list = ls())
+# import data
+data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1H3TP-2SBMGleriJLESOe1cdCjtSj2F76bUh5iBqC8tI/edit#gid=2142000894"))
+```
+
+1a. Find the 95% CI for the proportion of JHS participants that drink alcohol on a regular basis (alc; 1=yes, 0=no).
+```{r}
+# clean data
+alcohol_data <- data %>% 
+  select(alc) %>% 
+  drop_na()
+
+# get sample size count
+alcohol_count = count(alcohol_data)
+alcohol_count
+
+# get YES count
+yes_filter <- alcohol_data %>% 
+  filter(alc == "Yes")
+yes_count <- count(yes_filter)
+yes_count
+
+# get YES count
+no_filter <- alcohol_data %>% 
+  filter(alc == "No")
+no_count <- count(no_filter)
+no_count
+
+# get Confidence Intervals
+prop.test(x = 1271,
+          n = 2643, #sample size
+          correct=FALSE)
+```
+- The 95% CI is (0.462, 0.499)
+
+1b. Use the appropriate hypothesis test to determine if less than half of the JHS participants drink alcohol on a regular basis. Test at the  level.
+
+```{r}
+# n = 2643
+# yes = 1271
+# no = 1372
+2643*.50
+
+# 50% sample size
+prop.test(x = 1271,
+          n = 2643, #sample size
+          p = 0.50,
+          correct=FALSE)
+```
+
+1c. Find the 99% CI for the difference in the proportion of male and female JHS participants that drink alcohol.
+
+1d. Use the appropriate hypothesis test to determine if there are fewer drinkers with hypertension (HTN; 1=yes, 0=no) than those without hypertension. Test at the  level.
+
+1e. Challenge! Construct a graph to help with explanation to the lead scientist of JHS.
+
+**2. A large retail lawn care dealer currently provides a 2-year warranty on all lawn mowers sold at its stores. A new employee suggested that the dealer could save money by just not offering the warranty. To evaluate this suggestion, the dealer randomly decides whether or not to offer the warranty to the next 50 customers who enter the store and express an interest in purchasing a lawnmower. Out of the 25 customers offered the warranty, 10 purchased a mower as compared to 4 of 25 not offered the warranty.
+
+2a. Find a 95% CI for , the difference in the proportions of customers purchasing lawnmowers with and without the warranty.
+
+2b. What are the requirements for using the z distribution when analyzing proportions?
+
+2c. Check those requirements here.
+
+2d. Is the CI in part a valid? Why or why not?
