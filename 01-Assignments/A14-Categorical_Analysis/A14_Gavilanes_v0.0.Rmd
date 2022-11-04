@@ -12,7 +12,7 @@ library("gsheet")
 library("formattable")
 ```
 
-1. Consider the Jackson Heart Study dataset.
+**1. Consider the Jackson Heart Study dataset.**
 
 ```{r}
 # clear environment
@@ -21,7 +21,7 @@ rm(list = ls())
 data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1H3TP-2SBMGleriJLESOe1cdCjtSj2F76bUh5iBqC8tI/edit#gid=2142000894"))
 ```
 
-1a. Find the 95% CI for the proportion of JHS participants that drink alcohol on a regular basis (alc; 1=yes, 0=no).
+**1a. Find the 95% CI for the proportion of JHS participants that drink alcohol on a regular basis (alc; 1=yes, 0=no).**
 ```{r}
 # alcohol count
 formattable(data) %>% 
@@ -34,7 +34,7 @@ prop.test(x = 1271,
 ```
 - The 95% CI for $\pi$, the population proportion of JHS participants that drink alcohol on a regular basis is (0.462, 0.499)
 
-1b. Use the appropriate hypothesis test to determine if less than half of the JHS participants drink alcohol on a regular basis. Test at the  level.
+**1b. Use the appropriate hypothesis test to determine if less than half of the JHS participants drink alcohol on a regular basis. Test at the  level.**
 
 ```{r}
 # n = 2643
@@ -55,8 +55,8 @@ z0
 
 ### Hypotheses
 
-- $H_0: \pi_{alcohol} \ge 0.50$
-- $H_1: \pi_{alcohol} < 0.50$
+- $H_0: \pi_{alcohol} \le 0.50$
+- $H_1: \pi_{alcohol} > 0.50$
 
 ### Test Statistic and p-Value
 
@@ -70,7 +70,7 @@ z0
 
 Reject $H_0$ at $\alpha = 0.05$. There is sufficient evidence to suggest that less than 50% of the JHS participants drink alcohol on a regular basis.
 
-1c. Find the 99% CI for the difference in the proportion of male and female JHS participants that drink alcohol.
+**1c. Find the 99% CI for the difference in the proportion of male and female JHS participants that drink alcohol.**
 ```{r}
 # get matrix/table
 table(data$alc, data$sex)
