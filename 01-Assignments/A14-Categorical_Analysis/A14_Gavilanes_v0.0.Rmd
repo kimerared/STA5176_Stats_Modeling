@@ -5,6 +5,11 @@ format: html
 self-contained: true
 editor: source
 ---
+#### Load libraries
+```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
+library("tidyverse")
+library("gsheet")
+```
 
 1. Consider the Jackson Heart Study dataset.
 
@@ -42,8 +47,17 @@ no_count
 prop.test(x = 1271,
           n = 2643, #sample size
           correct=FALSE)
+# alcohol
+data %>% 
+  count(alc)
+
+#test
+data %>% 
+  count(BPmeds)
+
+1302+1331
 ```
-- The 95% CI is (0.462, 0.499)
+- The 95% CI for $pi$ is (0.462, 0.499)
 
 1b. Use the appropriate hypothesis test to determine if less than half of the JHS participants drink alcohol on a regular basis. Test at the  level.
 
@@ -57,10 +71,48 @@ prop.test(x = 1271,
 prop.test(x = 1271,
           n = 2643, #sample size
           p = 0.50,
+          alternative = "less",
           correct=FALSE)
+
+z0 = round(sqrt(3.859), digits = 3)
+z0
 ```
+### Hypothesis Test: Alcohol Drinkers
+
+### Hypotheses
+
+- $H_0: \pi_{alcohol} \ge 0.50$
+- $H_1: \pi_{alcohol} < 0.50$
+
+### Test Statistic and p-Value
+
+- $X^2_{0}$ = 3.859 or $z_0$ = $\sqrt{3.859}$ = `r z0` 
+
+### p-Value
+
+- $p = 0.0247$
+
+## Conclusion
+
+Reject $H_0$ at $\alpha = 0.05$. There is sufficient evidence to suggest that less than 50% of the JHS participants drink alcohol on a regular basis.
 
 1c. Find the 99% CI for the difference in the proportion of male and female JHS participants that drink alcohol.
+```{r}
+table(data$alc, data$sex)
+
+# n female = 1666
+982+684
+
+# n male = 977
+390+587
+
+# 99% CI for two proportions
+prop.test(x = c(684, 587),
+          n = c(1666, 977),
+          correct = FALSE,
+          conf.level = 0.99)
+```
+- The 99% CI for $pi_F$ - $pi_M$ is (-0.241, -0.139) 
 
 1d. Use the appropriate hypothesis test to determine if there are fewer drinkers with hypertension (HTN; 1=yes, 0=no) than those without hypertension. Test at the  level.
 
