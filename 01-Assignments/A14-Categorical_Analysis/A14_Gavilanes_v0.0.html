@@ -2534,7 +2534,8 @@ vertical-align: -.125em;
 <h4 class="anchored" data-anchor-id="load-libraries">Load libraries</h4>
 <div class="cell" data-warnings="false">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;tidyverse&quot;</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;gsheet&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;gsheet&quot;</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;formattable&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol type="1">
 <li>Consider the Jackson Heart Study dataset.</li>
@@ -2547,46 +2548,55 @@ vertical-align: -.125em;
 </div>
 <p>1a. Find the 95% CI for the proportion of JHS participants that drink alcohol on a regular basis (alc; 1=yes, 0=no).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># clean data</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>alcohol_data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> </span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(alc) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>()</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># get sample size count</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>alcohol_count <span class="ot">=</span> <span class="fu">count</span>(alcohol_data)</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>alcohol_count</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 1
-      n
-  &lt;int&gt;
-1  2643</code></pre>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># alcohol count</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">formattable</span>(data) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(alc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<table class="table table-condensed">
+<thead>
+<tr>
+<th style="text-align:right;">
+alc
+</th>
+<th style="text-align:right;">
+n
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+No
+</td>
+<td style="text-align:right;">
+1372
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+Yes
+</td>
+<td style="text-align:right;">
+1271
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+10
+</td>
+</tr>
+</tbody>
+
+</table>
 </div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get YES count</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>yes_filter <span class="ot">&lt;-</span> alcohol_data <span class="sc">%&gt;%</span> </span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(alc <span class="sc">==</span> <span class="st">&quot;Yes&quot;</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>yes_count <span class="ot">&lt;-</span> <span class="fu">count</span>(yes_filter)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>yes_count</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 1
-      n
-  &lt;int&gt;
-1  1271</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get YES count</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>no_filter <span class="ot">&lt;-</span> alcohol_data <span class="sc">%&gt;%</span> </span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(alc <span class="sc">==</span> <span class="st">&quot;No&quot;</span>)</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>no_count <span class="ot">&lt;-</span> <span class="fu">count</span>(no_filter)</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>no_count</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 1
-      n
-  &lt;int&gt;
-1  1372</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get Confidence Intervals</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.test</span>(<span class="at">x =</span> <span class="dv">1271</span>,</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">n =</span> <span class="dv">2643</span>, <span class="co">#sample size</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">correct=</span><span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get Confidence Intervals</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.test</span>(<span class="at">x =</span> <span class="dv">1271</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">n =</span> <span class="dv">2643</span>, <span class="co">#sample size</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">correct=</span><span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
     1-sample proportions test without continuity correction
@@ -2602,40 +2612,37 @@ sample estimates:
 </div>
 </div>
 <ul>
-<li>The 95% CI for <span class="math inline">\(pi\)</span> is (0.462, 0.499)</li>
+<li>The 95% CI for <span class="math inline">\(\pi\)</span>, the population proportion of JHS participants that drink alcohol on a regular basis is (0.462, 0.499)</li>
 </ul>
 <p>1b. Use the appropriate hypothesis test to determine if less than half of the JHS participants drink alcohol on a regular basis. Test at the level.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># n = 2643</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># yes = 1271</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># no = 1372</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="dv">2643</span><span class="sc">*</span>.<span class="dv">50</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 1321.5</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 50% sample size</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.test</span>(<span class="at">x =</span> <span class="dv">1271</span>,</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">n =</span> <span class="dv">2643</span>, <span class="co">#sample size</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">p =</span> <span class="fl">0.50</span>,</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">alternative =</span> <span class="st">&quot;less&quot;</span>,</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>          <span class="at">correct=</span><span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># n = 2643</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># yes = 1271</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># no = 1372</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># less than 50% drink</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.test</span>(<span class="at">x =</span> <span class="dv">1271</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>          <span class="at">n =</span> <span class="dv">2643</span><span class="sc">+</span><span class="dv">1271</span>, <span class="co">#sample size</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>          <span class="at">p =</span> <span class="fl">0.50</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>          <span class="at">alternative =</span> <span class="st">&quot;less&quot;</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>          <span class="at">correct=</span><span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
     1-sample proportions test without continuity correction
 
-data:  1271 out of 2643, null probability 0.5
-X-squared = 3.8596, df = 1, p-value = 0.02473
+data:  1271 out of 2643 + 1271, null probability 0.5
+X-squared = 480.94, df = 1, p-value &lt; 2.2e-16
 alternative hypothesis: true p is less than 0.5
 95 percent confidence interval:
- 0.00000 0.49689
+ 0.0000000 0.3371608
 sample estimates:
         p 
-0.4808929 </code></pre>
+0.3247317 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>z0 <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">sqrt</span>(<span class="fl">3.859</span>), <span class="at">digits =</span> <span class="dv">3</span>)</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>z0</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>z0 <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">sqrt</span>(<span class="fl">480.94</span>), <span class="at">digits =</span> <span class="dv">3</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>z0</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 1.964</code></pre>
+<pre><code>[1] 21.93</code></pre>
 </div>
 </div>
 </section>
@@ -2652,13 +2659,13 @@ sample estimates:
 <section id="test-statistic-and-p-value" class="level3">
 <h3 class="anchored" data-anchor-id="test-statistic-and-p-value">Test Statistic and p-Value</h3>
 <ul>
-<li><span class="math inline">\(X^2_{0}\)</span> = 3.859 or <span class="math inline">\(z_0\)</span> = <span class="math inline">\(\sqrt{3.859}\)</span> = 1.964</li>
+<li><span class="math inline">\(X^2_{0}\)</span> = 480.94 or <span class="math inline">\(z_0\)</span> = <span class="math inline">\(\sqrt{3.859}\)</span> = 21.93</li>
 </ul>
 </section>
 <section id="p-value" class="level3">
 <h3 class="anchored" data-anchor-id="p-value">p-Value</h3>
 <ul>
-<li><span class="math inline">\(p = 0.0247\)</span></li>
+<li><span class="math inline">\(p &lt; 0.001\)</span></li>
 </ul>
 </section>
 <section id="conclusion" class="level2">
@@ -2666,28 +2673,29 @@ sample estimates:
 <p>Reject <span class="math inline">\(H_0\)</span> at <span class="math inline">\(\alpha = 0.05\)</span>. There is sufficient evidence to suggest that less than 50% of the JHS participants drink alcohol on a regular basis.</p>
 <p>1c. Find the 99% CI for the difference in the proportion of male and female JHS participants that drink alcohol.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(data<span class="sc">$</span>alc, data<span class="sc">$</span>sex)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get matrix/table</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(data<span class="sc">$</span>alc, data<span class="sc">$</span>sex)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     
       Female Male
   No     982  390
   Yes    684  587</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># n female = 1666</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="dv">982</span><span class="sc">+</span><span class="dv">684</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># n female = 1666</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="dv">982</span><span class="sc">+</span><span class="dv">684</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1666</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># n male = 977</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="dv">390</span><span class="sc">+</span><span class="dv">587</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># n male = 977</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="dv">390</span><span class="sc">+</span><span class="dv">587</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 977</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 99% CI for two proportions</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.test</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="dv">684</span>, <span class="dv">587</span>),</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">n =</span> <span class="fu">c</span>(<span class="dv">1666</span>, <span class="dv">977</span>),</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">correct =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">conf.level =</span> <span class="fl">0.99</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 99% CI for two proportions</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.test</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="dv">684</span>, <span class="dv">587</span>),</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">n =</span> <span class="fu">c</span>(<span class="dv">1666</span>, <span class="dv">977</span>),</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">correct =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">conf.level =</span> <span class="fl">0.99</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
     2-sample test for equality of proportions without continuity correction
@@ -2703,10 +2711,116 @@ sample estimates:
 </div>
 </div>
 <ul>
-<li>The 99% CI for <span class="math inline">\(pi_F\)</span> - <span class="math inline">\(pi_M\)</span> is (-0.241, -0.139)</li>
+<li>The 99% CI for <span class="math inline">\(\pi_F\)</span> - <span class="math inline">\(\pi_M\)</span> is (-0.241, -0.139)</li>
 </ul>
 <p>1d. Use the appropriate hypothesis test to determine if there are fewer drinkers with hypertension (HTN; 1=yes, 0=no) than those without hypertension. Test at the level.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># count hypertension</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>data <span class="sc">%&gt;%</span> </span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(data<span class="sc">$</span>alc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 2
+  `data$alc`     n
+  &lt;chr&gt;      &lt;int&gt;
+1 No          1372
+2 Yes         1271
+3 &lt;NA&gt;          10</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># drinkers with hypertension count</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(data<span class="sc">$</span>HTN, data<span class="sc">$</span>alc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     
+       No Yes
+  No  547 683
+  Yes 825 588</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># less drinkers with hypertension</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="co"># drinkers n = 1271</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># drinkers+HTN = 588</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co"># drinkers-HTN = 683</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.test</span>(<span class="at">x =</span> <span class="dv">588</span>,</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>          <span class="at">n =</span> <span class="dv">1271</span><span class="sc">+</span><span class="dv">588</span>,</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>          <span class="at">alternative =</span> <span class="st">&quot;less&quot;</span>,</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>          <span class="at">correct =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    1-sample proportions test without continuity correction
+
+data:  588 out of 1271 + 588, null probability 0.5
+X-squared = 250.94, df = 1, p-value &lt; 2.2e-16
+alternative hypothesis: true p is less than 0.5
+95 percent confidence interval:
+ 0.0000000 0.3342958
+sample estimates:
+        p 
+0.3162991 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get Z0</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>z_htn <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">sqrt</span>(<span class="fl">250.94</span>), <span class="at">digits =</span> <span class="dv">3</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>z_htn</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 15.841</code></pre>
+</div>
+</div>
+<section id="hypothesis-test-alcohol-drinkers-1" class="level3">
+<h3 class="anchored" data-anchor-id="hypothesis-test-alcohol-drinkers-1">Hypothesis Test: Alcohol Drinkers</h3>
+</section>
+<section id="hypotheses-1" class="level3">
+<h3 class="anchored" data-anchor-id="hypotheses-1">Hypotheses</h3>
+<ul>
+<li><span class="math inline">\(H_0: \pi_{hypertension} \ge \pi_{alcohol}\)</span></li>
+<li><span class="math inline">\(H_1: \pi_{hypertension} &lt; \pi_{alcohol}\)</span></li>
+</ul>
+</section>
+<section id="test-statistic-and-p-value-1" class="level3">
+<h3 class="anchored" data-anchor-id="test-statistic-and-p-value-1">Test Statistic and p-Value</h3>
+<ul>
+<li><span class="math inline">\(X^2_{0}\)</span> = 250.94 or <span class="math inline">\(z_0\)</span> = <span class="math inline">\(\sqrt{250.94}\)</span> = 15.841</li>
+</ul>
+</section>
+<section id="p-value-1" class="level3">
+<h3 class="anchored" data-anchor-id="p-value-1">p-Value</h3>
+<ul>
+<li><span class="math inline">\(p &lt; 0.001\)</span></li>
+</ul>
+</section>
+</section>
+<section id="conclusion-1" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion-1">Conclusion</h2>
+<p>Reject <span class="math inline">\(H_0\)</span> at <span class="math inline">\(\alpha = 0.05\)</span>. There is sufficient evidence to suggest that there are fewer drinkers with hypertension than those without hypertension.</p>
 <p>1e. Challenge! Construct a graph to help with explanation to the lead scientist of JHS.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># data types</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(data<span class="sc">$</span>sex)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;character&quot;</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(data<span class="sc">$</span>alc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;character&quot;</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(data<span class="sc">$</span>HTN)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;character&quot;</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># factor</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>sex_factor <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(data<span class="sc">$</span>sex)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>alc_factor <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(data<span class="sc">$</span>alc)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>htn_factor <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(data<span class="sc">$</span>HTN)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="fu">pie</span>(<span class="fu">table</span>(data<span class="sc">$</span>alc))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABUAAAAPACAMAAADDuCPrAAAAilBMVEUAAAAAADoAAGYAOjoAOmYAOpAAZrY6AAA6Ojo6OmY6ZmY6ZrY6kNtmAABmOgBmOjpmkLZmtttmtv+QOgCQZjqQkGaQkLaQttuQ2/+t2Oa2ZgC2Zjq2kGa2tpC229u22/+2///bkDrbtmbbtpDb27bb2//b////tmb/25D/27b/29v//7b//9v///9muIa6AAAACXBIWXMAAB2HAAAdhwGP5fFlAAAaDUlEQVR4nO3ca3dk11WG0TIkcRKcEOJAQhNwTIKdS/f//3uodC2pJbXqVVWdtfaa8wvuwRigPu/ej+u05N59AiCy2/oLAOhKQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBIQAFCAgoQElCAkIAChAQUICSgACEBBQgJKEBI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QgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgND/A+fxAOCdOJTpAAAAAElFTkSuQmCC" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pie</span>(<span class="fu">table</span>(data<span class="sc">$</span>sex))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABUAAAAPACAMAAADDuCPrAAAAn1BMVEUAAAAAADoAAGYAOjoAOmYAOpAAZrY6AAA6OgA6Ojo6OmY6ZrY6kNtmAABmOgBmOjpmZpBmkJBmkLZmtrZmtttmtv+QOgCQZgCQZmaQkGaQtraQttuQ29uQ2/+t2Oa2ZgC2Zjq2kGa229u22/+2///bkDrbtmbbtpDbtrbb27bb2//b/7bb/9vb////tmb/25D/27b/29v//7b//9v///+b2xmVAAAACXBIWXMAAB2HAAAdhwGP5fFlAAAdSUlEQVR4nO3da2Ob1Zm2YbFrprSUDgNMp8wUGAq0dAil8f//bWNZG0u2LD/Ppd1a6z6OD/OGJLiOLt0nVuzkXdwBEFnc+h0A6JWAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQE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QgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoT+H5U5cFBoTGZwAAAAAElFTkSuQmCC" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pie</span>(<span class="fu">table</span>(data<span class="sc">$</span>HTN))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABUAAAAPACAMAAADDuCPrAAAAilBMVEUAAAAAADoAAGYAOjoAOmYAOpAAZrY6AAA6Ojo6OmY6ZmY6ZrY6kNtmAABmOgBmOjpmkLZmtttmtv+QOgCQZjqQkGaQkLaQttuQ2/+t2Oa2ZgC2Zjq2kGa2tpC229u22/+2///bkDrbtmbbtpDb27bb2//b////tmb/25D/27b/29v//7b//9v///9muIa6AAAACXBIWXMAAB2HAAAdhwGP5fFlAAAaf0lEQVR4nO3ce3tbaXXGYQ0FhrZAD9ACKS1MDzO0TL7/16tlO/EhtiM93tJe6133/Q+Ti5ZL2s9+f9GONTl8BCBy2PsFAHQloAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAk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QgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCD0/y3GeE16ibIDAAAAAElFTkSuQmCC" class="img-fluid" width="672"></p>
+</div>
+</div>
 <p>**2. A large retail lawn care dealer currently provides a 2-year warranty on all lawn mowers sold at its stores. A new employee suggested that the dealer could save money by just not offering the warranty. To evaluate this suggestion, the dealer randomly decides whether or not to offer the warranty to the next 50 customers who enter the store and express an interest in purchasing a lawnmower. Out of the 25 customers offered the warranty, 10 purchased a mower as compared to 4 of 25 not offered the warranty.</p>
 <p>2a. Find a 95% CI for , the difference in the proportions of customers purchasing lawnmowers with and without the warranty.</p>
 <p>2b. What are the requirements for using the z distribution when analyzing proportions?</p>

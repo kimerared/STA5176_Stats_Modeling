@@ -9,6 +9,7 @@ editor: source
 ```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
 library("tidyverse")
 library("gsheet")
+library("formattable")
 ```
 
 1. Consider the Jackson Heart Study dataset.
@@ -22,42 +23,16 @@ data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1H3TP-2SBMG
 
 1a. Find the 95% CI for the proportion of JHS participants that drink alcohol on a regular basis (alc; 1=yes, 0=no).
 ```{r}
-# clean data
-alcohol_data <- data %>% 
-  select(alc) %>% 
-  drop_na()
-
-# get sample size count
-alcohol_count = count(alcohol_data)
-alcohol_count
-
-# get YES count
-yes_filter <- alcohol_data %>% 
-  filter(alc == "Yes")
-yes_count <- count(yes_filter)
-yes_count
-
-# get YES count
-no_filter <- alcohol_data %>% 
-  filter(alc == "No")
-no_count <- count(no_filter)
-no_count
+# alcohol count
+formattable(data) %>% 
+  count(alc)
 
 # get Confidence Intervals
 prop.test(x = 1271,
           n = 2643, #sample size
           correct=FALSE)
-# alcohol
-data %>% 
-  count(alc)
-
-#test
-data %>% 
-  count(BPmeds)
-
-1302+1331
 ```
-- The 95% CI for $pi$ is (0.462, 0.499)
+- The 95% CI for $\pi$, the population proportion of JHS participants that drink alcohol on a regular basis is (0.462, 0.499)
 
 1b. Use the appropriate hypothesis test to determine if less than half of the JHS participants drink alcohol on a regular basis. Test at the  level.
 
@@ -65,16 +40,15 @@ data %>%
 # n = 2643
 # yes = 1271
 # no = 1372
-2643*.50
 
-# 50% sample size
+# less than 50% drink
 prop.test(x = 1271,
-          n = 2643, #sample size
+          n = 2643+1271, #sample size
           p = 0.50,
           alternative = "less",
           correct=FALSE)
 
-z0 = round(sqrt(3.859), digits = 3)
+z0 = round(sqrt(480.94), digits = 3)
 z0
 ```
 ### Hypothesis Test: Alcohol Drinkers
@@ -86,11 +60,11 @@ z0
 
 ### Test Statistic and p-Value
 
-- $X^2_{0}$ = 3.859 or $z_0$ = $\sqrt{3.859}$ = `r z0` 
+- $X^2_{0}$ = 480.94 or $z_0$ = $\sqrt{3.859}$ = `r z0` 
 
 ### p-Value
 
-- $p = 0.0247$
+- $p < 0.001$
 
 ## Conclusion
 
@@ -98,6 +72,7 @@ Reject $H_0$ at $\alpha = 0.05$. There is sufficient evidence to suggest that le
 
 1c. Find the 99% CI for the difference in the proportion of male and female JHS participants that drink alcohol.
 ```{r}
+# get matrix/table
 table(data$alc, data$sex)
 
 # n female = 1666
@@ -112,11 +87,63 @@ prop.test(x = c(684, 587),
           correct = FALSE,
           conf.level = 0.99)
 ```
-- The 99% CI for $pi_F$ - $pi_M$ is (-0.241, -0.139) 
+- The 99% CI for $\pi_F$ - $\pi_M$ is (-0.241, -0.139) 
 
 1d. Use the appropriate hypothesis test to determine if there are fewer drinkers with hypertension (HTN; 1=yes, 0=no) than those without hypertension. Test at the  level.
+```{r}
+# count hypertension
+data %>% 
+  count(data$alc)
+# drinkers with hypertension count
+table(data$HTN, data$alc)
+
+# less drinkers with hypertension
+# drinkers n = 1271
+# drinkers+HTN = 588
+# drinkers-HTN = 683
+prop.test(x = 588,
+          n = 1271+588,
+          alternative = "less",
+          correct = FALSE)
+
+# get Z0
+z_htn = round(sqrt(250.94), digits = 3)
+z_htn
+```
+### Hypothesis Test: Alcohol Drinkers
+
+### Hypotheses
+
+- $H_0: \pi_{hypertension} \ge \pi_{alcohol}$
+- $H_1: \pi_{hypertension} < \pi_{alcohol}$
+
+### Test Statistic and p-Value
+
+- $X^2_{0}$ = 250.94 or $z_0$ = $\sqrt{250.94}$ = `r z_htn` 
+
+### p-Value
+
+- $p < 0.001$
+
+## Conclusion
+
+Reject $H_0$ at $\alpha = 0.05$. There is sufficient evidence to suggest that there are fewer drinkers with hypertension than those without hypertension.
 
 1e. Challenge! Construct a graph to help with explanation to the lead scientist of JHS.
+```{r}
+# data types
+class(data$sex)
+class(data$alc)
+class(data$HTN)
+# factor
+sex_factor <- as.factor(data$sex)
+alc_factor <- as.factor(data$alc)
+htn_factor <- as.factor(data$HTN)
+
+pie(table(data$alc))
+pie(table(data$sex))
+pie(table(data$HTN))
+```
 
 **2. A large retail lawn care dealer currently provides a 2-year warranty on all lawn mowers sold at its stores. A new employee suggested that the dealer could save money by just not offering the warranty. To evaluate this suggestion, the dealer randomly decides whether or not to offer the warranty to the next 50 customers who enter the store and express an interest in purchasing a lawnmower. Out of the 25 customers offered the warranty, 10 purchased a mower as compared to 4 of 25 not offered the warranty.
 
