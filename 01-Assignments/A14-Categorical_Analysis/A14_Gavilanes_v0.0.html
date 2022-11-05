@@ -2593,8 +2593,8 @@ NA
 </div>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get Confidence Intervals</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>alcohol_ci <span class="ot">&lt;-</span> <span class="fu">prop.test</span>(<span class="at">x =</span> <span class="dv">1271</span>,</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                               <span class="at">n =</span> <span class="dv">1372</span><span class="sc">+</span><span class="dv">1271</span>, <span class="co">#sample size</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>                               <span class="at">correct=</span><span class="cn">FALSE</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                        <span class="at">n =</span> <span class="dv">1372</span><span class="sc">+</span><span class="dv">1271</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>                        <span class="at">correct=</span><span class="cn">FALSE</span>)</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(alcohol_ci<span class="sc">$</span>conf.int, <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.462 0.500
@@ -2613,7 +2613,7 @@ attr(,&quot;conf.level&quot;)
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># less than 50% drink</span></span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>alcohol_proportion <span class="ot">&lt;-</span> <span class="fu">prop.test</span>(<span class="at">x =</span> <span class="dv">1271</span>,</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>                                <span class="at">n =</span> <span class="dv">1372</span><span class="sc">+</span><span class="dv">1271</span>, <span class="co">#sample size</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>                                <span class="at">n =</span> <span class="dv">1372</span><span class="sc">+</span><span class="dv">1271</span>,</span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>                                <span class="at">p =</span> <span class="fl">0.50</span>,</span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>                                <span class="at">alternative =</span> <span class="st">&quot;less&quot;</span>,</span>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>                                <span class="at">correct=</span><span class="cn">FALSE</span>)</span>
@@ -2692,9 +2692,9 @@ sample estimates:
 </div>
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 99% CI for two proportions</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>gender_proportion <span class="ot">&lt;-</span> <span class="fu">prop.test</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="dv">684</span>, <span class="dv">587</span>),</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">n =</span> <span class="fu">c</span>(<span class="dv">1666</span>, <span class="dv">977</span>),</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>                       <span class="at">correct =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>                       <span class="at">conf.level =</span> <span class="fl">0.99</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>                               <span class="at">n =</span> <span class="fu">c</span>(<span class="dv">1666</span>, <span class="dv">977</span>),</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>                               <span class="at">correct =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>                               <span class="at">conf.level =</span> <span class="fl">0.99</span>)</span>
 <span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="co"># get CI</span></span>
 <span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>gender_proportion</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -2767,15 +2767,17 @@ sample estimates:
 <section id="hypothesis-test-alcohol-drinkers-1" class="level3">
 <h3 class="anchored" data-anchor-id="hypothesis-test-alcohol-drinkers-1">Hypothesis Test: Alcohol Drinkers</h3>
 <ul>
-<li>The proportion of drinkers with hypertension, <span class="math inline">\(\pi_{drinker-HTN}\)</span> = 588/1271 = 0.4105642</li>
-<li>The proportion of drinkers without hypertension, <span class="math inline">\(\pi_{drinker}\)</span> = 683/1271 = 0.6008188</li>
+<li><p>The proportion of drinkers with hypertension, <!-- $\pi_{drinker-HTN}$ = 588/1271 = 0.4105642 --></p>
+<p><span class="math display">\[ \hat{\pi}_{\text{drinkers+HTN}} = \frac{588}{1271} = 0.4626279 \]</span></p></li>
+<li><p>The proportion of drinkers without hypertension, <span class="math inline">\(\pi_{drinker}\)</span> = 683/1271 = 0.6008188</p>
+<p><span class="math display">\[ \hat{\pi}_{\text{drinkers+HTN}} = \frac{683}{1271} = 0.5373721 \]</span></p></li>
 </ul>
 </section>
 <section id="hypotheses-1" class="level3">
 <h3 class="anchored" data-anchor-id="hypotheses-1">Hypotheses</h3>
 <ul>
-<li><span class="math inline">\(H_0: \pi_{drinker-HTN} \le \pi_{drinker}\)</span></li>
-<li><span class="math inline">\(H_1: \pi_{drinker-HTN} &gt; \pi_{drinker}\)</span></li>
+<li><span class="math inline">\(H_0: \pi_{drinkers+HTN} \le \pi_{drinker}\)</span></li>
+<li><span class="math inline">\(H_1: \pi_{drinkers+HTN} &gt; \pi_{drinker}\)</span></li>
 </ul>
 </section>
 <section id="test-statistic-and-p-value-1" class="level3">
@@ -2793,8 +2795,8 @@ sample estimates:
 </section>
 <section id="conclusion-1" class="level2">
 <h2 class="anchored" data-anchor-id="conclusion-1">Conclusion</h2>
-<p>Reject <span class="math inline">\(H_0\)</span> at <span class="math inline">\(\alpha = 0.05\)</span>. There is sufficient evidence to suggest that there are fewer drinkers with hypertension than those without hypertension.</p>
-<p>1e. Challenge! Construct a graph to help with explanation to the lead scientist of JHS.</p>
+<p>Reject <span class="math inline">\(H_0\)</span> at <span class="math inline">\(\alpha = 0.05\)</span>. There is not sufficient evidence to suggest that there are fewer drinkers with hypertension than those without hypertension.</p>
+<p><strong>1e. Challenge! Construct a graph to help with explanation to the lead scientist of JHS.</strong></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># data types</span></span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(data<span class="sc">$</span>sex)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -2827,11 +2829,66 @@ sample estimates:
 <p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABUAAAAPACAMAAADDuCPrAAAAilBMVEUAAAAAADoAAGYAOjoAOmYAOpAAZrY6AAA6Ojo6OmY6ZmY6ZrY6kNtmAABmOgBmOjpmkLZmtttmtv+QOgCQZjqQkGaQkLaQttuQ2/+t2Oa2ZgC2Zjq2kGa2tpC229u22/+2///bkDrbtmbbtpDb27bb2//b////tmb/25D/27b/29v//7b//9v///9muIa6AAAACXBIWXMAAB2HAAAdhwGP5fFlAAAaf0lEQVR4nO3ce3tbaXXGYQ0FhrZAD9ACKS1MDzO0TL7/16tlO/EhtiM93tJe6133/Q+Ti5ZL2s9+f9GONTl8BCBy2PsFAHQloAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAk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QgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCD0/y3GeE16ibIDAAAAAElFTkSuQmCC" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>**2. A large retail lawn care dealer currently provides a 2-year warranty on all lawn mowers sold at its stores. A new employee suggested that the dealer could save money by just not offering the warranty. To evaluate this suggestion, the dealer randomly decides whether or not to offer the warranty to the next 50 customers who enter the store and express an interest in purchasing a lawnmower. Out of the 25 customers offered the warranty, 10 purchased a mower as compared to 4 of 25 not offered the warranty.</p>
-<p>2a. Find a 95% CI for , the difference in the proportions of customers purchasing lawnmowers with and without the warranty.</p>
-<p>2b. What are the requirements for using the z distribution when analyzing proportions?</p>
-<p>2c. Check those requirements here.</p>
-<p>2d. Is the CI in part a valid? Why or why not?</p>
+<p><strong>2. A large retail lawn care dealer currently provides a 2-year warranty on all lawn mowers sold at its stores. A new employee suggested that the dealer could save money by just not offering the warranty. To evaluate this suggestion, the dealer randomly decides whether or not to offer the warranty to the next 50 customers who enter the store and express an interest in purchasing a lawnmower. Out of the 25 customers offered the warranty, 10 purchased a mower as compared to 4 of 25 not offered the warranty.</strong></p>
+<p><strong>2a. Find a 95% CI for the difference in the proportions of customers purchasing lawnmowers with and without the warranty.</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>warranty <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">21</span>,<span class="dv">15</span>, <span class="dv">4</span>,<span class="dv">10</span>), <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="st">&quot;NO_purchase&quot;</span>, <span class="st">&quot;Yes_purchase&quot;</span>),</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>                               <span class="fu">c</span>(<span class="st">&quot;No_Warranty&quot;</span>, <span class="st">&quot;Yes_warranty&quot;</span>)))</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>warranty</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>             No_Warranty Yes_warranty
+NO_purchase           21           15
+Yes_purchase           4           10</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># # warranty proportion test</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="co"># warranty_proportion &lt;- prop.test(x = c(10,4),</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="co">#                                  n = c(25, 25),</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="co">#                                  correct = FALSE)</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="co"># # get CI</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a><span class="co"># warranty_ci &lt;- round(warranty_proportion$conf.int, digits = 5)</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a><span class="co"># warranty_ci</span></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a><span class="co"># warranty proportion test</span></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>warranty_binom <span class="ot">&lt;-</span> <span class="fu">binom.test</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="dv">10</span>,<span class="dv">4</span>),</span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>                             <span class="at">n =</span> <span class="fu">c</span>(<span class="dv">25</span>, <span class="dv">25</span>))</span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>warranty_binom</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Exact binomial test
+
+data:  c(10, 4)
+number of successes = 10, number of trials = 14, p-value = 0.1796
+alternative hypothesis: true probability of success is not equal to 0.5
+95 percent confidence interval:
+ 0.4189647 0.9161107
+sample estimates:
+probability of success 
+             0.7142857 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get CI</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>warranty_ci <span class="ot">&lt;-</span> <span class="fu">round</span>(warranty_binom<span class="sc">$</span>conf.int, <span class="at">digits =</span> <span class="dv">3</span>)</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>warranty_ci</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.419 0.916
+attr(,&quot;conf.level&quot;)
+[1] 0.95</code></pre>
+</div>
+</div>
+<ul>
+<li>The 95% CI for <span class="math inline">\(\pi_{warranty}\)</span> - <span class="math inline">\(\pi_{no-warranty}\)</span> is (0.419, 0.916).</li>
+<li>Because the interval is positive, it indicates that the proportion of lawnmowers with warranty group is bigger than the lawnmowers without warranty group.</li>
+</ul>
+<p><strong>2b. What are the requirements for using the z distribution when analyzing proportions?</strong></p>
+<ul>
+<li>The sample size should be greater than 30.</li>
+<li>Test results are accurate when <span class="math inline">\(n\pi\)</span> and <span class="math inline">\(n(1-\pi)\)</span> are greater than 5.</li>
+<li>Both populations follow a binomial distribution.</li>
+</ul>
+<p><strong>2c. Check those requirements here.</strong></p>
+<p>The sample was collected among 50 customers; however, the marginal total, or sample size for both groups is 25.</p>
+<p>Therefore, we cannot use the Z-distribution.</p>
+<p><strong>2d. Is the CI in part 2a valid? Why or why not?</strong></p>
 </section>
 
 </main>

@@ -29,8 +29,8 @@ formattable(data) %>%
 
 # get Confidence Intervals
 alcohol_ci <- prop.test(x = 1271,
-                               n = 1372+1271, #sample size
-                               correct=FALSE)
+                        n = 1372+1271,
+                        correct=FALSE)
 round(alcohol_ci$conf.int, digits = 3)
 ```
 - The 95% CI for $\pi$, the population proportion of JHS participants that drink alcohol on a regular basis is (0.462, 0.500)
@@ -44,7 +44,7 @@ round(alcohol_ci$conf.int, digits = 3)
 
 # less than 50% drink
 alcohol_proportion <- prop.test(x = 1271,
-                                n = 1372+1271, #sample size
+                                n = 1372+1271,
                                 p = 0.50,
                                 alternative = "less",
                                 correct=FALSE)
@@ -86,9 +86,9 @@ table(data$alc, data$sex)
 587/977
 # 99% CI for two proportions
 gender_proportion <- prop.test(x = c(684, 587),
-                       n = c(1666, 977),
-                       correct = FALSE,
-                       conf.level = 0.99)
+                               n = c(1666, 977),
+                               correct = FALSE,
+                               conf.level = 0.99)
 # get CI
 gender_proportion
 gender_ci <- round(gender_proportion$conf.int, digits = 3)
@@ -122,14 +122,17 @@ z_htn = round(sqrt(x_squared_htn), digits = 3)
 ### Hypothesis Test: Alcohol Drinkers
 
 - The proportion of drinkers with hypertension,
-  $\pi_{drinker-HTN}$ = 588/1271 = 0.4105642
+  <!-- $\pi_{drinker-HTN}$ = 588/1271 = 0.4105642 -->
+  $$ \hat{\pi}_{\text{drinkers+HTN}} = \frac{588}{1271} = `r 588/1271` $$
+  
 - The proportion of drinkers without hypertension,
   $\pi_{drinker}$ = 683/1271 = 0.6008188
 
+  $$ \hat{\pi}_{\text{drinkers+HTN}} = \frac{683}{1271} = `r 683/1271` $$
 ### Hypotheses
 
-- $H_0: \pi_{drinker-HTN} \le \pi_{drinker}$
-- $H_1: \pi_{drinker-HTN} > \pi_{drinker}$
+- $H_0: \pi_{drinkers+HTN} \le \pi_{drinker}$
+- $H_1: \pi_{drinkers+HTN} > \pi_{drinker}$
 
 ### Test Statistic and p-Value
 
@@ -163,22 +166,41 @@ pie(table(data$HTN))
 
 **2a. Find a 95% CI for the difference in the proportions of customers purchasing lawnmowers with and without the warranty.**
 ```{r}
-# drinkers n = 1271
-# drinkers+HTN = 588
-# drinkers-HTN = 683
+warranty <- matrix(c(21,15, 4,10), nrow = 2, ncol = 2, byrow = TRUE,
+               dimnames = list(c("NO_purchase", "Yes_purchase"),
+                               c("No_Warranty", "Yes_warranty")))
+warranty
 
-mower_proportion <- prop.test(x = c(4, 10),
-                            n = c(14, 14),
-                            correct = FALSE)
-mower_proportion
+# # warranty proportion test
+# warranty_proportion <- prop.test(x = c(10,4),
+#                                  n = c(25, 25),
+#                                  correct = FALSE)
+# # get CI
+# warranty_ci <- round(warranty_proportion$conf.int, digits = 5)
+# warranty_ci
+
+# warranty proportion test
+warranty_binom <- binom.test(x = c(10,4),
+                             n = c(25, 25))
+warranty_binom
+
+# get CI
+warranty_ci <- round(warranty_binom$conf.int, digits = 3)
+warranty_ci
 ```
+- The 95% CI for $\pi_{warranty}$ - $\pi_{no-warranty}$ is (`r warranty_ci`).
+- Because the interval is positive, it indicates that the proportion of lawnmowers with warranty group is bigger than the lawnmowers without warranty group.
 
 **2b. What are the requirements for using the z distribution when analyzing proportions?**
 
-The standard deviation of the population, and the sample size should be above 30.
+- The sample size should be greater than 30.
+- Test results are accurate when $n\pi$ and $n(1-\pi)$ are greater than 5.
+- Both populations follow a binomial distribution.
 
 **2c. Check those requirements here.**
 
-The sample was collected among 50 customers. Therefore, we can use the Z-distribution.
+The sample was collected among 50 customers; however, the marginal total, or sample size for both groups is 25. 
 
-**2d. Is the CI in part a valid? Why or why not?**
+Therefore, we cannot use the Z-distribution.
+
+**2d. Is the CI in part 2a valid? Why or why not?**
