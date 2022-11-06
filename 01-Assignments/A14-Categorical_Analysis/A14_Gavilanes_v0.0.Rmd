@@ -148,19 +148,56 @@ Reject $H_0$ at $\alpha = 0.05$. There is not sufficient evidence to suggest tha
 
 **1e. Challenge! Construct a graph to help with explanation to the lead scientist of JHS.**
 ```{r}
-# data types
-class(data$sex)
-class(data$alc)
-class(data$HTN)
-# factor
-sex_factor <- as.factor(data$sex)
-alc_factor <- as.factor(data$alc)
-htn_factor <- as.factor(data$HTN)
-
-pie(table(data$alc))
-pie(table(data$sex))
-pie(table(data$HTN))
+# # data types
+# class(data$sex)
+# class(data$alc)
+# class(data$HTN)
+# # factor
+# sex_factor <- as.factor(data$sex)
+# alc_factor <- as.factor(data$alc)
+# htn_factor <- as.factor(data$HTN)
+# 
+# pie(table(data$alc))
+# pie(table(data$sex))
+# pie(table(data$HTN))
 ```
+
+##### Regular Drinkers
+```{r}
+# 01 - Regular drinkers
+# color
+semaforo <- c("#450D54","#d5e1df" )
+# pie chart
+pie(table(data$alc), labels = c("Non-Drinkers", "Drinkers"), col = semaforo)
+
+# stacked barchart
+
+```
+##### Drinkers by Gender
+```{r}
+# 02 - Drinker by Gender
+table(data$sex, data$alc)
+
+gender_drinkers <- data %>% 
+  select(sex, alc) %>% 
+  filter(alc == "Yes") %>% 
+  count(sex)
+
+sex_drinkers <- c(684, 587)
+pie(sex_drinkers, labels = c("Female Drinkers", "Male Drinkers"), col = semaforo)
+```
+##### Drinkers with Hypertension
+```{r}
+# drinkers with hypertension count
+table(data$HTN, data$alc)
+
+htn_data <- c(683, 588)
+
+pie(htn_data, labels = c("Drinker+HTN", "Drinker"), col = semaforo)
+```
+
+
+
 
 **2. A large retail lawn care dealer currently provides a 2-year warranty on all lawn mowers sold at its stores. A new employee suggested that the dealer could save money by just not offering the warranty. To evaluate this suggestion, the dealer randomly decides whether or not to offer the warranty to the next 50 customers who enter the store and express an interest in purchasing a lawnmower. Out of the 25 customers offered the warranty, 10 purchased a mower as compared to 4 of 25 not offered the warranty.**
 
@@ -170,14 +207,6 @@ warranty <- matrix(c(21,15, 4,10), nrow = 2, ncol = 2, byrow = TRUE,
                dimnames = list(c("NO_purchase", "Yes_purchase"),
                                c("No_Warranty", "Yes_warranty")))
 warranty
-
-# # warranty proportion test
-# warranty_proportion <- prop.test(x = c(10,4),
-#                                  n = c(25, 25),
-#                                  correct = FALSE)
-# # get CI
-# warranty_ci <- round(warranty_proportion$conf.int, digits = 5)
-# warranty_ci
 
 # warranty proportion test
 warranty_binom <- binom.test(x = c(10,4),
