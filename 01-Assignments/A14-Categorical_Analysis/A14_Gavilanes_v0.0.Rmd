@@ -204,3 +204,5 @@ The sample was collected among 50 customers; however, the marginal total, or sam
 Therefore, we cannot use the Z-distribution.
 
 **2d. Is the CI in part 2a valid? Why or why not?**
+
+Yes, the CI is neither close to 0, nor close to 1.
