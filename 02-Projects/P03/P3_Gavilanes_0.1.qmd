@@ -227,7 +227,7 @@ gg_data <- data %>%
          c4 = c1[1] + c1[2]*data$age + c1[3], + c1[4]*4)
 
 # ggplot graph
-gg_data %>% ggplot(aes(x = age, y = charges)) +
+age_plot <- gg_data %>% ggplot(aes(x = age, y = charges)) +
   geom_point(color = "darkgray", size=3, alpha = 0.4) + 
   geom_point(data = outlier_color, color = "magenta", size = 3) +
   geom_line(aes(y = c0), color = "orange") +
@@ -238,6 +238,8 @@ gg_data %>% ggplot(aes(x = age, y = charges)) +
        y = "Insurance Charges") +
   theme_bw()
 
+age_plot
+
 # create lines graph for Children of 0, 2, 4
 # bmi on the x-axis
 gg_data <- data %>%
@@ -246,7 +248,7 @@ gg_data <- data %>%
          c4 = c1[1] + c1[2] + c1[3]*data$bmi, + c1[4]*4)
 
 # ggplot graph
-gg_data %>% ggplot(aes(x = bmi, y = charges)) +
+bmi_plot <- gg_data %>% ggplot(aes(x = bmi, y = charges)) +
   geom_point(color = "darkgray", size=3, alpha = 0.4) + 
   geom_point(data = outlier_color, color = "magenta", size = 3) +
   geom_line(aes(y = c0), color = "orange") +
@@ -256,6 +258,8 @@ gg_data %>% ggplot(aes(x = bmi, y = charges)) +
        x = "BMI",
        y = "Insurance Charges") +
   theme_bw()
+
+bmi_plot
 ```
 
 **13. Write a short paragraph to accompany your results, appropriate for your supervisor who is not a statistician or data scientist. Outline your modeling technique as well as the summary of the data (i.e., the first table) and results.**
@@ -284,6 +288,13 @@ The model did not fit well. We have detected and investigated points: 544 and 10
 - A significant difference between the insurance charges' 75th percentile and the maximum value indicated the presence of potential outliers. Moreover, the difference represented 283.23% growth.
 - Furthermore, a high Standard Deviation for Insurance charges, Age, and BMI indicated the data points were more spread out above the mean.
 
+#### Regression Model
+
+```{r, echo = FALSE}
+insurance_model <- lm(data$charges ~ data$age + data$bmi  + data$children)
+summary(insurance_model)
+```
+
 #### Model formula:
 $$\hat{y} = -6916.24 + 240{\text{ age}} + 332.08{\text{ bmi}} + 542.9{\text{ children}} $$
 
@@ -295,3 +306,128 @@ $$\hat{y} = -6916.24 + 240{\text{ age}} + 332.08{\text{ bmi}} + 542.9{\text{ chi
 
 - $R^2_{adj}$ is 0.1181 - 11.81% of the variability in insurance charges are explained by the model with age, bmi, and number of children.
 
+#### Confidence Intervals
+
+A table was generated to compare the confidence intervals with coefficients, and p-Values.
+
+| Predictor          | $\hat{\beta}_i$ (95% CI) | *p*-Value |
+|--------------------|--------------------------|-----------|
+| Age                | 240 (196.269, 283.719)     |  < 0.001  |            
+| BMI                | 332.08 (231.425, 432.741)  |  < 0.001  |            
+| Number of Children | 542.9 (36.261, 1,049.468)  |  0.0357   |                       
+
+```{r, echo = FALSE}
+confint(insurance_model)
+```
+
+#### Significant Predictors
+
+- Age, BMI, and Children variables were significant predictors.
+
+##### Determine if Age is a significant predictor of insurance charges
+- Reject $H_0$ at the $\alpha=0.05$ level. After adjusting for insurance charges, there is sufficient evidence to suggest that *Age* is a significant predictor with a $p < 0.001$.
+
+##### Determine if BMI is a significant predictor of insurance charges
+- Reject $H_0$ at the $\alpha=0.05$ level. After adjusting for insurance charges, there is sufficient evidence to suggest that *BMI* is a significant predictor with a $p < 0.001$.
+
+##### Determine if Children is a significant predictor of insurance charges
+- Reject $H_0$ at the $\alpha=0.05$ level. After adjusting for insurance charges, there is sufficient evidence to suggest that *Children* is a significant predictor with a $p = 0.0357$.
+
+#### Significant Regression Line
+
+**Hypotheses**
+
+- $H_0: \beta_{charges} = \beta_{age} = \beta_{bmi} = \beta_{children} = 0$
+- $H_1:$ at least one $\beta_i$ is different.
+
+**Test Statistic and *p*-value**
+
+- $F_0 = 60.69$
+
+- $p < 0.001$ 
+
+**Conclusion/Interpretation**
+
+- Reject $H_0$ at the $\alpha=0.05$ level. There was sufficient evidence to suggest that at least one variable was a significant predictor of insurance charges.
+
+#### Correlations
+
+```{r, echo = FALSE}
+# calculate Pearson's correlation matrix
+insurance_matrix <- data %>% 
+  select(charges, age, bmi, children)
+cor(insurance_matrix,
+    method = "pearson",
+    use = "complete.obs")
+# calculate Spearman's correlation matrix 
+cor(insurance_matrix,
+    method = "spearman",
+    use = "complete.obs")
+```
+- We have tested for parametric, and non-parametric correlations.
+- Overall, the correlations had very low scores. No suspicious high values.
+- The non-parametric test showed a medium correlation of 0.534 between Insurance Charges, and Age.
+
+#### Outliers
+
+The following test reported 11 outliers.
+
+```{r, echo = FALSE}
+# count outliers in the model
+n = 2.5
+outlier_data <- data %>% 
+  mutate(Outlier = abs(rstandard(insurance_model)) > n)
+formattable(outlier_data) %>% count(Outlier)
+
+# get outliers
+positive_outlier <- outlier_data %>% 
+  select(age, bmi, children, charges, Outlier) %>% 
+  drop_na() %>% 
+  mutate(obs = row_number()) 
+formattable(positive_outlier) %>% 
+  filter(Outlier == TRUE)
+```
+
+#### Influential and Leverage Points
+
+The following graphs displayed that a lot of points had high leverage, and high influence.
+
+- Points 544, 1048 needed further investigation.
+- However, there are more outliers that could represent potential issues for the model.
+
+```{r, echo = FALSE}
+gg_cooksd(insurance_model) + theme_bw()
+ols_plot_resid_lev(insurance_model)
+```
+
+#### Multicollinearity
+
+-No multicollinearity was present. 
+
+```{r, echo = FALSE}
+ols_vif_tol(insurance_model)
+```
+
+### Visualization of the Model
+
+#### Added-Variable Plots
+
+The Added-Variable plots allowed us to observe the relationship between each individual predictor variable and the response variable while holding other predictor variables constant.
+
+- The labeled points in each plot represented the observations with the largest residuals and the observations with the largest partial leverage.
+
+```{r, echo=FALSE}
+avPlots(insurance_model)
+```
+
+#### Visualization for Age on the X-axis
+
+```{r, echo=FALSE}
+age_plot
+```
+
+#### Visualization for BMI on the X-axis
+
+```{r, echo=FALSE}
+bmi_plot
+```
