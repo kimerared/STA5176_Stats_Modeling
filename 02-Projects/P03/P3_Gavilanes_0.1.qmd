@@ -243,6 +243,8 @@ age_plot <- gg_data %>% ggplot(aes(x = age, y = charges)) +
   geom_line(aes(y = ch0), color = "magenta", size = 1.5) +
   geom_line(aes(y = ch2), color = "magenta", size = 1.5) +
   geom_line(aes(y = ch4), color = "magenta", size = 1.5) +
+  geom_text(aes(x = 68, y = 25500, label = "4 children")) +
+  geom_text(aes(x = 68, y = 19000, label = "2 children")) +
   labs(title = "Multiple Linear Regression",
        x = "Age",
        y = "Insurance Charges") +
@@ -267,9 +269,10 @@ bmi_plot <- gg_data %>% ggplot(aes(x = bmi, y = charges)) +
   labs(title = "Multiple Linear Regression",
        x = "BMI",
        y = "Insurance Charges") +
-  theme_bw()
+  theme_bw()+
 
-bmi_plot
+
+# bmi_plot
 ```
 
 **13. Write a short paragraph to accompany your results, appropriate for your supervisor who is not a statistician or data scientist. Outline your modeling technique as well as the summary of the data (i.e., the first table) and results.**
