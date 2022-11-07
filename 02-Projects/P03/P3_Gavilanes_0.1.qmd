@@ -216,6 +216,11 @@ outlier_color
 c1 <- coefficients(insurance_model)
 c1
 
+# colors
+yellow_m = "#FCCB1A"
+blue_m = "#347B98"
+red_m =  "#AE0D7A" 
+
 # Children Quantile
 quantile(data$children, na.rm = TRUE)
 # BMI Quantile
@@ -232,11 +237,11 @@ gg_data <- data %>%
 
 # ggplot graph
 age_plot <- gg_data %>% ggplot(aes(x = age, y = charges)) +
-  geom_point(color = "darkgray", size=3, alpha = 0.4) + 
-  geom_point(data = outlier_color, color = "magenta", size = 3) +
-  geom_line(aes(y = ch0), color = "#FCCB1A", size = 1.5) +
-  geom_line(aes(y = ch2), color = "#347B98", size = 1.5) +
-  geom_line(aes(y = ch4), color = "#AE0D7A", size = 1.5) +
+  geom_point(color = "darkgray", size=3, alpha = 0.3) + 
+  geom_point(data = outlier_color, color = blue_m, size = 3) +
+  geom_line(aes(y = ch0), color = red_m, size = 1.5) +
+  geom_line(aes(y = ch2), color = red_m, size = 1.5) +
+  geom_line(aes(y = ch4), color = red_m, size = 1.5) +
   labs(title = "Multiple Linear Regression",
        x = "Age",
        y = "Insurance Charges") +
@@ -253,11 +258,11 @@ gg_data <- data %>%
 
 # ggplot graph
 bmi_plot <- gg_data %>% ggplot(aes(x = bmi, y = charges)) +
-  geom_point(color = "darkgray", size=3, alpha = 0.4) + 
+  geom_point(color = "darkgray", size=3, alpha = 0.3) + 
   geom_point(data = outlier_color, color = "magenta", size = 3) +
-  geom_line(aes(y = ch0), color = "#FCCB1A", size = 1.5) +
-  geom_line(aes(y = ch2), color = "#347B98", size = 1.5) +
-  geom_line(aes(y = ch4), color = "#AE0D7A", size = 1.5) +
+  geom_line(aes(y = ch0), color = yellow_m, size = 1.5) +
+  geom_line(aes(y = ch2), color = yellow_m, size = 1.5) +
+  geom_line(aes(y = ch4), color = yellow_m, size = 1.5) +
   labs(title = "Multiple Linear Regression",
        x = "BMI",
        y = "Insurance Charges") +
