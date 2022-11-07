@@ -181,14 +181,30 @@ ggplot(alcohol_count, aes(fill = alc, y = n, x = alc))+
 # 02 - Drinker by Gender
 table(data$sex, data$alc)
 
+sex_drinkers <- c(684, 587)
+pie(sex_drinkers, labels = c("Female Drinkers", "Male Drinkers"), col = semaforo)
+```
+
+Barchart
+
+```{r}
+# get drinkers sex
 gender_drinkers <- data %>% 
   select(sex, alc) %>% 
   filter(alc == "Yes") %>% 
   count(sex)
 
-sex_drinkers <- c(684, 587)
-pie(sex_drinkers, labels = c("Female Drinkers", "Male Drinkers"), col = semaforo)
+# grouped barchart
+ggplot(gender_drinkers, aes(fill = sex, y = n, x = sex))+
+  geom_col()+
+  scale_fill_discrete(breaks = c("Female", "Male"))+
+  labs(title = "Proportion of Regular Drinkers by Gender",
+       y = "Count")+
+  theme_bw()+
+  geom_text(label = "684",x = 1, y = 500, size = 5, colour = "white")+
+  geom_text(label = "587",x = 2, y = 500, size = 5, colour = "white")
 ```
+
 ##### Drinkers with Hypertension
 ```{r}
 # drinkers with hypertension count
@@ -197,6 +213,23 @@ table(data$HTN, data$alc)
 htn_data <- c(683, 588)
 
 pie(htn_data, labels = c("Drinker+HTN", "Drinker"), col = semaforo)
+
+# get drinkers with hypertension
+htn_drinkers <- data %>% 
+  select(HTN, alc) %>% 
+  filter(alc == "Yes") %>% 
+  count(HTN)
+htn_drinkers
+
+# grouped barchart
+ggplot(htn_drinkers, aes(fill = HTN, y = n, x = HTN))+
+  geom_col()+
+  scale_fill_discrete(breaks = c("HTN", "No-HTN"))+
+  labs(title = "Proportion of Regular Drinkers with hypertension",
+       y = "Count")+
+  theme_bw()+
+  geom_text(label = "683",x = 1, y = 500, size = 5, colour = "white")+
+  geom_text(label = "588",x = 2, y = 500, size = 5, colour = "white")
 ```
 
 
