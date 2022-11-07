@@ -171,6 +171,8 @@ semaforo <- c("#450D54","#d5e1df" )
 pie(table(data$alc), labels = c("Non-Drinkers", "Drinkers"), col = semaforo)
 
 # stacked barchart
+data %>% 
+  count(alc)
 
 ```
 ##### Drinkers by Gender
