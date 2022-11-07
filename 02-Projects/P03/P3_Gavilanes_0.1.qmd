@@ -219,7 +219,8 @@ c1
 # colors
 yellow_m = "#FCCB1A"
 blue_m = "#347B98"
-red_m =  "#AE0D7A" 
+red_m =  "#AE0D7A"
+purple = "#8601AF"
 
 # Children Quantile
 quantile(data$children, na.rm = TRUE)
@@ -238,10 +239,10 @@ gg_data <- data %>%
 # ggplot graph
 age_plot <- gg_data %>% ggplot(aes(x = age, y = charges)) +
   geom_point(color = "darkgray", size=3, alpha = 0.3) + 
-  geom_point(data = outlier_color, color = blue_m, size = 3) +
-  geom_line(aes(y = ch0), color = red_m, size = 1.5) +
-  geom_line(aes(y = ch2), color = red_m, size = 1.5) +
-  geom_line(aes(y = ch4), color = red_m, size = 1.5) +
+  geom_point(data = outlier_color, color = "#FB9902", size = 3) +
+  geom_line(aes(y = ch0), color = "magenta", size = 1.5) +
+  geom_line(aes(y = ch2), color = "magenta", size = 1.5) +
+  geom_line(aes(y = ch4), color = "magenta", size = 1.5) +
   labs(title = "Multiple Linear Regression",
        x = "Age",
        y = "Insurance Charges") +
