@@ -42,7 +42,7 @@ round(alcohol_ci$conf.int, digits = 3)
 # yes = 1271
 # no = 1372
 
-# less than 50% drink
+# drinkers < 50% 
 alcohol_proportion <- prop.test(x = 1271,
                                 n = 1372+1271,
                                 p = 0.50,
@@ -58,8 +58,8 @@ z0 = round(sqrt(alcohol_proportion$statistic), digits = 3)
 
 ### Hypotheses
 
-- $H_0: \pi_{alcohol} \le 0.50$
-- $H_1: \pi_{alcohol} > 0.50$
+- $H_0: \pi_{alcohol} \ge 0.50$
+- $H_1: \pi_{alcohol} < 0.50$
 
 ### Test Statistic and p-Value
 
@@ -71,7 +71,7 @@ z0 = round(sqrt(alcohol_proportion$statistic), digits = 3)
 
 ## Conclusion
 
-Reject $H_0$ at $\alpha = 0.05$. There is not sufficient evidence to suggest that less than 50% of the JHS participants drink alcohol on a regular basis.
+Reject $H_0$ at $\alpha = 0.05$. There is sufficient evidence to suggest that less than 50% of the JHS participants drink alcohol on a regular basis.
 
 **1c. Find the 99% CI for the difference in the proportion of male and female JHS participants that drink alcohol.**
 ```{r}
@@ -129,10 +129,11 @@ z_htn = round(sqrt(x_squared_htn), digits = 3)
   $\pi_{drinker}$ = 683/1271 = 0.6008188
 
   $$ \hat{\pi}_{\text{drinkers+HTN}} = \frac{683}{1271} = `r 683/1271` $$
+
 ### Hypotheses
 
-- $H_0: \pi_{drinkers+HTN} \le \pi_{drinker}$
-- $H_1: \pi_{drinkers+HTN} > \pi_{drinker}$
+- $H_0: \pi_{drinkers+HTN} \ge \pi_{drinker}$
+- $H_1: \pi_{drinkers+HTN} < \pi_{drinker}$
 
 ### Test Statistic and p-Value
 
@@ -144,20 +145,12 @@ z_htn = round(sqrt(x_squared_htn), digits = 3)
 
 ## Conclusion
 
-Reject $H_0$ at $\alpha = 0.05$. There is not sufficient evidence to suggest that there are fewer drinkers with hypertension than those without hypertension.
+Reject $H_0$ at $\alpha = 0.05$. There is sufficient evidence to suggest that there are fewer drinkers with hypertension than those without hypertension.
 
 **1e. Challenge! Construct a graph to help with explanation to the lead scientist of JHS.**
 
 ##### Regular Drinkers
-```{r}
-# 01 - Regular drinkers
-# color
-semaforo <- c("#450D54","#d5e1df" )
-# pie chart
-pie(table(data$alc), labels = c("Non-Drinkers", "Drinkers"), col = semaforo)
-```
 
-Grouped Barchart
 ```{r}
 # grouped barchart
 alcohol_count <- data %>% 
@@ -177,15 +170,6 @@ ggplot(alcohol_count, aes(fill = alc, y = n, x = alc))+
 ```
 
 ##### Drinkers by Gender
-```{r}
-# 02 - Drinker by Gender
-table(data$sex, data$alc)
-
-sex_drinkers <- c(684, 587)
-pie(sex_drinkers, labels = c("Female Drinkers", "Male Drinkers"), col = semaforo)
-```
-
-Barchart
 
 ```{r}
 # get drinkers sex
@@ -209,10 +193,6 @@ ggplot(gender_drinkers, aes(fill = sex, y = n, x = sex))+
 ```{r}
 # drinkers with hypertension count
 table(data$HTN, data$alc)
-
-htn_data <- c(683, 588)
-
-pie(htn_data, labels = c("Drinker+HTN", "Drinker"), col = semaforo)
 
 # get drinkers with hypertension
 htn_drinkers <- data %>% 
