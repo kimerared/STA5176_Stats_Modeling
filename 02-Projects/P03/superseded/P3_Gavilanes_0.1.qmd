@@ -1,0 +1,446 @@
+---
+title: "Project 3"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+
+```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
+library(tidyverse)
+library(formattable)                                   
+library(lindia) # Influence & Leverage: gg_cooksd()
+library(olsrr) #multicollinearity: ols_vif_tol()
+library(car)
+```
+
+**Consider the insurance cost data availabile [here](https://github.com/stedy/Machine-Learning-with-R-datasets/blob/master/insurance.csv).**
+
+**1. Import the data. Extra credit will be given to students that figure out how to directly import from GitHub.**
+
+```{r, echo = TRUE}
+# clear environment
+rm(list = ls())
+# extract data
+data<-read.csv("https://raw.githubusercontent.com/stedy/Machine-Learning-with-R-datasets/master/insurance.csv")
+```
+
+**2. Fill in the following table:**
+
+|                    |        | Mean (Standard Deviation) or Number (Percent) |
+|--------------------|--------|-----------------------------------------------|
+| Charges            |        |   SD = 12,110.01  Mean = 13,270.42            |
+| Age                |        |   SD = 14.04996   Mean = 39.20703             |
+| BMI                |        |   SD = 6.098      Mean = 30.663               |
+| Sex                | Male   |   Count = 676     Percent = 50.52%            |
+|                    | Female |   Count = 662     Percent = 49.48%            |
+| Smoking Status     | Yes    |   Count = 274     Percent = 20.48%            |
+|                    | No     |   Count = 1064    Percent = 79.52%            |
+| Number of Children | 0      |   Count = 574     Percent = 42.9%             |
+|                    | 1      |   Count = 324     Percent = 24.22%            |
+|                    | 2      |   Count = 240     Percent = 17.94%            |
+|                    | 3      |   Count = 157     Percent = 11.73%            |  
+|                    | 4      |   Count = 25      Percent = 1.87%             |
+|                    | 5      |   Count = 18      Percent = 1.35%             |
+
+```{r, echo = TRUE}
+# get custom summary statistics
+# !! sym() creates a symbol from a string
+get_custom_summary <- function(data_table, numerical){
+  data_table %>% 
+    # group_by(!! sym(category)) %>% 
+    summarise(SD = sd(!! sym(numerical)),
+              Avg = mean(!! sym(numerical))
+              )
+}
+get_custom_summary(data, "charges")
+get_custom_summary(data, "age")
+get_custom_summary(data, "bmi")
+
+get_count_percent <- function(categorical){
+  total = length(categorical) 
+  c_count <- table(categorical)  
+  c_percent <- round(((c_count/total)*100), digits = 2)
+  return(c(c_count, c_percent))
+}
+get_count_percent(data$sex)
+get_count_percent(data$smoker)
+formattable(get_count_percent(data$children))
+
+# general summary
+data %>% 
+  select(charges, age, bmi, children) %>% 
+  summary(data)
+# Charges: Max vs 3rd-Quantile
+(63770/16640-1)*100
+```
+- There is a large difference between the Insurance Charges’ 75th percentile and the maximum value indicating the presence of potential outliers. Moreover, the difference represents 283.23% growth.
+- Furthermore, there are high Standard Deviation for Insurance charges, Age, and BMI indicating the data points are more spread out above the mean.
+
+**3. Model insurance charges as a function of age, BMI, and number of children. Remember to state the resulting model.**
+
+```{r, echo = TRUE}
+insurance_model <- lm(data$charges ~ data$age + data$bmi  + data$children)
+summary(insurance_model)
+```
+## Model formula:
+$$\hat{y} = -6916.24 + 240{\text{ age}} + 332.08{\text{ bmi}} + 542.9{\text{ children}} $$
+
+**4. Provide brief and appropriate interpretations for all regression coefficients.**
+
+- When Age, BMI, and Children are 0, we expect insurance charges to be at ($6,916.24).
+- As Age increase by 1 year, the insurance charges increases by $240, after controlling for BMI, and Children.
+- As BMI increase by 1 point, the insurance charges increases by $332.08, after controlling for Age, and Children.
+- As Children increase by 1 kid, the insurance charges increases by $542.9, after controlling for BMI, and Age.
+
+- $R^2_{adj}$ is 0.1181 - 11.81% of the variability in insurance charges are explained by the model with age, bmi, and number of children.
+
+**5. Fill in the following table:**
+
+| Predictor          | $\hat{\beta}_i$ (95% CI) | *p*-Value |
+|--------------------|--------------------------|-----------|
+| Age                | 240 (196.27, 283.72)     |  < 0.001  |            
+| BMI                | 332.08 (231.43, 432.74)  |  < 0.001  |            
+| Number of Children | 542.9 (36.26, 1,049.47)  |  0.0357   |                       
+
+```{r, echo = TRUE}
+confint(insurance_model)
+```
+**(yes, I am asking you to place both the estimated $\beta$ as well as the corresponding 95% CI in the cell.)**
+
+**6. Which, if any, are significant predictors of insurance charges? Test at the $\alpha=0.05$ level. You do not need to state all hypothesis test pieces, but you must provide appropriate justification for your conclusions.**
+
+- Age, BMI, and Children variables are significant predictors.
+
+##### Determine if Age is a significant predictor of insurance charges
+- Reject $H_0$ at the $\alpha=0.05$ level. After adjusting for insurance charges, there is sufficient evidence to suggest that *Age* is a significant predictor with a $p < 0.001$.
+
+##### Determine if BMI is a significant predictor of insurance charges
+- Reject $H_0$ at the $\alpha=0.05$ level. After adjusting for insurance charges, there is sufficient evidence to suggest that *BMI* is a significant predictor with a $p < 0.001$.
+
+##### Determine if Children is a significant predictor of insurance charges
+- Reject $H_0$ at the $\alpha=0.05$ level. After adjusting for insurance charges, there is sufficient evidence to suggest that *Children* is a significant predictor with a $p = 0.0357$.
+
+**7. Use the appropriate hypothesis test to determine if this is a significant regression line. Test at the $\alpha=0.05$ level.**
+
+**Hypotheses**
+
+- $H_0: \beta_{charges} = \beta_{age} = \beta_{bmi} = \beta_{children} = 0$
+- $H_1:$ at least one $\beta_i$ is different.
+
+**Test Statistic and *p*-value**
+
+- $F_0 = 60.69$
+
+- $p < 0.001$ 
+
+**Conclusion/Interpretation**
+
+- Reject $H_0$ at the $\alpha=0.05$ level. There is sufficient evidence to suggest that at least one variable is a significant predictor of insurance charges.
+
+**8. Construct the correlation matrix for the variables in the regression model. Are any suspiciously high?**
+
+```{r, echo = TRUE}
+# calculate Pearson's correlation matrix
+insurance_matrix <- data %>% 
+  select(charges, age, bmi, children)
+cor(insurance_matrix,
+    method = "pearson",
+    use = "complete.obs")
+# calculate Spearman's correlation matrix 
+cor(insurance_matrix,
+    method = "spearman",
+    use = "complete.obs")
+```
+- We have tested for parametric, and non-parametric correlations.
+- Overall, the correlations have very low scores. No suspicious high values.
+- The non-parametric test shows a medium correlation between Insurance Charges, and Age.
+
+**9. Check for outliers. How many are there?**
+
+```{r, echo = TRUE}
+# count outliers in the model
+n = 2.5
+outlier_data <- data %>% 
+  mutate(Outlier = abs(rstandard(insurance_model)) > n)
+formattable(outlier_data) %>% count(Outlier)
+
+# get outliers
+positive_outlier <- outlier_data %>% 
+  select(age, bmi, children, charges, Outlier) %>% 
+  drop_na() %>% 
+  mutate(obs = row_number()) 
+formattable(positive_outlier) %>% 
+  filter(Outlier == TRUE)
+```
+
+**10. Check for influential/leverage points. How many are there?**
+
+```{r, echo = TRUE}
+gg_cooksd(insurance_model) + theme_bw()
+ols_plot_resid_lev(insurance_model)
+```
+- Points 544, 1048 need further investigation.
+- However, there are more outliers that could represent potential issues for the model.
+
+**11. Check for multicollinearity. Do the results surprise you?**
+
+```{r, echo = TRUE}
+ols_vif_tol(insurance_model)
+```
+
+-No multicollinearity is present. 
+
+**12. Construct a graph to aid with explanation of the regression model. Create lines for 0, 2, and 4 children. You pick what goes on the *x*-axis and what is plugged in for the remaining variable. Extra credit if you make the outlier dots a different color than the non-outlier dots.**
+
+#### Added-Variable Plots
+
+The Added-Variable plots allow us to observe the relationship between each individual predictor variable and the response variable while holding other predictor variables constant.
+
+```{r}
+avPlots(insurance_model)
+```
+
+#### Visualization with GGPlot
+
+- The orange points in each plot represent the observations with the largest residuals and the observations with the largest partial leverage.
+
+```{r, echo = TRUE}
+# insurance_model <- lm(charges ~ age + bmi  + children)
+
+# check for specific outliers observations
+outlier_color <- positive_outlier %>% 
+  filter(obs == 544 | obs == 1048)
+outlier_color
+
+# get coefficients
+c1 <- coefficients(insurance_model)
+c1
+
+# colors
+yellow_m = "#FCCB1A"
+blue_m = "#347B98"
+red_m =  "#AE0D7A"
+purple = "#8601AF"
+orange_m = "#FB9902"
+
+# Children Quantile
+quantile(data$children, na.rm = TRUE)
+# BMI Quantile
+quantile(data$bmi, na.rm = TRUE)
+# Age Quantile
+quantile(data$age, na.rm = TRUE)
+
+# create lines graph for Children of 0, 2, 4
+# Age on the X-axis. Plug in for Children
+age_quant_data <- data %>%
+  mutate(a0 = c1[1] + c1[2]*age + c1[3]*20, + c1[4]*0,
+         a2 = c1[1] + c1[2]*age + c1[3]*31, + c1[4]*2,
+         a4 = c1[1] + c1[2]*age + c1[3]*50, + c1[4]*4)
+
+# ggplot graph
+age_plot <- age_quant_data %>%
+  ggplot(aes(x = age, y = charges)) +
+  geom_point(color = "darkgray", size=3, alpha = 0.3) + 
+  geom_point(data = outlier_color, color = orange_m, size = 3) +
+  geom_line(aes(y = a0), color = "magenta", size = 1.5) +
+  geom_line(aes(y = a2), color = "magenta", size = 1.5) +
+  geom_line(aes(y = a4), color = "magenta", size = 1.5) +
+  geom_text(aes(x = 66, y = 25500, label = "4")) +
+  geom_text(aes(x = 66, y = 19000, label = "2")) +
+  geom_text(aes(x = 66, y = 15000, label = "0")) +
+  annotate("text", x = 68, y = 29500, label = "Children", color = red_m, size = 4.5)+
+  labs(title = "Multiple Linear Regression",
+       x = "Age",
+       y = "Insurance Charges") +
+  theme_bw()+
+  xlim(c(18,70))+
+  ylim(c(0,70000))
+
+age_plot
+
+# create lines graph for Children of 0, 2, 4
+# bmi on the x-axis
+bmi_quant_data <- data %>%
+  mutate(b0 = c1[1] + c1[2]*20 + c1[3]*data$bmi, + c1[4]*0,
+         b2 = c1[1] + c1[2]*39 + c1[3]*data$bmi, + c1[4]*2,
+         b4 = c1[1] + c1[2]*60 + c1[3]*data$bmi, + c1[4]*4)
+
+# ggplot graph
+bmi_plot <- bmi_quant_data %>% ggplot(aes(x = bmi, y = charges)) +
+  geom_point(color = "darkgray", size=3, alpha = 0.3) + 
+  geom_point(data = outlier_color, color = orange_m, size = 3) +
+  geom_line(aes(y = b0), color = "magenta", size = 1.5) +
+  geom_line(aes(y = b2), color = "magenta", size = 1.5) +
+  geom_line(aes(y = b4), color = "magenta", size = 1.5) +
+  labs(title = "Multiple Linear Regression",
+       x = "BMI",
+       y = "Insurance Charges") +
+  theme_bw()
+
+bmi_plot
+```
+
+**13. Write a short paragraph to accompany your results, appropriate for your supervisor who is not a statistician or data scientist. Outline your modeling technique as well as the summary of the data (i.e., the first table) and results.**
+
+## Conclusion
+
+The model did not fit well. We have detected and investigated points: 544 and 1048. However, there are more outliers that caused issues for the model. Therefore, we suggest to explore the other categorical predictors such as sex, region, or smoking status to find relevant data that can help to create a more robust model.
+
+#### Summary Statistics
+|                    |        | Mean (Standard Deviation) or Number (Percent) |
+|--------------------|--------|-----------------------------------------------|
+| Charges            |        |   SD = 12,110.01  Mean = 13,270.42            |
+| Age                |        |   SD = 14.04996   Mean = 39.20703             |
+| BMI                |        |   SD = 6.098      Mean = 30.663               |
+| Sex                | Male   |   Count = 676     Percent = 50.52%            |
+|                    | Female |   Count = 662     Percent = 49.48%            |
+| Smoking Status     | Yes    |   Count = 274     Percent = 20.48%            |
+|                    | No     |   Count = 1064    Percent = 79.52%            |
+| Number of Children | 0      |   Count = 574     Percent = 42.9%             |
+|                    | 1      |   Count = 324     Percent = 24.22%            |
+|                    | 2      |   Count = 240     Percent = 17.94%            |
+|                    | 3      |   Count = 157     Percent = 11.73%            |  
+|                    | 4      |   Count = 25      Percent = 1.87%             |
+|                    | 5      |   Count = 18      Percent = 1.35%             |
+
+- A significant difference between the insurance charges' 75th percentile and the maximum value indicated the presence of potential outliers. Moreover, the difference represented 283.23% growth.
+- Furthermore, a high Standard Deviation for Insurance charges, Age, and BMI indicated the data points were more spread out above the mean.
+
+#### Regression Model
+
+```{r, echo = FALSE}
+insurance_model <- lm(data$charges ~ data$age + data$bmi  + data$children)
+summary(insurance_model)
+```
+
+#### Model formula:
+$$\hat{y} = -6916.24 + 240{\text{ age}} + 332.08{\text{ bmi}} + 542.9{\text{ children}} $$
+
+#### Model Interpretation
+- When Age, BMI, and Children are 0, we expect insurance charges to be at ($6,916.24).
+- As Age increase by 1 year, the insurance charges increases by $240, after controlling for BMI, and Children.
+- As BMI increase by 1 point, the insurance charges increases by $332.08, after controlling for Age, and Children.
+- As Children increase by 1 kid, the insurance charges increases by $542.9, after controlling for BMI, and Age.
+
+- $R^2_{adj}$ is 0.1181 - 11.81% of the variability in insurance charges are explained by the model with age, bmi, and number of children.
+
+#### Confidence Intervals
+
+A table was generated to compare the confidence intervals with coefficients, and p-Values.
+
+| Predictor          | $\hat{\beta}_i$ (95% CI) | *p*-Value |
+|--------------------|--------------------------|-----------|
+| Age                | 240 (196.269, 283.719)     |  < 0.001  |            
+| BMI                | 332.08 (231.425, 432.741)  |  < 0.001  |            
+| Number of Children | 542.9 (36.261, 1,049.468)  |  0.0357   |                       
+
+```{r, echo = FALSE}
+confint(insurance_model)
+```
+
+#### Significant Predictors
+
+- Age, BMI, and Children variables were significant predictors.
+
+##### Determine if Age is a significant predictor of insurance charges
+- Reject $H_0$ at the $\alpha=0.05$ level. After adjusting for insurance charges, there is sufficient evidence to suggest that *Age* is a significant predictor with a $p < 0.001$.
+
+##### Determine if BMI is a significant predictor of insurance charges
+- Reject $H_0$ at the $\alpha=0.05$ level. After adjusting for insurance charges, there is sufficient evidence to suggest that *BMI* is a significant predictor with a $p < 0.001$.
+
+##### Determine if Children is a significant predictor of insurance charges
+- Reject $H_0$ at the $\alpha=0.05$ level. After adjusting for insurance charges, there is sufficient evidence to suggest that *Children* is a significant predictor with a $p = 0.0357$.
+
+#### Significant Regression Line
+
+**Hypotheses**
+
+- $H_0: \beta_{charges} = \beta_{age} = \beta_{bmi} = \beta_{children} = 0$
+- $H_1:$ at least one $\beta_i$ is different.
+
+**Test Statistic and *p*-value**
+
+- $F_0 = 60.69$
+
+- $p < 0.001$ 
+
+**Conclusion/Interpretation**
+
+- Reject $H_0$ at the $\alpha=0.05$ level. There was sufficient evidence to suggest that at least one variable was a significant predictor of insurance charges.
+
+#### Correlations
+
+```{r, echo = FALSE}
+# calculate Pearson's correlation matrix
+insurance_matrix <- data %>% 
+  select(charges, age, bmi, children)
+cor(insurance_matrix,
+    method = "pearson",
+    use = "complete.obs")
+# calculate Spearman's correlation matrix 
+cor(insurance_matrix,
+    method = "spearman",
+    use = "complete.obs")
+```
+- We have tested for parametric, and non-parametric correlations.
+- Overall, the correlations had very low scores. No suspicious high values.
+- The non-parametric test showed a medium correlation of 0.534 between Insurance Charges, and Age.
+
+#### Outliers
+
+The following test reported 11 outliers.
+
+```{r, echo = FALSE}
+# count outliers in the model
+n = 2.5
+outlier_data <- data %>% 
+  mutate(Outlier = abs(rstandard(insurance_model)) > n)
+formattable(outlier_data) %>% count(Outlier)
+
+# get outliers
+positive_outlier <- outlier_data %>% 
+  select(age, bmi, children, charges, Outlier) %>% 
+  drop_na() %>% 
+  mutate(obs = row_number()) 
+formattable(positive_outlier) %>% 
+  filter(Outlier == TRUE)
+```
+
+#### Influential and Leverage Points
+
+The following graphs displayed that a lot of points had high leverage, and high influence.
+
+- Points 544, 1048 needed further investigation.
+- However, there are more outliers that could represent potential issues for the model.
+
+```{r, echo = FALSE}
+gg_cooksd(insurance_model) + theme_bw()
+ols_plot_resid_lev(insurance_model)
+```
+
+#### Multicollinearity
+
+-No multicollinearity was present. 
+
+```{r, echo = FALSE}
+ols_vif_tol(insurance_model)
+```
+
+### Visualization of the Model
+
+#### Added-Variable Plots
+
+The Added-Variable plots allowed us to observe the relationship between each individual predictor variable and the response variable while holding other predictor variables constant.
+
+```{r, echo=FALSE}
+avPlots(insurance_model)
+```
+
+#### Visualization for Age on the X-axis
+
+- The orange points represented the observations with the largest residuals and the observations with the largest partial leverage.
+
+```{r, echo=FALSE}
+age_plot
+```
