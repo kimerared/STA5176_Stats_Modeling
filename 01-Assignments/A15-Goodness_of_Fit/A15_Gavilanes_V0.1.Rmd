@@ -79,17 +79,34 @@ chisq.test(win_counts)
 
 ```{r, echo = TRUE}
 hit_counts <- c(229, 211, 93, 35, 7, 0, 0, 1)
-hit_probs <- c(0.396, 0.36505, 0.16109, 0.06055, 0.01211, 0.00173)
-8/578
-round(229/578, digits = 3)
-round(211/578, digits = 3)
-round(93/578, digits = 3)
-round(35/578, digits = 3)
-round(7/578, digits = 3)
-round(1/578, digits = 3)
+hit_probs <- c(0.398 + 0.366 + 0.161 + 0.061 + 0.012 + 0 + 0 + 0.002)
+# 8/576
+# round(229/576, digits = 3)
+# round(211/576, digits = 3)
+# round(93/576, digits = 3)
+# round(35/576, digits = 3)
+# round(7/576, digits = 3)
+# round(1/576, digits = 3)
 
-1 - (0.396 + 0.365 + 0.161 + 0.061 + 0.012 + 0.002)
+# (0*229 + 1*211 + 2*93 + 3*35 + 4*7 + 7*1)
 
-chisq.test(hit_counts)
+# mean for poisson distribution
+y_hat = 537/576
+# y_hat
+
+dpois(0, y_hat)
+dpois(1, y_hat)
+dpois(2, y_hat)
+dpois(3, y_hat)
+dpois(4, y_hat)
+dpois(5, y_hat)
+dpois(6, y_hat)
+
+# lower tail
+ppois(7, y_hat)
+# upper tail
+ppois(7, y_hat, lower.tail = FALSE)
+
+poisson.test(7, y_hat)
 ```
 
