@@ -23,7 +23,7 @@ counts <- c(238, 32, 12, 13, 5)
 probs <- c(0.8, 0.1, 0.05, 0.03, 0.02)
 chisq.test(counts, p = probs)
 ```
-Keep H0
+Keep H0. There is not sufficient evidence to suggest that the data does not follow the historical defective distribution.
 
 **2. The data in the following table document the starting positions of the winning horses in 144 races. The starting position listed as 1 is the position of the horse in the starting gate closest to the inside rail of the track, and position 8 is farthest from the rail. Racing officials contend that starting position has no effect on the chance of winning the race.**
 
@@ -41,13 +41,26 @@ Keep H0
 **Do the data support the racing officials' contention?**
 
 ```{r, echo = TRUE}
-100/8
 win_counts <- (c(29, 19, 18, 25, 17, 10, 15, 11))
-win_probs <- (c(0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125))
 
-chisq.test(win_counts, p = win_probs)
+chisq.test(win_counts)
 ```
-Reject H0
+**Hypotheses**
+
+- $H_0$: The starting position has no effect on the chance of winning the race
+- $H_1$: The starting position has an effect on the chance of winning the race
+
+**Test Statistic and *p*-Value**
+
+- $\chi_0^2=576.07$; $\ p < 0.001$
+
+**Rejection Region**
+
+- Reject $H_0$ if $p < \alpha$; $\alpha=0.05$
+
+**Conclusion/Interpretation**
+
+- Reject $H_0$ at the $\alpha=0.05$ level. There is sufficient evidence to suggest that starting position has an effect on the chance of winning the race.
 
 **3. Challenge! A study examining bomb hits in South London during World War II is documented in the following table. The bomb hits were recorded in the 576 grids in a map of a region in South London. The study contended that certain areas were less likely to be hit with a bomb because of certain geographical features. If the bomb hits were purely random, a Poisson model would produce the number of hits per grid.**
 
@@ -65,6 +78,18 @@ Reject H0
 **Does the distribution of bomb hits appear to be random across this region of South London?**
 
 ```{r, echo = TRUE}
+hit_counts <- c(229, 211, 93, 35, 7, 0, 0, 1)
+hit_probs <- c(0.396, 0.36505, 0.16109, 0.06055, 0.01211, 0.00173)
+8/578
+round(229/578, digits = 3)
+round(211/578, digits = 3)
+round(93/578, digits = 3)
+round(35/578, digits = 3)
+round(7/578, digits = 3)
+round(1/578, digits = 3)
 
+1 - (0.396 + 0.365 + 0.161 + 0.061 + 0.012 + 0.002)
+
+chisq.test(hit_counts)
 ```
 
