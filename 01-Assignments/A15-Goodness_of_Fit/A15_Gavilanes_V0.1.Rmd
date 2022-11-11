@@ -80,7 +80,8 @@ Total| 576   | 537
 **Does the distribution of bomb hits appear to be random across this region of South London?**
 
 ```{r, echo = TRUE}
-n = sum(229, 211, 93, 35, 7, 0, 0, 1) #576
+grids = c(229, 211, 93, 35, 7, 0, 0, 1)
+n = sum(grids) #576
 total = (0*229 + 1*211 + 2*93 + 3*35 + 4*7 + 7*1) #537
 
 # mean for poisson distribution
@@ -91,19 +92,29 @@ y_hat
 # e_lambda = 1/(2.718281828)^0.932
 # e_lambda
 
-probabilities <- round(dpois(0:7, lambda = y_hat), digits = 4)
+probabilities <- round(dpois(0:7, lambda = y_hat), digits = 5)
 probabilities
 
 # expected frequencies
 expected <- probabilities * n
 expected
 
+# Frequencies Table
+bomb_df <- data.frame(nBomb = 0:7,
+                        obsFreq = as.vector(grids),
+                        expFreq = expected)
+bomb_df
+
+# Eliminate 3 degrees of freedom (DF) + added to the previous term
 e4 = expected[5]+expected[6]+expected[7]
 e4
 
 # Combine observations 5,6,7 into observation 4
 observation_freq_group <- c(229, 211, 93, 35, 8)
 expected_freq_group <- c(expected[1], expected[2], expected[3], expected[4], e4)
+
+# Alternative
+# obsFreqGroup <- tapply(bomb_df$obsFreq)
 
 # Sum of observation and expected groups
 observation_sum <- sum(observation_freq_group)
@@ -115,14 +126,21 @@ expected_freq_sum <- expected_sum + diff
 
 expected_freq_group[length(expected_freq_group)] <- n - sum(expected_freq_group[1:(length(expected_freq_group)-1)])
 expected_freq_group
-# Goodness of Fit
-chisq.test(observation_freq_group, p = expected_freq_group/n)
 
+# Adjusted Data frame
+data.frame(nBomb = 0:4, obs = observation_freq_group, expect = expected_freq_group)
+
+# Goodness of Fit
+x_square <- chisq.test(observation_freq_group, p = expected_freq_group/n)
+
+# Correct degrees of freedom (DF) calculation
+hit_pd <- 1 - pchisq(x_square$statistic, df = 3) #0.800663
+hit_pd
 ```
-Observation   |   0       1       2       3       4       5       6       7
-------------------------------------------------------------------------------
+Observation   |   0       1       2       3       4       
+------------------------------------------------------
 Probability
-$\mu$= 0.932  | 0.3937  0.367   0.1711  0.0532  0.0124  0.0023  0.0004    0
+$\mu$= 0.932  | 0.3937  0.367   0.1711  0.0532  0.015  
 
 
 Observation   |   0           1         2         3         4         5         6       7
@@ -132,24 +150,20 @@ Expected      | 226.7712    211.392   98.5536   30.6432   7.1424    1.3248    0.
 
 Observation   |   0           1         2         3         4
 -------------------------------------------------------------------
-Expected      | 226.7712    211.392   98.5536   30.6432    8.6976
+Expected      | 226.7712    211.392   98.5536   306.432    8.6976
 
 Test
 ```{r}
-# lower tail
-ppois(7, y_hat)
-# upper tail
-ppois(7, y_hat, lower.tail = FALSE)
+p7 = 1- ppois(4, y_hat)
+sprintf("%.6f", p7)
+p1_3 = dpois(0:3, lambda = y_hat)
+p4 = round(1-sum(dpois(0:3, lambda = y_hat)), 3)
 
-poisson.test(7, y_hat)
+obs_bomb <- c(0.3937, 0.367, 0.1711, 0.532, 0.015)
+obs_bomb
 
-dpois(0, 3.3)
-dpois(1, 3.3)
-dpois(2, 3.3)
-dpois(3, 3.3)
-
-# combine terms < 5
-7.1424 + 1.3248 + 0.2304 + 0
+exp_bomb <- obs_bomb * n
+exp_bomb
 ```
 
 
