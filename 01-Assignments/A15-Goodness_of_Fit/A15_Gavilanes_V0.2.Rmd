@@ -6,6 +6,11 @@ self-contained: true
 editor: source
 ---
 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(formattable)
+library(tidyverse)
+```
+
 **1. The quality control department of a motorcycle company classifies new motorcycles according to the number of defective components per motorcycle at an initial inspection. An improvement to the production process has been implemented, and, hopefully, there will be a change from the historical defective distribution: $\pi_1 = 0.80,$ $\pi_2 = 0.10,$ $\pi_3 = .05,$ $\pi_4 = .03,$ and $\pi_5 = 0.02$. A random sample of 300 motorcycles produced under the new system is classified as follows:**
 
 | No. Defective | No. Motorcycles |
@@ -74,19 +79,147 @@ chisq.test(win_counts)
 | 5  | 0     | 0
 | 6  | 0     | 0
 | 7  | 1     | 7
--------------------
-Total| 576   | 537
 
 
 **Does the distribution of bomb hits appear to be random across this region of South London?**
 
-```{r, echo = TRUE}
+### V3
+```{r}
+
+grids = c(229, 211, 93, 35, 7, 1)
+
+data <- data.frame(n_Bomb_hits = 0:5,
+                   Grids = grids)
+
+# Total Cell clumps per field
+total_clumps = (0*229 + 1*211 + 2*93 + 3*35 + 4*7 + 7*1) #537
+
+# Total Grids
+n = sum(data$Grids) #576
+
+# Poisson mean
+y_hat = total_clumps/n
+
+# Poisson Probabilities
+probabilities <- round(dpois(0:6, lambda = y_hat), 5)
+p7 = round(1 - ppois(6, y_hat), 5)
+probabilities <- c(probabilities, p7)
+
+
+probs_df <- data.frame(data,
+                       Probabilities = probabilities)
+format_table(probs_df, align = "l")
+
+# Expected counts
+expected <- probabilities * n
+
+expected_df <- data.frame(probs_df,
+                          Expected = expected)
+format_table(expected_df)
+
+# Eliminate 3 degrees of freedom (DF) + added to the previous term
+e4 = expected[5]+expected[6]+expected[7]+expected[8]
+e4
+
+# combine degrees of freedom into observation 4
+combined_grids = c(229, 211, 93, 35, 8)
+combined_expected = c(expected[0:4],  e4)
+
+
+combined_df <- data.frame(n_bomb_hits = 0:4,
+                          Grids = combined_grids,
+                          Expected = combined_expected)
+  
+combined_df
+
+# recalculate expected frequency for last group
+combined_df$Expected[length(combined_df$Expected)] <-
+  n - sum(combined_df$Expected[1:(length(combined_df$Expected)-1)])
+
+# table
+combined_df
+
+# Chi-squared goodness of fit
+x_sq <-chisq.test(combined_df$Grids, p = combined_df$Expected/n)
+x_sq$observed
+x_sq$expected
+x_sq 
+
+# Correct degrees of freedom
+1 - pchisq(x_sq$statistic, df = 3) #0.7967786
+```
+
+### V2
+```{r}
 library(formattable)
+library(tidyverse)
 grids = c(229, 211, 93, 35, 7, 0, 0, 1)
 
 data <- data.frame(n_Bomb_hits = 0:7,
-           Grids = grids)
-data
+                   Grids = grids)
+
+# Total Cell clumps per field
+total_clumps = (0*229 + 1*211 + 2*93 + 3*35 + 4*7 + 7*1) #537
+
+# Total Grids
+n = sum(data$Grids) #576
+
+# Poisson mean
+y_hat = total_clumps/n
+
+# Poisson Probabilities
+probabilities <- round(dpois(0:6, lambda = y_hat), 5)
+p7 = round(1 - ppois(6, y_hat), 5)
+probabilities <- c(probabilities, p7)
+
+
+probs_df <- data.frame(data,
+                       Probabilities = probabilities)
+format_table(probs_df, align = "l")
+
+# Expected counts
+expected <- probabilities * n
+
+expected_df <- data.frame(probs_df,
+                          Expected = expected)
+format_table(expected_df)
+
+# Eliminate 3 degrees of freedom (DF) + added to the previous term
+e4 = expected[5]+expected[6]+expected[7]+expected[8]
+e4
+
+# combine degrees of freedom into observation 4
+combined_grids = c(229, 211, 93, 35, 8)
+combined_expected = c(expected[0:4],  e4)
+
+
+combined_df <- data.frame(n_bomb_hits = 0:4,
+                          Grids = combined_grids,
+                          Expected = combined_expected)
+  
+combined_df
+
+# recalculate expected frequency for last group
+combined_df$Expected[length(combined_df$Expected)] <-
+  n - sum(combined_df$Expected[1:(length(combined_df$Expected)-1)])
+
+# table
+combined_df
+
+# Chi-squared goodness of fit
+x_sq <-chisq.test(combined_df$Grids, p = combined_df$Expected/n)
+x_sq$observed
+x_sq$expected
+x_sq 
+
+# Correct degrees of freedom
+1 - pchisq(x_sq$statistic, df = 3) #0.7967786
+```
+
+
+### V1
+```{r, echo = TRUE}
+
 
 n = sum(grids) #576
 total = (0*229 + 1*211 + 2*93 + 3*35 + 4*7 + 7*1) #537
@@ -120,8 +253,6 @@ e4
 observation_freq_group <- c(229, 211, 93, 35, 8)
 expected_freq_group <- c(expected[1], expected[2], expected[3], expected[4], e4)
 
-# Alternative
-# obsFreqGroup <- tapply(bomb_df$obsFreq)
 
 # Sum of observation and expected groups
 observation_sum <- sum(observation_freq_group)
@@ -144,33 +275,3 @@ x_square <- chisq.test(observation_freq_group, p = expected_freq_group/n)
 hit_pd <- 1 - pchisq(x_square$statistic, df = 3) #0.800663
 hit_pd
 ```
-Observation   |   0       1       2       3       4       
-------------------------------------------------------
-Probability
-$\mu$= 0.932  | 0.3937  0.367   0.1711  0.0532  0.015  
-
-
-Observation   |   0           1         2         3         4         5         6       7
--------------------------------------------------------------------------------------------
-Expected      | 226.7712    211.392   98.5536   30.6432   7.1424    1.3248    0.2304    0
-
-
-Observation   |   0           1         2         3         4
--------------------------------------------------------------------
-Expected      | 226.7712    211.392   98.5536   306.432    8.6976
-
-Test
-```{r}
-p7 = 1- ppois(4, y_hat)
-sprintf("%.6f", p7)
-p1_3 = dpois(0:3, lambda = y_hat)
-p4 = round(1-sum(dpois(0:3, lambda = y_hat)), 3)
-
-obs_bomb <- c(0.3937, 0.367, 0.1711, 0.532, 0.015)
-obs_bomb
-
-exp_bomb <- obs_bomb * n
-exp_bomb
-```
-
-
