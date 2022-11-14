@@ -1,0 +1,249 @@
+---
+title: "One and Two Proportions - Week 10, Lecture 1"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+#### Load libraries
+```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
+library("tidyverse")
+library("gsheet")
+library("formattable")
+```
+
+**1. Consider the Jackson Heart Study dataset.**
+
+```{r}
+# clear environment
+rm(list = ls())
+# import data
+data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1H3TP-2SBMGleriJLESOe1cdCjtSj2F76bUh5iBqC8tI/edit#gid=2142000894"))
+```
+
+**1a. Find the 95% CI for the proportion of JHS participants that drink alcohol on a regular basis (alc; 1=yes, 0=no).**
+```{r}
+# alcohol count
+formattable(data) %>% 
+  count(alc)
+
+# get Confidence Intervals
+alcohol_ci <- prop.test(x = 1271,
+                        n = 1372+1271,
+                        correct=FALSE)
+round(alcohol_ci$conf.int, digits = 3)
+```
+- The 95% CI for $\pi$, the population proportion of JHS participants that drink alcohol on a regular basis is (0.462, 0.500)
+
+**1b. Use the appropriate hypothesis test to determine if less than half of the JHS participants drink alcohol on a regular basis. Test at the  level.**
+
+```{r}
+# n = 2643
+# yes = 1271
+# no = 1372
+
+# drinkers < 50% 
+alcohol_proportion <- prop.test(x = 1271,
+                                n = 1372+1271,
+                                p = 0.50,
+                                alternative = "less",
+                                correct=FALSE)
+alcohol_proportion
+# get X-squared
+x_squared <- alcohol_proportion$statistic
+# get Z0
+z0 = round(sqrt(alcohol_proportion$statistic), digits = 3)
+```
+### Hypothesis Test: Alcohol Drinkers
+
+### Hypotheses
+
+- $H_0: \pi_{alcohol} \ge 0.50$
+- $H_1: \pi_{alcohol} < 0.50$
+
+### Test Statistic and p-Value
+
+- $X^2_{0}$ = `r x_squared` or $z_0$ = $\sqrt{3.8596}$ = `r z0` 
+
+### p-Value
+
+- $p < 0.001$
+
+## Conclusion
+
+Reject $H_0$ at $\alpha = 0.05$. There is sufficient evidence to suggest that less than 50% of the JHS participants drink alcohol on a regular basis.
+
+**1c. Find the 99% CI for the difference in the proportion of male and female JHS participants that drink alcohol.**
+```{r}
+# get matrix/table
+table(data$alc, data$sex)
+
+# n female = 1666
+982+684
+684/1666
+# n male = 977
+390+587
+587/977
+# 99% CI for two proportions
+gender_proportion <- prop.test(x = c(684, 587),
+                               n = c(1666, 977),
+                               correct = FALSE,
+                               conf.level = 0.99)
+# get CI
+gender_proportion
+gender_ci <- round(gender_proportion$conf.int, digits = 3)
+```
+
+- The 99% CI for $\pi_F$ - $\pi_M$ is (`r gender_ci`).
+- Because the interval is negative, it indicates that the proportion of JHS participants in the female group is smaller than the male group.
+
+**1d. Use the appropriate hypothesis test to determine if there are fewer drinkers with hypertension (HTN; 1=yes, 0=no) than those without hypertension. Test at the  level.**
+```{r}
+# count hypertension
+data %>% 
+  count(data$alc)
+# drinkers with hypertension count
+table(data$HTN, data$alc)
+
+# drinkers n = 1271
+# drinkers+HTN = 588
+# drinkers-HTN = 683
+
+htn_proportion <- prop.test(x = c(588, 683),
+                            n = c(1271, 1271),
+                            alternative = "less",
+                            correct = FALSE)
+htn_proportion
+# get X-squared
+x_squared_htn <- htn_proportion$statistic
+# get Z0
+z_htn = round(sqrt(x_squared_htn), digits = 3)
+```
+### Hypothesis Test: Alcohol Drinkers
+
+- The proportion of drinkers with hypertension,
+  <!-- $\pi_{drinker-HTN}$ = 588/1271 = 0.4105642 -->
+  $$ \hat{\pi}_{\text{drinkers+HTN}} = \frac{588}{1271} = `r 588/1271` $$
+  
+- The proportion of drinkers without hypertension,
+  $\pi_{drinker}$ = 683/1271 = 0.6008188
+
+  $$ \hat{\pi}_{\text{drinkers+HTN}} = \frac{683}{1271} = `r 683/1271` $$
+
+### Hypotheses
+
+- $H_0: \pi_{drinkers+HTN} \ge \pi_{drinker}$
+- $H_1: \pi_{drinkers+HTN} < \pi_{drinker}$
+
+### Test Statistic and p-Value
+
+- $X^2_{0}$ = `r x_squared_htn` or $z_0$ = $\sqrt{250.94}$ = `r z_htn` 
+
+### p-Value
+
+- $p < 0.001$
+
+## Conclusion
+
+Reject $H_0$ at $\alpha = 0.05$. There is sufficient evidence to suggest that there are fewer drinkers with hypertension than those without hypertension.
+
+**1e. Challenge! Construct a graph to help with explanation to the lead scientist of JHS.**
+
+##### Regular Drinkers
+
+```{r}
+# grouped barchart
+alcohol_count <- data %>% 
+  count(alc)
+
+ggplot(alcohol_count, aes(fill = alc, y = n, x = alc))+
+  geom_col()+
+  scale_fill_discrete(breaks = c("No", "Yes", "NA"))+
+  labs(title = "Proportion of Regular Drinkers",
+       x = "Alcohol Consumption",
+       y = "Count")+
+  theme_bw()+
+  geom_text(label = "1,372",x = 1, y = 1000, size = 5, colour = "white")+
+  geom_text(label = "1,271",x = 2, y = 1000, size = 5, colour = "white")+
+  geom_text(label = "10",x = 3, y = 60, size = 5, colour = "black")
+
+```
+
+##### Drinkers by Gender
+
+```{r}
+# get drinkers sex
+gender_drinkers <- data %>% 
+  select(sex, alc) %>% 
+  filter(alc == "Yes") %>% 
+  count(sex)
+
+# grouped barchart
+ggplot(gender_drinkers, aes(fill = sex, y = n, x = sex))+
+  geom_col()+
+  scale_fill_discrete(breaks = c("Female", "Male"))+
+  labs(title = "Proportion of Regular Drinkers by Gender",
+       y = "Count")+
+  theme_bw()+
+  geom_text(label = "684",x = 1, y = 500, size = 5, colour = "white")+
+  geom_text(label = "587",x = 2, y = 500, size = 5, colour = "white")
+```
+
+##### Drinkers with Hypertension
+```{r}
+# drinkers with hypertension count
+table(data$HTN, data$alc)
+
+# get drinkers with hypertension
+htn_drinkers <- data %>% 
+  select(HTN, alc) %>% 
+  filter(alc == "Yes") %>% 
+  count(HTN)
+htn_drinkers
+
+# grouped barchart
+ggplot(htn_drinkers, aes(fill = HTN, y = n, x = HTN))+
+  geom_col()+
+  scale_fill_discrete(breaks = c("HTN", "No-HTN"))+
+  labs(title = "Proportion of Regular Drinkers with hypertension",
+       y = "Count")+
+  theme_bw()+
+  geom_text(label = "683",x = 1, y = 500, size = 5, colour = "white")+
+  geom_text(label = "588",x = 2, y = 500, size = 5, colour = "white")
+```
+
+
+
+
+**2. A large retail lawn care dealer currently provides a 2-year warranty on all lawn mowers sold at its stores. A new employee suggested that the dealer could save money by just not offering the warranty. To evaluate this suggestion, the dealer randomly decides whether or not to offer the warranty to the next 50 customers who enter the store and express an interest in purchasing a lawnmower. Out of the 25 customers offered the warranty, 10 purchased a mower as compared to 4 of 25 not offered the warranty.**
+
+**2a. Find a 95% CI for the difference in the proportions of customers purchasing lawnmowers with and without the warranty.**
+```{r}
+# warranty proportion test
+warranty_binom <- binom.test(x = c(4, 10),
+                             n = c(25, 25))
+warranty_binom
+
+# get CI
+warranty_ci <- round(warranty_binom$conf.int, digits = 3)
+warranty_ci
+
+```
+- The 95% CI for $\pi_{no-warranty}$ - $\pi_{warranty}$ is (`r warranty_ci`).
+- Because the interval is positive, it indicates that the proportion of lawnmowers with warranty group is bigger than the lawnmowers without warranty group.
+
+**2b. What are the requirements for using the z distribution when analyzing proportions?**
+
+- The sample size should be greater than 30.
+- Test results are accurate when $n\pi$ and $n(1-\pi)$ are greater than 5.
+- Both populations follow a binomial distribution.
+
+**2c. Check those requirements here.**
+
+The sample was collected among 50 customers; however, the marginal total, or sample size for both groups is 25. 
+
+Therefore, we cannot use the Z-distribution.
+
+**2d. Is the CI in part 2a valid? Why or why not?**
+
+Yes, the CI (`r warranty_ci`) is neither close to 0, nor close to 1. 

@@ -1,0 +1,143 @@
+---
+title: "Contingency Tables - Week 12, Day 2"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(gmodels)
+library(formattable)
+```
+
+**1. The fire department in a large city is examining its promotion policy to assess if there is the potential for an age discrimination lawsuit.**
+
+**1a. Consider the following data:**
+
+| | Under 30 | 30--39 | 40--49 | 50 or Older | 
+|--|--|--|--|--|
+| Promoted | 9 | 29 | 34 | 12 |
+| Not Promoted | 41 | 39 | 46 | 38 |
+
+
+**Is there evidence to suggest there is age discrimination? Test at the $\alpha=0.05$ level.**
+
+```{r}
+age_matrix <- matrix(c(9, 29, 34, 12,
+                       41, 39, 46, 38),
+                     nrow = 2, ncol = 4, byrow = T)
+colnames(age_matrix) <- c("<30", "30-39", "40-49", ">=50")
+rownames(age_matrix) <- c("Promoted", "Not Promoted")
+age_table <- as.data.frame(age_matrix)
+format_table(age_table)
+# format_table(as.data.frame(age_matrix))
+chisq.test(age_matrix)
+
+# library(reshape2)
+# long_data <- melt(age_table)
+# long_data %>% 
+#   select(starts_with("Promoted"))
+# long_data
+# age_table %>% 
+#   filter(rownames == "Promoted") %>% 
+#   ggplot(aes(x = factor(rownames), y = age_table[1:4]))+
+#   geom_bar()
+
+```
+**Hypotheses**
+
+- $H_0$: Promotion does not depend on relationship of age.
+- $H_1$: Promotion depends on relationship of age.
+
+**Test Statistic and *p*-Value**
+
+- $\chi_0^2 = 12.796$; $\ p = 0.0051$
+
+**Rejection Region**
+
+- Reject $H_0$ if $p < \alpha$; $\alpha=0.05$
+
+**Conclusion/Interpretation**
+
+- Reject $H_0$ at the $\alpha=0.05$ level. There is sufficient evidence to suggest that promotion depends on relationship of age.
+
+
+**1b. Consider the following data:**
+
+| | 39 or Younger | 40 or Older | 
+|--|--|--|
+| Promoted | 38 | 46 |
+| Not Promoted | 80 | 84 |
+
+**Is there evidence to suggest there is age discrimination? Test at the $\alpha=0.05$ level.**
+
+```{r}
+# warranty <- matrix(c(21,15, 4,10), nrow = 2, ncol = 2, byrow = TRUE,
+#                dimnames = list(c("NO_purchase", "Yes_purchase"),
+#                                c("No_Warranty", "Yes_warranty")))
+
+age_matrix_2 <- matrix(c(38, 46,
+                       80, 84),
+                     nrow = 2, ncol = 2, byrow = T)
+chisq.test(age_matrix_2)
+```
+
+**Hypotheses**
+
+- $H_0$: Promotion does not depend on relationship of age.
+- $H_1$: Promotion depends on relationship of age.
+
+**Test Statistic and *p*-Value**
+
+- $\chi_0^2 = 12.796$; $\ p = 0.6933$
+
+**Rejection Region**
+
+- Reject $H_0$ if $p < \alpha$; $\alpha=0.05$
+
+**Conclusion/Interpretation**
+
+- Keep $H_0$ at the $\alpha=0.05$ level. There is not sufficient evidence to suggest that promotion depends on relationship of age.
+
+**1c. Construct (separate) graphs to represent the data in 1a and 1b.**
+
+```{r}
+
+```
+
+**1d. What are you take away from this exercise?**
+
+**2. Recall this problem from last week:**
+
+**A large retail lawn care dealer currently provides a 2-year warranty on all lawn mowers sold at its stores. A new employee suggested that the dealer could save money by just not offering the warranty. To evaluate this suggestion, the dealer randomly decides whether or not to offer the warranty to the next 50 customers who enter the store and express an interest in purchasing a lawnmower. Out of the 25 customers offered the warranty, 10 purchased a mower as compared to 4 of 25 not offered the warranty.**
+
+**Last week, you determined that the data does not meet the assumption to use the *z* test. Now that we know what to do in the case of small expected values, use the appropriate hypothesis test to determine if offering the warranty changes the proportion of customers who will purchase a mower. Test at the $\alpha=0.05$ level.**
+
+```{r}
+warranty <- matrix(c(21,15, 4,10), nrow = 2, ncol = 2, byrow = TRUE,
+               dimnames = list(c("No_purchase", "Yes_purchase"),
+                               c("No_Warranty", "Yes_warranty")))
+warranty
+
+# Chi-square test
+chisq.test(warranty)
+
+```
+**Hypotheses**
+
+- $H_0$: offering the warranty does not depend on relationship of mower purchasing.
+- $H_1$: offering the warranty depends on relationship of mower purchasing.
+
+**Test Statistic and *p*-Value**
+
+- $\chi_0^2 = 2.4802$; $\ p = 0.1153$
+
+**Rejection Region**
+
+- Reject $H_0$ if $p < \alpha$; $\alpha=0.05$
+
+**Conclusion/Interpretation**
+
+- Keep $H_0$ at the $\alpha=0.05$ level. There is not sufficient evidence to suggest that offering the warranty depends on relationship of mower purchasing.

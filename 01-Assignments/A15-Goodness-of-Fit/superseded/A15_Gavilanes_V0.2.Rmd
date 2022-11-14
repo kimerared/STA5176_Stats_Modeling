@@ -1,0 +1,276 @@
+---
+title: "Goodness of Fit - Week 12, Day 1"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(formattable)
+library(tidyverse)
+```
+
+**1. The quality control department of a motorcycle company classifies new motorcycles according to the number of defective components per motorcycle at an initial inspection. An improvement to the production process has been implemented, and, hopefully, there will be a change from the historical defective distribution: $\pi_1 = 0.80,$ $\pi_2 = 0.10,$ $\pi_3 = .05,$ $\pi_4 = .03,$ and $\pi_5 = 0.02$. A random sample of 300 motorcycles produced under the new system is classified as follows:**
+
+| No. Defective | No. Motorcycles |
+|---|---        |
+| 0 | 238       |
+| 1 | 32        |
+| 2 | 12        |
+| 3 | 13        |
+| 4 | 5         |
+
+**At the \alpha = 0.05$ level, does there appear to be a change in the historical proportions of defectives?**
+
+```{r, echo = TRUE}
+counts <- c(238, 32, 12, 13, 5)
+probs <- c(0.8, 0.1, 0.05, 0.03, 0.02)
+chisq.test(counts, p = probs)
+```
+Keep H0. There is not sufficient evidence to suggest that the data does not follow the historical defective distribution.
+
+**2. The data in the following table document the starting positions of the winning horses in 144 races. The starting position listed as 1 is the position of the horse in the starting gate closest to the inside rail of the track, and position 8 is farthest from the rail. Racing officials contend that starting position has no effect on the chance of winning the race.**
+
+| Starting Position | No. Winners |
+|---|---|
+| 1 | 29 |
+| 2 | 19 |
+| 3 | 18 |
+| 4 | 25 |
+| 5 | 17 |
+| 6 | 10 |
+| 7 | 15 |
+| 8 | 11 |
+
+**Do the data support the racing officials' contention?**
+
+```{r, echo = TRUE}
+win_counts <- (c(29, 19, 18, 25, 17, 10, 15, 11))
+
+chisq.test(win_counts)
+```
+**Hypotheses**
+
+- $H_0$: The starting position has equal chance of winning the race
+- $H_1$: The starting position has not equal chance of winning the race
+
+**Test Statistic and *p*-Value**
+
+- $\chi_0^2=576.07$; $\ p < 0.001$
+
+**Rejection Region**
+
+- Reject $H_0$ if $p < \alpha$; $\alpha=0.05$
+
+**Conclusion/Interpretation**
+
+- Reject $H_0$ at the $\alpha=0.05$ level. There is sufficient evidence to suggest that starting position has not equal chance of winning the race.
+
+**3. Challenge! A study examining bomb hits in South London during World War II is documented in the following table. The bomb hits were recorded in the 576 grids in a map of a region in South London. The study contended that certain areas were less likely to be hit with a bomb because of certain geographical features. If the bomb hits were purely random, a Poisson model would produce the number of hits per grid.**
+
+| No. Bomb Hits | No. Grids |
+|----|-------|
+| 0  | 229   | 0
+| 1  | 211   | 211
+| 2  | 93    | 186
+| 3  | 35    | 105
+| 4  | 7     | 28
+| 5  | 0     | 0
+| 6  | 0     | 0
+| 7  | 1     | 7
+
+
+**Does the distribution of bomb hits appear to be random across this region of South London?**
+
+### V3
+```{r}
+
+grids = c(229, 211, 93, 35, 7, 1)
+
+data <- data.frame(n_Bomb_hits = 0:5,
+                   Grids = grids)
+
+# Total Cell clumps per field
+total_clumps = (0*229 + 1*211 + 2*93 + 3*35 + 4*7 + 7*1) #537
+
+# Total Grids
+n = sum(data$Grids) #576
+
+# Poisson mean
+y_hat = total_clumps/n
+
+# Poisson Probabilities
+probabilities <- round(dpois(0:5, lambda = y_hat), 5)
+p7 = round(1 - ppois(5, y_hat), 5)
+probabilities <- c(probabilities, p7)
+
+probs_df <- data.frame(data,
+                       Probabilities = probabilities)
+format_table(probs_df, align = "l")
+
+# Expected counts
+expected <- probabilities * n
+
+expected_df <- data.frame(probs_df,
+                          Expected = expected)
+format_table(expected_df)
+
+# Eliminate 3 degrees of freedom (DF) + added to the previous term
+e4 = expected[5]+expected[6]+expected[7]+expected[8]
+e4
+
+# combine degrees of freedom into observation 4
+combined_grids = c(229, 211, 93, 35, 8)
+combined_expected = c(expected[0:4],  e4)
+
+
+combined_df <- data.frame(n_bomb_hits = 0:4,
+                          Grids = combined_grids,
+                          Expected = combined_expected)
+  
+combined_df
+
+# recalculate expected frequency for last group
+combined_df$Expected[length(combined_df$Expected)] <-
+  n - sum(combined_df$Expected[1:(length(combined_df$Expected)-1)])
+
+# table
+combined_df
+
+# Chi-squared goodness of fit
+x_sq <-chisq.test(combined_df$Grids, p = combined_df$Expected/n)
+x_sq$observed
+x_sq$expected
+x_sq 
+
+# Correct degrees of freedom
+1 - pchisq(x_sq$statistic, df = 3) #0.7967786
+```
+
+### V2
+```{r}
+library(formattable)
+library(tidyverse)
+grids = c(229, 211, 93, 35, 7, 0, 0, 1)
+
+data <- data.frame(n_Bomb_hits = 0:7,
+                   Grids = grids)
+
+# Total Cell clumps per field
+total_clumps = (0*229 + 1*211 + 2*93 + 3*35 + 4*7 + 7*1) #537
+
+# Total Grids
+n = sum(data$Grids) #576
+
+# Poisson mean
+y_hat = total_clumps/n
+
+# Poisson Probabilities
+probabilities <- round(dpois(0:6, lambda = y_hat), 5)
+p7 = round(1 - ppois(6, y_hat), 5)
+probabilities <- c(probabilities, p7)
+
+
+probs_df <- data.frame(data,
+                       Probabilities = probabilities)
+format_table(probs_df, align = "l")
+
+# Expected counts
+expected <- probabilities * n
+
+expected_df <- data.frame(probs_df,
+                          Expected = expected)
+format_table(expected_df)
+
+# Eliminate 3 degrees of freedom (DF) + added to the previous term
+e4 = expected[5]+expected[6]+expected[7]+expected[8]
+e4
+
+# combine degrees of freedom into observation 4
+combined_grids = c(229, 211, 93, 35, 8)
+combined_expected = c(expected[0:4],  e4)
+
+
+combined_df <- data.frame(n_bomb_hits = 0:4,
+                          Grids = combined_grids,
+                          Expected = combined_expected)
+  
+combined_df
+
+# recalculate expected frequency for last group
+combined_df$Expected[length(combined_df$Expected)] <-
+  n - sum(combined_df$Expected[1:(length(combined_df$Expected)-1)])
+
+# table
+combined_df
+
+# Chi-squared goodness of fit
+x_sq <-chisq.test(combined_df$Grids, p = combined_df$Expected/n)
+x_sq$observed
+x_sq$expected
+x_sq 
+
+# Correct degrees of freedom
+1 - pchisq(x_sq$statistic, df = 3) #0.7967786
+```
+
+
+### V1
+```{r, echo = TRUE}
+
+
+n = sum(grids) #576
+total = (0*229 + 1*211 + 2*93 + 3*35 + 4*7 + 7*1) #537
+
+# mean for poisson distribution
+y_hat = total/n #537/576
+y_hat
+
+# Poisson probabilities
+# e_lambda = 1/(2.718281828)^0.932
+# e_lambda
+
+probabilities <- round(dpois(0:7, lambda = y_hat), digits = 5)
+probabilities
+
+# expected frequencies
+expected <- probabilities * n
+expected
+
+# Frequencies Table
+bomb_df <- data.frame(nBomb = 0:7,
+                        obsFreq = as.vector(grids),
+                        expFreq = expected)
+bomb_df
+
+# Eliminate 3 degrees of freedom (DF) + added to the previous term
+e4 = expected[5]+expected[6]+expected[7]
+e4
+
+# Combine observations 5,6,7 into observation 4
+observation_freq_group <- c(229, 211, 93, 35, 8)
+expected_freq_group <- c(expected[1], expected[2], expected[3], expected[4], e4)
+
+
+# Sum of observation and expected groups
+observation_sum <- sum(observation_freq_group)
+expected_sum <- sum(expected_freq_group)
+
+# Recalculate expected frequencies as 576
+diff = observation_sum - expected_sum
+expected_freq_sum <- expected_sum + diff
+
+expected_freq_group[length(expected_freq_group)] <- n - sum(expected_freq_group[1:(length(expected_freq_group)-1)])
+expected_freq_group
+
+# Adjusted Data frame
+data.frame(nBomb = 0:4, obs = observation_freq_group, expect = expected_freq_group)
+
+# Goodness of Fit
+x_square <- chisq.test(observation_freq_group, p = expected_freq_group/n)
+
+# Correct degrees of freedom (DF) calculation
+hit_pd <- 1 - pchisq(x_square$statistic, df = 3) #0.800663
+hit_pd
+```

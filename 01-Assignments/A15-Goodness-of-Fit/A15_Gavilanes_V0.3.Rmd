@@ -1,6 +1,6 @@
 ---
 title: "Goodness of Fit - Week 12, Day 1"
-author: "Your Name Here"
+author: "Hector Gavilanes"
 format: html
 self-contained: true
 editor: source
@@ -28,7 +28,23 @@ counts <- c(238, 32, 12, 13, 5)
 probs <- c(0.8, 0.1, 0.05, 0.03, 0.02)
 chisq.test(counts, p = probs)
 ```
-Keep H0. There is not sufficient evidence to suggest that the data does not follow the historical defective distribution.
+**Hypotheses**
+
+- $H_0$: The data follows a historical defective distribution
+- $H_1$: The data does not follow a historical defective distribution
+
+**Test Statistic and *p*-Value**
+
+- $\chi_0^2 = 2.6944$; $\ p = 0.6102$
+
+**Rejection Region**
+
+- Reject $H_0$ if $p < \alpha$; $\alpha=0.05$
+
+**Conclusion/Interpretation**
+
+- Keep $H_0$ at the $\alpha=0.05$ level. There is not sufficient evidence to suggest that the data does not follow a historical defective distribution.
+
 
 **2. The data in the following table document the starting positions of the winning horses in 144 races. The starting position listed as 1 is the position of the horse in the starting gate closest to the inside rail of the track, and position 8 is farthest from the rail. Racing officials contend that starting position has no effect on the chance of winning the race.**
 
@@ -57,7 +73,7 @@ chisq.test(win_counts)
 
 **Test Statistic and *p*-Value**
 
-- $\chi_0^2=576.07$; $\ p < 0.001$
+- $\chi_0^2 = 16.333$; $\ p = 0.02224$
 
 **Rejection Region**
 
@@ -83,83 +99,15 @@ chisq.test(win_counts)
 
 **Does the distribution of bomb hits appear to be random across this region of South London?**
 
-### V3
 ```{r}
 
-grids = c(229, 211, 93, 35, 7, 1)
-
-data <- data.frame(n_Bomb_hits = 0:5,
-                   Grids = grids)
-
-# Total Cell clumps per field
-total_clumps = (0*229 + 1*211 + 2*93 + 3*35 + 4*7 + 7*1) #537
-
-# Total Grids
-n = sum(data$Grids) #576
-
-# Poisson mean
-y_hat = total_clumps/n
-
-# Poisson Probabilities
-probabilities <- round(dpois(0:6, lambda = y_hat), 5)
-p7 = round(1 - ppois(6, y_hat), 5)
-probabilities <- c(probabilities, p7)
-
-
-probs_df <- data.frame(data,
-                       Probabilities = probabilities)
-format_table(probs_df, align = "l")
-
-# Expected counts
-expected <- probabilities * n
-
-expected_df <- data.frame(probs_df,
-                          Expected = expected)
-format_table(expected_df)
-
-# Eliminate 3 degrees of freedom (DF) + added to the previous term
-e4 = expected[5]+expected[6]+expected[7]+expected[8]
-e4
-
-# combine degrees of freedom into observation 4
-combined_grids = c(229, 211, 93, 35, 8)
-combined_expected = c(expected[0:4],  e4)
-
-
-combined_df <- data.frame(n_bomb_hits = 0:4,
-                          Grids = combined_grids,
-                          Expected = combined_expected)
-  
-combined_df
-
-# recalculate expected frequency for last group
-combined_df$Expected[length(combined_df$Expected)] <-
-  n - sum(combined_df$Expected[1:(length(combined_df$Expected)-1)])
-
-# table
-combined_df
-
-# Chi-squared goodness of fit
-x_sq <-chisq.test(combined_df$Grids, p = combined_df$Expected/n)
-x_sq$observed
-x_sq$expected
-x_sq 
-
-# Correct degrees of freedom
-1 - pchisq(x_sq$statistic, df = 3) #0.7967786
-```
-
-### V2
-```{r}
-library(formattable)
-library(tidyverse)
 grids = c(229, 211, 93, 35, 7, 0, 0, 1)
 
 data <- data.frame(n_Bomb_hits = 0:7,
                    Grids = grids)
 
 # Total Cell clumps per field
-total_clumps = (0*229 + 1*211 + 2*93 + 3*35 + 4*7 + 7*1) #537
+total_clumps = (1*211 + 2*93 + 3*35 + 4*7 + 7*1) #537
 
 # Total Grids
 n = sum(data$Grids) #576
@@ -172,7 +120,6 @@ probabilities <- round(dpois(0:6, lambda = y_hat), 5)
 p7 = round(1 - ppois(6, y_hat), 5)
 probabilities <- c(probabilities, p7)
 
-
 probs_df <- data.frame(data,
                        Probabilities = probabilities)
 format_table(probs_df, align = "l")
@@ -184,11 +131,11 @@ expected_df <- data.frame(probs_df,
                           Expected = expected)
 format_table(expected_df)
 
-# Eliminate 3 degrees of freedom (DF) + added to the previous term
+# Eliminate 3 degrees of freedom (DF) + added to the 4th observation
 e4 = expected[5]+expected[6]+expected[7]+expected[8]
 e4
 
-# combine degrees of freedom into observation 4
+# combine degrees of freedom into 4th observation 
 combined_grids = c(229, 211, 93, 35, 8)
 combined_expected = c(expected[0:4],  e4)
 
@@ -203,75 +150,36 @@ combined_df
 combined_df$Expected[length(combined_df$Expected)] <-
   n - sum(combined_df$Expected[1:(length(combined_df$Expected)-1)])
 
-# table
 combined_df
 
 # Chi-squared goodness of fit
 x_sq <-chisq.test(combined_df$Grids, p = combined_df$Expected/n)
-x_sq$observed
-x_sq$expected
-x_sq 
+x_sq
+p_value = round(x_sq$p.value, 3) 
 
 # Correct degrees of freedom
-1 - pchisq(x_sq$statistic, df = 3) #0.7967786
+# k-1 = 8 - 1 = 7
+# 7 - 1 = 6 (estimating mean)
+# 6 - 3 = 3 (cancelled expected frequencies)
+corrected_x_sq = 1 - pchisq(x_sq$statistic, df = 3) 
+
+corrected_x_sq = round(corrected_x_sq, 3) #X-sq = 0.7967786
 ```
 
+**Hypotheses**
 
-### V1
-```{r, echo = TRUE}
+- $H_0$: The data follows a Poisson distribution
+- $H_1$: The data does not follow a Poisson distribution
 
+**Test Statistic and *p*-Value**
 
-n = sum(grids) #576
-total = (0*229 + 1*211 + 2*93 + 3*35 + 4*7 + 7*1) #537
+- $\chi_0^2 = `r corrected_x_sq`$; $\ p = `r p_value`$
 
-# mean for poisson distribution
-y_hat = total/n #537/576
-y_hat
+**Rejection Region**
 
-# Poisson probabilities
-# e_lambda = 1/(2.718281828)^0.932
-# e_lambda
+- Reject $H_0$ if $p < \alpha$; $\alpha=0.05$
 
-probabilities <- round(dpois(0:7, lambda = y_hat), digits = 5)
-probabilities
+**Conclusion/Interpretation**
 
-# expected frequencies
-expected <- probabilities * n
-expected
-
-# Frequencies Table
-bomb_df <- data.frame(nBomb = 0:7,
-                        obsFreq = as.vector(grids),
-                        expFreq = expected)
-bomb_df
-
-# Eliminate 3 degrees of freedom (DF) + added to the previous term
-e4 = expected[5]+expected[6]+expected[7]
-e4
-
-# Combine observations 5,6,7 into observation 4
-observation_freq_group <- c(229, 211, 93, 35, 8)
-expected_freq_group <- c(expected[1], expected[2], expected[3], expected[4], e4)
-
-
-# Sum of observation and expected groups
-observation_sum <- sum(observation_freq_group)
-expected_sum <- sum(expected_freq_group)
-
-# Recalculate expected frequencies as 576
-diff = observation_sum - expected_sum
-expected_freq_sum <- expected_sum + diff
-
-expected_freq_group[length(expected_freq_group)] <- n - sum(expected_freq_group[1:(length(expected_freq_group)-1)])
-expected_freq_group
-
-# Adjusted Data frame
-data.frame(nBomb = 0:4, obs = observation_freq_group, expect = expected_freq_group)
-
-# Goodness of Fit
-x_square <- chisq.test(observation_freq_group, p = expected_freq_group/n)
-
-# Correct degrees of freedom (DF) calculation
-hit_pd <- 1 - pchisq(x_square$statistic, df = 3) #0.800663
-hit_pd
-```
+- Keep $H_0$ at the $\alpha=0.05$ level. There is not sufficient evidence to suggest that the data does not follow a Poisson distribution.
+- In other words, the data follows a Poisson distribution.
