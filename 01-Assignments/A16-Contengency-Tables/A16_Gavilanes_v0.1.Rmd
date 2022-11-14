@@ -25,26 +25,29 @@ library(formattable)
 **Is there evidence to suggest there is age discrimination? Test at the $\alpha=0.05$ level.**
 
 ```{r}
+# create contingency matrix table 
 age_matrix <- matrix(c(9, 29, 34, 12,
                        41, 39, 46, 38),
-                     nrow = 2, ncol = 4, byrow = T)
-colnames(age_matrix) <- c("<30", "30-39", "40-49", ">=50")
-rownames(age_matrix) <- c("Promoted", "Not Promoted")
-age_table <- as.data.frame(age_matrix)
+                     nrow = 2, ncol = 4, byrow = T,
+                     dimnames = list(c("Promoted", "Not Promoted"),
+                                     c("<30", "30-39", "40-49", ">=50")))
+
+age_table <- as.data.frame.matrix(age_matrix)
 format_table(age_table)
-# format_table(as.data.frame(age_matrix))
+
+# Chi-square test
 chisq.test(age_matrix)
 
-# library(reshape2)
-# long_data <- melt(age_table)
-# long_data %>% 
-#   select(starts_with("Promoted"))
-# long_data
-# age_table %>% 
-#   filter(rownames == "Promoted") %>% 
-#   ggplot(aes(x = factor(rownames), y = age_table[1:4]))+
-#   geom_bar()
+# Visualization of Age Descrimination
+long_age_table <- age_table %>% 
+  rownames_to_column() %>% 
+  gather(Column, Value, -rowname)
 
+long_age_table
+
+gg_age_table <- long_age_table %>% 
+  ggplot(aes(x = Column, y = Value, fill = rowname))+
+  geom_bar(stat = "identity")
 ```
 **Hypotheses**
 
@@ -74,14 +77,28 @@ chisq.test(age_matrix)
 **Is there evidence to suggest there is age discrimination? Test at the $\alpha=0.05$ level.**
 
 ```{r}
-# warranty <- matrix(c(21,15, 4,10), nrow = 2, ncol = 2, byrow = TRUE,
-#                dimnames = list(c("NO_purchase", "Yes_purchase"),
-#                                c("No_Warranty", "Yes_warranty")))
-
+# create contingency matrix table 
 age_matrix_2 <- matrix(c(38, 46,
                        80, 84),
-                     nrow = 2, ncol = 2, byrow = T)
+                     nrow = 2, ncol = 2, byrow = T,
+                     dimnames = list(c("Promoted", "Not Promoted"),
+                                     c("<=39", ">=40")))
+age_table_2 <- as.data.frame.matrix(age_matrix_2)
+format_table(age_table_2)
+
+# Chi-square test
 chisq.test(age_matrix_2)
+
+# Visualization of Age Descrimination
+long_age_table_2 <- age_table_2 %>% 
+  rownames_to_column() %>% 
+  gather(Column, Value, -rowname)
+
+long_age_table_2
+
+gg_age_table_2 <- long_age_table_2 %>% 
+  ggplot(aes(x = Column, y = Value, fill = rowname))+
+  geom_bar(stat = "identity")
 ```
 
 **Hypotheses**
@@ -103,11 +120,36 @@ chisq.test(age_matrix_2)
 
 **1c. Construct (separate) graphs to represent the data in 1a and 1b.**
 
+#### Visualization of 1A
 ```{r}
-
+gg_age_table+
+  labs(title = "Promotions by Age",
+       subtitle = "Fire Department",
+       fill = "Promotions")+
+  xlab("Age Groups")+
+  ylab("Count")
+  
+```
+#### Visualization of 1B
+```{r}
+gg_age_table_2+
+  labs(title = "Promotions by Age",
+       subtitle = "Fire Department",
+       fill = "Promotions")+
+  xlab("Age Groups")+
+  ylab("Count")
 ```
 
 **1d. What are you take away from this exercise?**
+
+Contingency tables display frequencies for two categorical variables that demonstrate the relationship between the variables.
+Moreover, a contingency table in survey research, business intelligence, engineering, and scientific research is worthwhile and practical.
+
+In the age discrimination lawsuit, statistical and graphical results demonstrate the relationship between promotion depending on age. 
+The promotions in smaller groups like 1A are in favor of the following ages: 30-39, and 40-49.
+However, in 1B the data demonstrates that the promotions are almost equal among both age groups.
+
+The fire department promotion policy needs further investigation to determine if there is a consistent discrimination pattern based on age.
 
 **2. Recall this problem from last week:**
 
