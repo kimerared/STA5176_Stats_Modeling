@@ -99,13 +99,9 @@ is.factor(clean_data$Embarked)
 # R interpretation of categorical variable
 contrasts(clean_data$Sex)
 
-# Cleaning & formatting of the data
-train <- clean_data[1:445,]
-test <- clean_data[446:891,]
-
 # logistic regression model
 m2 <- glm(Survived ~ Age + Pclass + Sex,
-          data = train,
+          data = clean_data,
           family = "binomial")
 summary(m2)
 

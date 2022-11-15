@@ -2797,41 +2797,37 @@ data$Fare    0.999  1.009</code></pre>
 female    0
 male      1</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Cleaning &amp; formatting of the data</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>train <span class="ot">&lt;-</span> clean_data[<span class="dv">1</span><span class="sc">:</span><span class="dv">445</span>,]</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>test <span class="ot">&lt;-</span> clean_data[<span class="dv">446</span><span class="sc">:</span><span class="dv">891</span>,]</span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="co"># logistic regression model</span></span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">glm</span>(Survived <span class="sc">~</span> Age <span class="sc">+</span> Pclass <span class="sc">+</span> Sex,</span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>          <span class="at">data =</span> train,</span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>          <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
-<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># logistic regression model</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">glm</span>(Survived <span class="sc">~</span> Age <span class="sc">+</span> Pclass <span class="sc">+</span> Sex,</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">data =</span> clean_data,</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
 glm(formula = Survived ~ Age + Pclass + Sex, family = &quot;binomial&quot;, 
-    data = train)
+    data = clean_data)
 
 Deviance Residuals: 
     Min       1Q   Median       3Q      Max  
--2.4833  -0.6431  -0.4500   0.6836   2.3545  
+-2.6557  -0.6579  -0.4211   0.6371   2.4264  
 
 Coefficients:
-            Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept)  3.95156    0.61983   6.375 1.83e-10 ***
-Age         -0.03061    0.01075  -2.847  0.00441 ** 
-Pclass      -0.85392    0.16477  -5.183 2.19e-07 ***
-Sexmale     -2.71969    0.25363 -10.723  &lt; 2e-16 ***
+             Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)  4.731956   0.449819  10.520  &lt; 2e-16 ***
+Age         -0.033427   0.007348  -4.549 5.38e-06 ***
+Pclass      -1.168463   0.118941  -9.824  &lt; 2e-16 ***
+Sexmale     -2.611964   0.186609 -13.997  &lt; 2e-16 ***
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 595.59  on 444  degrees of freedom
-Residual deviance: 410.42  on 441  degrees of freedom
-AIC: 418.42
+    Null deviance: 1186.66  on 890  degrees of freedom
+Residual deviance:  805.33  on 887  degrees of freedom
+AIC: 813.33
 
-Number of Fisher Scoring iterations: 4</code></pre>
+Number of Fisher Scoring iterations: 5</code></pre>
 </div>
 </div>
 <p><strong>2a. Report the model.</strong></p>
@@ -2840,11 +2836,11 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>m2_coeff</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>(Intercept)         Age      Pclass     Sexmale 
- 3.95156418 -0.03060827 -0.85392420 -2.71969136 </code></pre>
+ 4.73195642 -0.03342722 -1.16846287 -2.61196394 </code></pre>
 </div>
 </div>
 <p><span class="math display">\[
-\ln \left( \frac{\hat{\pi}}{1-\hat{\pi}} \right) = 3.952 -0.031 \text{ Age} -0.854 \text{ Class} -2.72 \text{ Sex}
+\ln \left( \frac{\hat{\pi}}{1-\hat{\pi}} \right) = 4.732 -0.033 \text{ Age} -1.168 \text{ Class} -2.612 \text{ Sex}
 \]</span> <strong>2b. Which, if any, are significant predictors of survival? The full hypothesis test is not needed, but you must provide statistical justification.</strong></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>significant <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">summary</span>(m2))[,<span class="st">&#39;Pr(&gt;|z|)&#39;</span>]</span>
@@ -2856,7 +2852,7 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(significant, <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>(Intercept)         Age      Pclass     Sexmale 
-      0.000       0.004       0.000       0.000 </code></pre>
+          0           0           0           0 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>non_significant <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">summary</span>(m2))[,<span class="st">&#39;Pr(&gt;|z|)&#39;</span>]</span>
 <span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>non_significant <span class="sc">&gt;</span> <span class="fl">0.05</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -2867,7 +2863,7 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(non_significant, <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>(Intercept)         Age      Pclass     Sexmale 
-      0.000       0.004       0.000       0.000 </code></pre>
+          0           0           0           0 </code></pre>
 </div>
 </div>
 <p>All variables are significant: - Age (p = 0.004) - Class (p &lt; 0.001) - Sex (p &lt; 0.001)</p>
@@ -2877,7 +2873,7 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">exp</span>(<span class="fu">coefficients</span>(m2)[<span class="sc">-</span><span class="dv">1</span>]), <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    Age  Pclass Sexmale 
-  0.970   0.426   0.066 </code></pre>
+  0.967   0.311   0.073 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get CI of odd ratios</span></span>
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">confint</span>(m2))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -2886,10 +2882,10 @@ Number of Fisher Scoring iterations: 4</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                  2.5 %      97.5 %
-(Intercept) 16.02509233 182.9468514
-Age          0.94924063   0.9901924
-Pclass       0.30595968   0.5846243
-Sexmale      0.03951699   0.1070084</code></pre>
+(Intercept) 48.04527527 280.7160638
+Age          0.95307909   0.9809661
+Pclass       0.24501062   0.3907723
+Sexmale      0.05051275   0.1050636</code></pre>
 </div>
 </div>
 <p><strong>2d. Provide interpretations for the odds ratios for each of the predictors in the model.</strong></p>
