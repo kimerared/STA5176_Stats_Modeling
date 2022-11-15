@@ -1,0 +1,217 @@
+---
+title: "Contingency Tables - Week 12, Day 2"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(gmodels)
+library(formattable)
+```
+
+**1. The fire department in a large city is examining its promotion policy to assess if there is the potential for an age discrimination lawsuit.**
+
+**1a. Consider the following data:**
+
+| | Under 30 | 30--39 | 40--49 | 50 or Older | 
+|--|--|--|--|--|
+| Promoted | 9 | 29 | 34 | 12 |
+| Not Promoted | 41 | 39 | 46 | 38 |
+
+
+**Is there evidence to suggest there is age discrimination? Test at the $\alpha=0.05$ level.**
+
+```{r}
+# create contingency matrix table 
+age_matrix <- matrix(c(9, 29, 34, 12,
+                       41, 39, 46, 38),
+                     nrow = 2, ncol = 4, byrow = T,
+                     dimnames = list(c("Promoted", "Not Promoted"),
+                                     c("<30", "30-39", "40-49", ">=50")))
+
+age_table <- as.data.frame.matrix(age_matrix)
+format_table(age_table)
+
+# Chi-square test
+chisq.test(age_matrix)
+
+# Visualization of Age Descrimination
+long_age_table <- age_table %>% 
+  rownames_to_column() %>% 
+  gather(Column, Value, -rowname)
+
+long_age_table
+
+gg_age_table <- long_age_table %>% 
+  ggplot(aes(x = Column, y = Value, fill = rowname))+
+  geom_bar(stat = "identity")
+
+# get percentages
+long_age_table %>% 
+  mutate(x_percent = (long_age_table$Value) / sum(long_age_table$Value))
+long_age_table
+
+```
+Test
+```{r}
+# library(gsheet)
+# # data
+# data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1H3TP-2SBMGleriJLESOe1cdCjtSj2F76bUh5iBqC8tI/edit#gid=2142000894"))
+# 
+# CrossTable(long_age_table$rowname, long_age_table$Column,
+#            prop.chisq = FALSE,
+#            prop.r = FALSE,
+#            prop.t = FALSE,
+#            chisq = TRUE)
+```
+
+**Hypotheses**
+
+- $H_0$: Promotion does not depend on relationship of age.
+- $H_1$: Promotion depends on relationship of age.
+
+**Test Statistic and *p*-Value**
+
+- $\chi_0^2 = 12.796$; $\ p = 0.0051$
+
+**Rejection Region**
+
+- Reject $H_0$ if $p < \alpha$; $\alpha=0.05$
+
+**Conclusion/Interpretation**
+
+- Reject $H_0$ at the $\alpha=0.05$ level. There is sufficient evidence to suggest that promotion depends on relationship of age.
+
+
+**1b. Consider the following data:**
+
+| | 39 or Younger | 40 or Older | 
+|--|--|--|
+| Promoted | 38 | 46 |
+| Not Promoted | 80 | 84 |
+
+**Is there evidence to suggest there is age discrimination? Test at the $\alpha=0.05$ level.**
+
+```{r}
+# create contingency matrix table 
+age_matrix_2 <- matrix(c(38, 46,
+                       80, 84),
+                     nrow = 2, ncol = 2, byrow = T,
+                     dimnames = list(c("Promoted", "Not Promoted"),
+                                     c("<=39", ">=40")))
+age_table_2 <- as.data.frame.matrix(age_matrix_2)
+format_table(age_table_2)
+
+# Chi-square test
+chisq.test(age_matrix_2)
+
+# Visualization of Age Descrimination
+long_age_table_2 <- age_table_2 %>% 
+  rownames_to_column() %>% 
+  gather(Column, Value, -rowname)
+
+long_age_table_2
+
+gg_age_table_2 <- long_age_table_2 %>% 
+  ggplot(aes(x = Column, y = Value, fill = rowname))+
+  geom_bar(stat = "identity")
+```
+
+**Hypotheses**
+
+- $H_0$: Promotion does not depend on relationship of age.
+- $H_1$: Promotion depends on relationship of age.
+
+**Test Statistic and *p*-Value**
+
+- $\chi_0^2 = 12.796$; $\ p = 0.6933$
+
+**Rejection Region**
+
+- Reject $H_0$ if $p < \alpha$; $\alpha=0.05$
+
+**Conclusion/Interpretation**
+
+- Keep $H_0$ at the $\alpha=0.05$ level. There is not sufficient evidence to suggest that promotion depends on relationship of age.
+
+**1c. Construct (separate) graphs to represent the data in 1a and 1b.**
+
+#### Visualization of 1A
+```{r}
+gg_age_table+
+  labs(title = "Promotions by Age",
+       subtitle = "Fire Department",
+       fill = "Promotions",
+       x = "Age Groups",
+       y = "Count")+
+  geom_text(label = "3.63%", x = 1, y = 5, size = 4, colour = "white")+
+  geom_text(label = "16.53%", x = 1, y = 40, size = 4, colour = "white")+
+  geom_text(label = "4.84%", x = 2, y = 5, size = 4, colour = "white")+
+  geom_text(label = "15.32%", x = 2, y = 40, size = 4, colour = "white")+
+  geom_text(label = "11.69%", x = 3, y = 5, size = 4, colour = "white")+
+  geom_text(label = "15.73%", x = 3, y = 40, size = 4, colour = "white")+
+  geom_text(label = "13.71%", x = 4, y = 5, size = 4, colour = "white")+
+  geom_text(label = "18.55%", x = 4, y = 40, size = 4, colour = "white")
+  
+# get percentages
+percent_age_table <- long_age_table %>% 
+  mutate(x_percent = (long_age_table$Value) / sum(long_age_table$Value)) %>% 
+  mutate(x_percent = round(x_percent * 100, 2))
+# percent_age_table$x_percent[1]
+```
+#### Visualization of 1B
+```{r}
+gg_age_table_2+
+  labs(title = "Promotions by Age",
+       subtitle = "Fire Department",
+       fill = "Promotions")+
+  xlab("Age Groups")+
+  ylab("Count")
+```
+
+**1d. What are you take away from this exercise?**
+
+Contingency tables display frequencies for two categorical variables that demonstrate the relationship between the variables.
+Moreover, a contingency table in survey research, business intelligence, engineering, and scientific research is worthwhile and practical.
+
+In the age discrimination lawsuit, statistical and graphical results demonstrate the relationship between promotion depending on age. 
+The promotions in smaller groups like 1A are in favor of the following ages: 30-39, and 40-49.
+However, in 1B the data demonstrates that the promotions are almost equal among both age groups.
+
+The fire department promotion policy needs further investigation to determine if there is a consistent discrimination pattern based on age.
+
+**2. Recall this problem from last week:**
+
+**A large retail lawn care dealer currently provides a 2-year warranty on all lawn mowers sold at its stores. A new employee suggested that the dealer could save money by just not offering the warranty. To evaluate this suggestion, the dealer randomly decides whether or not to offer the warranty to the next 50 customers who enter the store and express an interest in purchasing a lawnmower. Out of the 25 customers offered the warranty, 10 purchased a mower as compared to 4 of 25 not offered the warranty.**
+
+**Last week, you determined that the data does not meet the assumption to use the *z* test. Now that we know what to do in the case of small expected values, use the appropriate hypothesis test to determine if offering the warranty changes the proportion of customers who will purchase a mower. Test at the $\alpha=0.05$ level.**
+
+```{r}
+warranty <- matrix(c(21,15, 4,10), nrow = 2, ncol = 2, byrow = TRUE,
+               dimnames = list(c("No_purchase", "Yes_purchase"),
+                               c("No_Warranty", "Yes_warranty")))
+warranty
+
+# fisher Test
+fisher.test(warranty)
+
+```
+**Hypotheses**
+
+- $H_0$: offering the warranty does not depend on relationship of mower purchasing.
+- $H_1$: offering the warranty depends on relationship of mower purchasing.
+
+**Test Statistic and *p*-Value**
+
+- $\chi_0^2 = 2.4802$; $\ p = 0.1153$
+
+**Rejection Region**
+
+- Reject $H_0$ if $p < \alpha$; $\alpha=0.05$
+
+**Conclusion/Interpretation**
+
+- Keep $H_0$ at the $\alpha=0.05$ level. There is not sufficient evidence to suggest that offering the warranty depends on relationship of mower purchasing.
