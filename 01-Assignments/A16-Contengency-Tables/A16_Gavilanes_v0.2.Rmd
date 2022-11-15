@@ -141,6 +141,12 @@ gg_age_table_2 <- long_age_table_2 %>%
 
 #### Visualization of 1A
 ```{r}
+# get percentages
+percent_age_table <- long_age_table %>% 
+  mutate(x_percent = (long_age_table$Value) / sum(long_age_table$Value)) %>% 
+  mutate(x_percent = round(x_percent * 100, 2))
+
+# ggplot
 gg_age_table+
   labs(title = "Promotions by Age",
        subtitle = "Fire Department",
@@ -156,20 +162,27 @@ gg_age_table+
   geom_text(label = "13.71%", x = 4, y = 5, size = 4, colour = "white")+
   geom_text(label = "18.55%", x = 4, y = 40, size = 4, colour = "white")
   
-# get percentages
-percent_age_table <- long_age_table %>% 
-  mutate(x_percent = (long_age_table$Value) / sum(long_age_table$Value)) %>% 
-  mutate(x_percent = round(x_percent * 100, 2))
-# percent_age_table$x_percent[1]
 ```
+
 #### Visualization of 1B
 ```{r}
+# get percentages
+percent_age_table_2 <- long_age_table_2 %>% 
+  mutate(x_percent = (long_age_table_2$Value) / sum(long_age_table_2$Value)) %>% 
+  mutate(x_percent = round(x_percent * 100, 2))
+
+percent_age_table_2
+# ggplot
 gg_age_table_2+
   labs(title = "Promotions by Age",
        subtitle = "Fire Department",
        fill = "Promotions")+
   xlab("Age Groups")+
-  ylab("Count")
+  ylab("Count")+
+  geom_text(label = "15.32%", x = 1, y = 25, size = 4, colour = "white")+
+  geom_text(label = "32.26%", x = 1, y = 100, size = 4, colour = "white")+
+  geom_text(label = "18.55%", x = 2, y = 25, size = 4, colour = "white")+
+  geom_text(label = "33.87%", x = 2, y = 100, size = 4, colour = "white")
 ```
 
 **1d. What are you take away from this exercise?**
@@ -177,9 +190,9 @@ gg_age_table_2+
 Contingency tables display frequencies for two categorical variables that demonstrate the relationship between the variables.
 Moreover, a contingency table in survey research, business intelligence, engineering, and scientific research is worthwhile and practical.
 
-In the age discrimination lawsuit, statistical and graphical results demonstrate the relationship between promotion depending on age. 
+In the age discrimination potential lawsuit, statistical and graphical results demonstrate the relationship between promotion depending on age. 
 The promotions in smaller groups like 1A are in favor of the following ages: 30-39, and 40-49.
-However, in 1B the data demonstrates that the promotions are almost equal among both age groups.
+However, in 1B the data demonstrates that the promotions are almost equal among both large age groups.
 
 The fire department promotion policy needs further investigation to determine if there is a consistent discrimination pattern based on age.
 
@@ -204,9 +217,9 @@ fisher.test(warranty)
 - $H_0$: offering the warranty does not depend on relationship of mower purchasing.
 - $H_1$: offering the warranty depends on relationship of mower purchasing.
 
-**Test Statistic and *p*-Value**
+**p-Value**
 
-- $\chi_0^2 = 2.4802$; $\ p = 0.1153$
+- $\ p = 0.1137$
 
 **Rejection Region**
 
