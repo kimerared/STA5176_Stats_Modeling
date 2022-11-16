@@ -7,10 +7,9 @@ editor: source
 ---
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
-# library(tidyverse)
+library(tidyverse)
 library(gsheet)
 library(naniar)
-library(rlang)
 ```
 
 **Recall the Titanic data from lecture. Use it to answer the following questions.**
@@ -25,7 +24,8 @@ data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1TrJ6jZ3hP6
 
 ```{r, echo = TRUE}
 m1 <- glm(data$Survived ~ data$Age + data$SibSp + data$Parch + data$Pclass + data$Fare,
-          family = binomial)
+          family = binomial,
+          na.action = na.exclude)
 summary(m1)
 ```
 
@@ -91,59 +91,23 @@ gg_miss_var(data) +
 clean_data <- subset(data,select=c(2,3,5,6,7,8,10,12))
 
 # replace missing values with mean
-clean_data$Age[is.na(clean_data$Age)] <- mean(clean_data$Age,na.rm=T)
+# clean_data$Age[is.na(clean_data$Age)] <- mean(clean_data$Age,na.rm=T)
 
-# double-check variables are factors 
+# double-check if variables are factors 
 is.factor(clean_data$Sex)
 is.factor(clean_data$Embarked)
 
 # R interpretation of categorical variable
 contrasts(clean_data$Sex)
 
-# Cleaning & formatting of the data
-train <- clean_data[1:445,]
-test <- clean_data[446:891,]
-
-# logistic regression model
+# logistic regression model, excluding missing values
 m2 <- glm(Survived ~ Age + Pclass + Sex,
-          data = train,
-          family = "binomial")
+          data = clean_data,
+          family = binomial,
+          na.action = na.exclude)
 summary(m2)
 
 ```
-### ANOVA to analyze the table of deviance
-```{r}
-anova(m2, test = "Chisq")
-```
-### McFadden R2 index can be used to assess the model fit.
-```{r}
-install.packages("pscl")
-library(pscl)
-pR2(m2)
-```
-### Assessing the predictive ability of the model
-```{r}
-fitted_results <- predict(m2,newdata=subset(test,select=c(2,3,4,5,6,7,8)),type='response')
-fitted_results <- ifelse(fitted_results > 0.5,1,0)
-
-# testing for Accuracy
-misClasificError <- mean(fitted_results != test$Survived)
-print(paste('Accuracy',1-misClasificError))
-```
-### ROC curve 
-```{r}
-library(ROCR)
-p <- predict(m2, newdata=subset(test,select=c(2,3,4,5,6,7,8)), type="response")
-pr <- prediction(p, test$Survived)
-prf <- performance(pr, measure = "tpr", x.measure = "fpr")
-plot(prf)
-
-auc <- performance(pr, measure = "auc")
-auc <- auc@y.values[[1]]
-auc
-
-```
-
 
 **2a. Report the model.**
 ```{r}
@@ -181,3 +145,5 @@ exp(confint(m2))
 ```
 
 **2d. Provide interpretations for the odds ratios for each of the predictors in the model.**
+Now we can analyze the fitting and interpret what the model is telling us.
+First of all, we can see that SibSp, Fare and Embarked are not statistically significant. As for the statistically significant variables, sex has the lowest p-value suggesting a strong association of the sex of the passenger with the probability of having survived. The negative coefficient for this predictor suggests that all other variables being equal, the male passenger is less likely to have survived. Remember that in the logit model the response variable is log odds: ln(odds) = ln(p/(1-p)) = a*x1 + b*x2 + … + z*xn. Since male is a dummy variable, being male reduces the log odds by 2.75 while a unit increase in age reduces the log odds by 0.037.
