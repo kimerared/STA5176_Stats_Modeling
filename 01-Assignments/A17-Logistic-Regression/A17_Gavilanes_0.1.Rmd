@@ -127,7 +127,7 @@ non_significant <- coef(summary(m2))[,'Pr(>|z|)']
 non_significant > 0.05
 round(non_significant, 3)
 ```
-All variables are significant:
+All variables are significant predictors of survival:
 - Age     (p = 0.004)
 - Class   (p < 0.001)
 - Sex     (p < 0.001)

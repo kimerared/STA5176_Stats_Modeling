@@ -110,6 +110,39 @@ m2 <- glm(Survived ~ Age + Pclass + Sex,
 summary(m2)
 
 ```
+### ANOVA to analyze the table of deviance
+```{r}
+anova(m2, test = "Chisq")
+```
+### McFadden R2 index can be used to assess the model fit.
+```{r}
+install.packages("pscl")
+library(pscl)
+pR2(m2)
+```
+### Assessing the predictive ability of the model
+```{r}
+fitted_results <- predict(m2,newdata=subset(test,select=c(2,3,4,5,6,7,8)),type='response')
+fitted_results <- ifelse(fitted_results > 0.5,1,0)
+
+# testing for Accuracy
+misClasificError <- mean(fitted_results != test$Survived)
+print(paste('Accuracy',1-misClasificError))
+```
+### ROC curve 
+```{r}
+library(ROCR)
+p <- predict(m2, newdata=subset(test,select=c(2,3,4,5,6,7,8)), type="response")
+pr <- prediction(p, test$Survived)
+prf <- performance(pr, measure = "tpr", x.measure = "fpr")
+plot(prf)
+
+auc <- performance(pr, measure = "auc")
+auc <- auc@y.values[[1]]
+auc
+
+```
+
 
 **2a. Report the model.**
 ```{r}
@@ -131,7 +164,7 @@ non_significant <- coef(summary(m2))[,'Pr(>|z|)']
 non_significant > 0.05
 round(non_significant, 3)
 ```
-All variables are significant:
+All variables are significant predictors of survival:
 - Age     (p = 0.004)
 - Class   (p < 0.001)
 - Sex     (p < 0.001)
