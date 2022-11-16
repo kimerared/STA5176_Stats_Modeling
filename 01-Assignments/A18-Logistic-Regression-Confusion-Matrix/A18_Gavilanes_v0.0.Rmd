@@ -1,0 +1,145 @@
+---
+title: "Logistic Regression - Week 13, Day 2"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(gsheet)
+library(gmodels)
+library(ggplot2)
+library(caret)
+library(InformationValue)
+library(ISLR)
+```
+
+```{r}
+# clear environment
+rm(list = ls())
+# load data
+data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1TrJ6jZ3hP6gQk6FvqbMrFUysEUEqle7XfuLnAkZsHYI/edit"))
+```
+**1. Challenge! Research "good" values of the metrics we discussed in lecture. How can we determine how well the model is performing using these metrics?**
+
+**2. Recall question 1 from the last activity.**
+
+**2a. Restate the model from 1a here.** 
+
+```{r, echo = TRUE}
+m1 <- glm(data$Survived ~ data$Age + data$SibSp + data$Parch + data$Pclass + data$Fare,
+          family = binomial)
+summary(m1)
+
+# get coefficients
+m1_coeff <- coefficients(m1)
+```
+
+$$
+\ln \left( \frac{\hat{\pi}}{1-\hat{\pi}} \right) = `r round(m1_coeff[1],3)` `r round(m1_coeff[2],3)` \text{ Age} `r round(m1_coeff[3],3)` \text{ Sibling \& Spouse} + `r round(m1_coeff[4],3)` \text{ Parents \& Children} `r round(m1_coeff[5],3)` \text{ Class} + `r round(m1_coeff[6],3)` \text{ Fare}
+$$
+
+**2b. Find the confusion matrix for this model.**
+
+```{r, echo = TRUE}
+# exclude missing values
+m1 <- glm(data$Survived ~ data$Age + data$SibSp + data$Parch + data$Pclass + data$Fare,
+          family = binomial,
+          na.action = na.exclude)
+
+# get predicted values
+data <- data %>% 
+  mutate(p_hat = predict(m1, type = "response"))
+
+# survival predictions
+data <- data %>% 
+  mutate(Predicted = ifelse(p_hat > 0.5, 1, 0))
+
+# get Confusion Matrix
+CrossTable(data$Survived, data$Predicted,
+           prop.r = FALSE,
+           prop.c = FALSE,
+           prop.t = FALSE,
+           prop.chisq = FALSE)
+```
+
+
+
+**2c. Find the sensitivity of the model.**
+
+```{r, echo = TRUE}
+tp = 150
+tn = 73
+fp = 140
+fn = 351
+
+# get sensitivity
+sensitivity = tp / (tp + fn)
+round(sensitivity, 3)
+```
+
+**2d. Find the specificity of the model.**
+
+```{r, echo = TRUE}
+# get specificity
+specificity = tn / (tn + fp)
+round(specificity, 3)
+```
+
+**2e. Find the positive predictive value of the model.**
+
+```{r, echo = TRUE}
+# get positive predictive value
+pos_pred_value = tp / (tp + tn)
+round(pos_pred_value, 3)
+```
+
+**2f. Find the negative predictive value of the model.**
+
+```{r, echo = TRUE}
+# get negative predictive value
+neg_pred_value = tn / (tn + fn)
+round(neg_pred_value, 3)
+```
+
+**2g. Find the false discovery rate of the model.**
+
+```{r, echo = TRUE}
+# get false discovery rate
+false_discovery_rate = fp / (fp + tp)
+round(false_discovery_rate, 3)
+```
+
+**3. Compare and contrasts the results from the models constructed in  lecture and the last activity. Which model performs better, based on your answer in question 1?**
+
+**4. Challenge! Construct a graph to support your answer in question 3.**
+
+```{r, echo = TRUE}
+library(cvms)
+library(tibble)
+basic_table <- matrix(c(150, 69, 140, 355), nrow = 2, ncol = 2,
+       dimnames = list(c("Actual_P", "Actual_N"), c("Predicted_P", "Predicted_N")))
+
+# conf_matrix <- tibble("target" = c(0, 1, 0, 1),
+#        "predicted" = c(0, 0, 1, 1),
+#        "counts" = c(351, 140, 73, 150))
+# 
+# plot_confusion_matrix(conf_matrix,
+#                       target_col = "target",
+#                       prediction_col = "predicted",
+#                       counts_col = "counts")
+
+conf_matrix <- tibble("target" = c(1, 0, 1, 0),
+       "predicted" = c(1, 1, 0, 0),
+       "counts" = c(150, 140, 73, 351))
+
+plot_confusion_matrix(conf_matrix,
+                      target_col = "target",
+                      prediction_col = "predicted",
+                      counts_col = "counts")
+```
+
+
+

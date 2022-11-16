@@ -10,6 +10,7 @@ editor: source
 library(tidyverse)
 library(gsheet)
 library(naniar)
+
 ```
 
 **Recall the Titanic data from lecture. Use it to answer the following questions.**
