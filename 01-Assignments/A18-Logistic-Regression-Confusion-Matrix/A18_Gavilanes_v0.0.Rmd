@@ -25,6 +25,10 @@ data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1TrJ6jZ3hP6
 ```
 **1. Challenge! Research "good" values of the metrics we discussed in lecture. How can we determine how well the model is performing using these metrics?**
 
+- Sensitivity: The “true positive rate” – the percentage of individuals the model correctly predicted would default.
+- Specificity: The “true negative rate” – the percentage of individuals the model correctly predicted would not default.
+- Total misclassification rate: The percentage of total incorrect classifications made by the model.
+
 **2. Recall question 1 from the last activity.**
 
 **2a. Restate the model from 1a here.** 
@@ -84,10 +88,15 @@ tn = 351
 fn = 140
 fp = 73
 
-# get sensitivity
+# get sensitivity (recall)
 sensitivity = tp / (tp + fn)
 round(sensitivity, 3)
 
+library(InformationValue)
+# optimalCutoff(data$Survived, data$Predicted)
+
+misClassError(data$Survived, data$Predicted)
+1 - 0.2391
 ```
 
 **2d. Find the specificity of the model.**
