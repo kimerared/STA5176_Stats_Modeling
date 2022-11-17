@@ -11,8 +11,10 @@ library(tidyverse)
 library(gsheet)
 library(gmodels)
 library(ggplot2)
-library(InformationValue)
+# library(InformationValue)
 library(ISLR)
+library(caret)
+library(e1071)
 ```
 
 ```{r}
@@ -52,16 +54,24 @@ m1 <- glm(data$Survived ~ data$Age + data$SibSp + data$Parch + data$Pclass + dat
 data <- data %>% 
   mutate(p_hat = predict(m1, type = "response"))
 
-# survival predictions
+# misclassification error
 data <- data %>% 
   mutate(Predicted = ifelse(p_hat > 0.5, 1, 0))
 
 # get Confusion Matrix
-CrossTable(data$Survived, data$Predicted,
+CrossTable(data$Predicted, data$Survived,
            prop.r = FALSE,
            prop.c = FALSE,
            prop.t = FALSE,
            prop.chisq = FALSE)
+
+# convert to factor
+Actual = factor(data$Survived)
+Predicted = factor(data$Predicted)
+
+# get confusion matrix formulas
+confusionMatrix(Predicted, Actual, positive = "1")
+
 ```
 
 
@@ -70,13 +80,14 @@ CrossTable(data$Survived, data$Predicted,
 
 ```{r, echo = TRUE}
 tp = 150
-tn = 73
-fp = 140
-fn = 351
+tn = 351
+fn = 140
+fp = 73
 
 # get sensitivity
 sensitivity = tp / (tp + fn)
 round(sensitivity, 3)
+
 ```
 
 **2d. Find the specificity of the model.**
@@ -90,8 +101,8 @@ round(specificity, 3)
 **2e. Find the positive predictive value of the model.**
 
 ```{r, echo = TRUE}
-# get positive predictive value
-pos_pred_value = tp / (tp + tn)
+# get positive predictive value (Precision)
+pos_pred_value = tp / (tp + fp)
 round(pos_pred_value, 3)
 ```
 
