@@ -11,10 +11,13 @@ library(tidyverse)
 library(gsheet)
 library(gmodels)
 library(ggplot2)
-# library(InformationValue)
+library(InformationValue) # miscalculation error
 library(ISLR)
 library(caret)
 library(e1071)
+library(cvms) # plot confusion matrix
+# install.packages("ggimage")
+# install.packages("rsvg")
 ```
 
 ```{r}
@@ -24,10 +27,15 @@ rm(list = ls())
 data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1TrJ6jZ3hP6gQk6FvqbMrFUysEUEqle7XfuLnAkZsHYI/edit"))
 ```
 **1. Challenge! Research "good" values of the metrics we discussed in lecture. How can we determine how well the model is performing using these metrics?**
+There are different metrics to assess the quality of a model.
 
-- Sensitivity: The “true positive rate” – the percentage of individuals the model correctly predicted would default.
-- Specificity: The “true negative rate” – the percentage of individuals the model correctly predicted would not default.
-- Total misclassification rate: The percentage of total incorrect classifications made by the model.
+- Accuracy: The percentage of all observations that are correctly classified by the model.
+- Sensitivity: The true positive rate; the probability of a positive test, conditioned on truly being positive.
+- Specificity: The true negative rate; the probability of a negative test, conditioned on truly being negative.
+- Total misclassification rate: The percentage of total incorrect classifications made by the model. The lower the value, the better.
+
+There is no universal threshold to determine a "good" model. A baseline model which includes every observation in a dataset to belong to the most common class. A model with higher metrics than the baseline can be consider useful. The greater the difference in metrics, the better.  
+
 
 **2. Recall question 1 from the last activity.**
 
@@ -92,9 +100,7 @@ fp = 73
 sensitivity = tp / (tp + fn)
 round(sensitivity, 3)
 
-library(InformationValue)
-# optimalCutoff(data$Survived, data$Predicted)
-
+# get miscalculation error
 misClassError(data$Survived, data$Predicted)
 1 - 0.2391
 ```
@@ -133,31 +139,22 @@ round(false_discovery_rate, 3)
 
 **3. Compare and contrasts the results from the models constructed in  lecture and the last activity. Which model performs better, based on your answer in question 1?**
 
+- The model from Q2 can be considered as the baseline model because it has the most common variables of the dataset.
+- The model shown in lecture had less variables; thus, the model's metrics are slighty better than the baseline. 
+
 **4. Challenge! Construct a graph to support your answer in question 3.**
 
 ```{r, echo = TRUE}
-library(cvms)
-library(tibble)
-basic_table <- matrix(c(150, 69, 140, 355), nrow = 2, ncol = 2,
-       dimnames = list(c("Actual_P", "Actual_N"), c("Predicted_P", "Predicted_N")))
-
-# conf_matrix <- tibble("target" = c(0, 1, 0, 1),
-#        "predicted" = c(0, 0, 1, 1),
-#        "counts" = c(351, 140, 73, 150))
-# 
-# plot_confusion_matrix(conf_matrix,
-#                       target_col = "target",
-#                       prediction_col = "predicted",
-#                       counts_col = "counts")
-
-conf_matrix <- tibble("target" = c(1, 0, 1, 0),
-       "predicted" = c(1, 1, 0, 0),
-       "counts" = c(150, 140, 73, 351))
+# plot confusion matrix
+conf_matrix <- tibble("Predicted" = c(0, 0, 1, 1),
+                      "Actual" =    c(0, 1, 0, 1),
+                      "Counts" =    c(351, 140, 73, 150))
 
 plot_confusion_matrix(conf_matrix,
-                      target_col = "target",
-                      prediction_col = "predicted",
-                      counts_col = "counts")
+                      target_col = "Actual",
+                      prediction_col = "Predicted",
+                      counts_col = "Counts")
+
 ```
 
 
