@@ -41,36 +41,39 @@ There is no universal threshold to determine a "good" model. A baseline model wh
 
 **2a. Restate the model from 1a here.** 
 
+## The Baseline model
 ```{r, echo = TRUE}
-m1 <- glm(data$Survived ~ data$Age + data$SibSp + data$Parch + data$Pclass + data$Fare,
+base_mod <- glm(data$Survived ~ data$Age + data$SibSp + data$Parch + data$Pclass + data$Fare,
           family = binomial)
-summary(m1)
+summary(base_mod)
 
 # get coefficients
-m1_coeff <- coefficients(m1)
+base_coeff <- coefficients(base_mod)
 ```
 
 $$
-\ln \left( \frac{\hat{\pi}}{1-\hat{\pi}} \right) = `r round(m1_coeff[1],3)` `r round(m1_coeff[2],3)` \text{ Age} `r round(m1_coeff[3],3)` \text{ Sibling \& Spouse} + `r round(m1_coeff[4],3)` \text{ Parents \& Children} `r round(m1_coeff[5],3)` \text{ Class} + `r round(m1_coeff[6],3)` \text{ Fare}
+\ln \left( \frac{\hat{\pi}}{1-\hat{\pi}} \right) = `r round(base_coeff[1],3)` `r round(base_coeff[2],3)` \text{ Age} `r round(base_coeff[3],3)` \text{ Sibling \& Spouse} + `r round(base_coeff[4],3)` \text{ Parents \& Children} `r round(base_coeff[5],3)` \text{ Class} + `r round(base_coeff[6],3)` \text{ Fare}
 $$
+- Age (p < 0.001), Siblings & Spouses (p = 0.006), Parents & Children (p = 0.023), and Passenger Class (p < 0.001) are significant predictors of survival.
+- Fare (0.194) is not a significant predictor of survival. 
 
 **2b. Find the confusion matrix for this model.**
 
 ```{r, echo = TRUE}
 # exclude missing values
-m1 <- glm(data$Survived ~ data$Age + data$SibSp + data$Parch + data$Pclass + data$Fare,
+base_mod <- glm(data$Survived ~ data$Age + data$SibSp + data$Parch + data$Pclass + data$Fare,
           family = binomial,
           na.action = na.exclude)
 
 # get predicted values
 data <- data %>% 
-  mutate(p_hat = predict(m1, type = "response"))
+  mutate(p_hat = predict(base_mod, type = "response"))
 
 # misclassification error
 data <- data %>% 
   mutate(Predicted = ifelse(p_hat > 0.5, 1, 0))
 
-# get Confusion Matrix
+# get Confusion Matrix cross-table
 CrossTable(data$Predicted, data$Survived,
            prop.r = FALSE,
            prop.c = FALSE,
@@ -81,12 +84,10 @@ CrossTable(data$Predicted, data$Survived,
 Actual = factor(data$Survived)
 Predicted = factor(data$Predicted)
 
-# get confusion matrix formulas
+# get confusion matrix function
 confusionMatrix(Predicted, Actual, positive = "1")
 
 ```
-
-
 
 **2c. Find the sensitivity of the model.**
 
@@ -140,21 +141,78 @@ round(false_discovery_rate, 3)
 **3. Compare and contrasts the results from the models constructed in  lecture and the last activity. Which model performs better, based on your answer in question 1?**
 
 - The model from Q2 can be considered as the baseline model because it has the most common variables of the dataset.
-- The model shown in lecture had less variables; thus, the model's metrics are slighty better than the baseline. 
+- The model shown in lecture had less variables; thus, the model's metrics are better than the baseline. 
+- For both models, the Fare variable is not a significant predictor of survival.
+- Perhaps, it is possible to obtain a better model without the Fare variable.
+
+## The Lecture model
+```{r}
+lecture_mod <- glm(Survived ~ Age + Pclass + Fare, 
+          data = data, 
+          family = binomial)
+summary(lecture_mod)
+c_lecture <- coefficients(lecture_mod)
+```
+$$
+\ln \left( \frac{\hat{\pi}}{1-\hat{\pi}} \right) = `r round(c_lecture[1],3)` `r round(c_lecture[2],3)` \text{ age} + `r round(c_lecture[3],3)` \text{ fare} `r round(c_lecture[4],3)`0 \text{ class}
+$$
+- Age (p < 0.001), and Passenger Class (p < 0.001) are significant predictors of survival.
+- Fare (0.194) is not a significant predictor of survival. 
 
 **4. Challenge! Construct a graph to support your answer in question 3.**
 
+## Baseline Model Confusion Matrix
 ```{r, echo = TRUE}
 # plot confusion matrix
-conf_matrix <- tibble("Predicted" = c(0, 0, 1, 1),
+base_matrix <- tibble("Predicted" = c(0, 0, 1, 1),
                       "Actual" =    c(0, 1, 0, 1),
                       "Counts" =    c(351, 140, 73, 150))
 
-plot_confusion_matrix(conf_matrix,
+plot_confusion_matrix(base_matrix,
                       target_col = "Actual",
                       prediction_col = "Predicted",
                       counts_col = "Counts")
 
+```
+## Lecture Model Confusion Matrix
+```{r}
+# exclude missing values from the model
+lecture_cf <- glm(data$Survived ~ data$Age + data$Pclass ,
+          family = binomial,
+          na.action = na.exclude)
+
+# get predicted values
+lecture_data <- data %>% 
+  mutate(p_hat = predict(lecture_cf, type = "response"))
+
+# misclassification error
+lecture_data <- data %>% 
+  mutate(Predicted = ifelse(p_hat > 0.5, 1, 0))
+
+# get Confusion Matrix cross-table
+CrossTable(lecture_data$Predicted, lecture_data$Survived,
+           prop.r = FALSE,
+           prop.c = FALSE,
+           prop.t = FALSE,
+           prop.chisq = FALSE)
+
+# convert to factor
+Actual_lect = factor(lecture_data$Survived)
+Predicted_lect = factor(lecture_data$Predicted)
+
+# get confusion matrix function
+confusionMatrix(Predicted_lect, Actual_lect, positive = "1")
+```
+```{r}
+# plot confusion matrix
+base_matrix <- tibble("Predicted" = c(0, 0, 1, 1),
+                      "Actual" =    c(0, 1, 0, 1),
+                      "Counts" =    c(355, 140, 69, 150))
+
+plot_confusion_matrix(base_matrix,
+                      target_col = "Actual",
+                      prediction_col = "Predicted",
+                      counts_col = "Counts")
 ```
 
 
