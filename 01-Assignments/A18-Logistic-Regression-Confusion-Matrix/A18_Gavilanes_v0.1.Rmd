@@ -140,26 +140,33 @@ round(false_discovery_rate, 3)
 - For both models, the Fare variable is not a significant predictor of survival.
 - Perhaps, it is possible to obtain a better model without the Fare variable.
 
-```{r}
-# models comparison
-anova(base_mod, lecture_mod,
-      test = "Chisq")
-```
+## Conclusion
+- After conducting a Chi-square comparison between both models are equal informative. 
+- Thus, the simpler model in this case will be suitable which is the one from the lecture.
 
-## The Lecture model
 ```{r}
-lecture_mod <- glm(Survived ~ Age + Pclass + Fare, 
-          data = data, 
+# drop Cabin, Passenger-ID, Name, Ticket columns
+clean_data <- subset(data,select=c(2,3,6,7,8,10))
+
+# replace missing values with mean for Age
+clean_data$Age[is.na(clean_data$Age)] <- mean(clean_data$Age,na.rm=T)
+
+# baseline model
+m2 <- glm(clean_data$Survived ~ clean_data$Age + clean_data$SibSp + clean_data$Parch + clean_data$Pclass + clean_data$Fare,
           family = binomial,
           na.action = na.exclude)
-summary(lecture_mod)
-c_lecture <- coefficients(lecture_mod)
+
+# lecture model
+m3 <- glm(clean_data$Survived ~ clean_data$Age + clean_data$Pclass + clean_data$Fare,
+          family = binomial,
+          na.action = na.exclude)
+# models comparison
+anova(object = m2, m3,
+      test = "Chisq")
+
 ```
-$$
-\ln \left( \frac{\hat{\pi}}{1-\hat{\pi}} \right) = `r round(c_lecture[1],3)` `r round(c_lecture[2],3)` \text{ age} + `r round(c_lecture[3],3)` \text{ fare} `r round(c_lecture[4],3)`0 \text{ class}
-$$
-- Age (p < 0.001), and Passenger Class (p < 0.001) are significant predictors of survival.
-- Fare (0.167) is not a significant predictor of survival. 
+
+
 
 **4. Challenge! Construct a graph to support your answer in question 3.**
 
@@ -176,10 +183,11 @@ plot_confusion_matrix(base_matrix,
                       counts_col = "Counts")
 
 ```
+
 ## Lecture Model Confusion Matrix
 ```{r}
 # exclude missing values from the model
-lecture_cf <- glm(data$Survived ~ data$Age + data$Pclass ,
+lecture_cf <- glm(data$Survived ~ data$Age + data$Pclass,
           family = binomial,
           na.action = na.exclude)
 
@@ -216,49 +224,35 @@ plot_confusion_matrix(base_matrix,
                       prediction_col = "Predicted",
                       counts_col = "Counts")
 ```
+### Baseline Model Plot for all Predictors
 ```{r}
 
 pairs(
   x = data[, c("Survived", "Age", "SibSp", "Parch", "Pclass", "Fare")],
-  col = data$Survived + 5
-)
+  col = data$Survived + 5)
 
 ```
 
-```{r}
+```{r, warning=FALSE}
 library(car)
 library(carData)
 
-# drop Cabin, Passenger-ID, Name, Ticket columns
-clean_data <- subset(data,select=c(2,3,5,6,7,8,10))
-
-# replace missing values with mean for Age
-clean_data$Age[is.na(clean_data$Age)] <- mean(clean_data$Age,na.rm=T)
-
-# logistic regression model
-m2 <- glm(clean_data$Survived ~ clean_data$Age + clean_data$SibSp + clean_data$Parch + clean_data$Pclass + clean_data$Fare,
-          family = quasibinomial(),
-          na.action = na.exclude)
-
-anova(object = m2,
-      test = "Chisq")
-
-# plot
+# baseline plot
 car::mmps(model = m2,
-          col = clean_data$Survived + 5)
+          col = clean_data$Survived)
 
 ```
-```{r}
-# remove Fare; not significant predictor
-m3 <- glm(clean_data$Survived ~ clean_data$Age + clean_data$Pclass)
-
-# plot
+## Lecture Model
+```{r, warning=FALSE}
+# lecture plot
 car::mmps(model = m3,
           col = clean_data$Survived + 5)
 ```
+
+### Diagnostic Plots
 ```{r}
-# models comparison
-anova(m2, m3,
-      test = "Chisq")
+plot(x = base_mod,
+     which = 1:6,
+     col = data$Survived)
 ```
 
