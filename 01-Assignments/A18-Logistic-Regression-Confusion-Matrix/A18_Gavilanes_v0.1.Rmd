@@ -239,7 +239,7 @@ library(carData)
 
 # baseline plot
 car::mmps(model = m2,
-          col = clean_data$Survived)
+          col = clean_data$Survived + 5)
 
 ```
 ## Lecture Model
@@ -253,6 +253,6 @@ car::mmps(model = m3,
 ```{r}
 plot(x = base_mod,
      which = 1:6,
-     col = data$Survived)
+     col = data$Survived + 5)
 ```
 
