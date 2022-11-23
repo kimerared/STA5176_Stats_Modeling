@@ -8,7 +8,7 @@ editor: source
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(tidyverse)
-
+library(gmodels)
 ```
 
 **Consider the [Palmer penguin data](https://allisonhorst.github.io/palmerpenguins/), available through the [`palmerpenguins` package](https://www.rdocumentation.org/packages/palmerpenguins/versions/0.1.1) in R. Note that if you are using R/RStudio on your own computer, you may need to install this package.**
@@ -24,16 +24,7 @@ data <- palmerpenguins::penguins
 
 **1. Consider the sex (*sex*) of the penguins.**
 ```{r}
-
-# female
-165/344
-# male
-168/344
-
-165+168
-
 data %>% count(sex)
-table(data$sex)
 ```
 
 **1a. It is known that the split of biological sex in humans is 50/50. Perform the appropriate hypothesis test to determine if the Palmer penguins have the same split.**
@@ -51,34 +42,119 @@ prop.test(x = 165,
 ```
 
 **2. Consider the species (*species*) of the penguins.**
+```{r}
+data %>% count(species)
+```
 
 **2a. Use the appropriate hypothesis test to determine if there is an even split of species in the dataset.**
 ```{r}
-table(data$species)
-prop.test(x = c(152, 68, 124),
-          n = c(344, 344, 344),
-          correct = FALSE)
+# k > 2: goodness of fit (multiple proportions)
+counts <- c(152,68,124)
+probs <- c(1/3, 1/3, 1/3)
+chisq.test(counts, p = probs)
 
+#Null hypothesis (H0): There is no significant difference between the observed and the expected value.
+#Alternative hypothesis (Ha): There is a significant difference between the observed and the expected value.
 ```
 
 **2b. Construct a graph to accompany the test performed in 2a.**
+```{r}
+species_count <- data %>% 
+  count(species) %>% 
+  mutate(perc = n/nrow(data))
+
+bar_colors <- c("#AE0D7A", "#FCBA12", "#448D76")
+# ggplot(species_count, aes(x = reorder(species, -n), y = perc, fill = species))+
+#   geom_col(stat = "count")+
+#   theme_bw()+
+#   labs(title = "Proportion of Penguin Species",
+#        x = "Species",
+#        y = "Count & Percent")+
+#   scale_fill_manual(values= bar_colors)+
+#   scale_y_continuous(labels = scales::percent)+
+#   geom_text(aes( label = scales::percent(perc),
+#                    y= ((..count..)/sum(..count..)) ), stat= "count", vjust = 0) 
+
+g <- ggplot(data, aes(species)) +
+  geom_bar(aes(y = (..count..)/sum(..count..), fill=species), stat= "count")+
+  geom_text(aes(label = scales::percent((..count..)/sum(..count..)),
+            y= ((..count..)/sum(..count..))), stat="count",
+            vjust = -.35)+
+  labs(title = "Proportion of Penguin Species",
+       x = "Species",
+       y = "Count & Percent")+
+  scale_fill_manual(values= bar_colors)+
+  scale_y_continuous(labels = scales::percent)+
+  theme_bw()
+g
+```
 
 **3. Consider sex and species.**
 
 **3a. Use the appropriate hypothesis test to determine if sex depends on species.**
+```{r}
+# Contengency Table
+CrossTable(data$sex, data$species,
+           prop.r = FALSE, prop.t = FALSE, prop.chisq = FALSE, chisq = TRUE)
+```
 
 **3b. Construct a graph to accompany the test performed in 3a.**
+```{r}
+g2 <- ggplot(data, aes(x = species, group = sex)) +
+  geom_bar(aes(y = (..count..)/sum(..count..), fill=species), stat= "count")+
+  geom_text(aes(label = scales::percent((..count..)/sum(..count..)),
+            y= ((..count..)/sum(..count..))), stat="count",
+            vjust = -.35)+
+  labs(title = "Proportion of Penguin Species",
+       x = "Species",
+       y = "Count & Percent")+
+  scale_fill_manual(values= bar_colors)+
+  scale_y_continuous(labels = scales::percent)+
+  theme_bw()
+g2
+```
 
 **4. Suppose we want to predict the sex of the penguin.**
 
 **4a. Construct the regression model that models sex as a function of bill length (*bill_length_mm*), body mass (*body_mass_g*), and flipper length (*flipper_length_mm*). Remember to state the resulting model.**
+```{r}
+m1 <- glm(sex ~ bill_length_mm + body_mass_g + flipper_length_mm,
+          data = data,
+          family = binomial,
+          na.action = na.exclude)
+summary(m1)
+```
+State the Model
+y_hat = ...
 
 **4b. Use the appropriate hypothesis tests to determine if there are any significant predictors of sex. You do not need to state all parts of the hypothesis tests, but you must justify your answer statistically.**
 
+All predictors are significant:
+- Bill Length     ($p < 0.001$)
+- Body Mass       ($p < 0.001$)
+- Flipper Length  ($p < 0.001$)
+
 **4c. Find the odds ratios for all of the predictors in the model.**
+```{r}
+round(exp(coefficients(m1)[-1]), 3)
+(1-1.157)*100
+(1-1.003)*100
+(1-0.874)*100
+```
 
 **4d. Provide interpretations for each of the odds ratios.**
 
+- For 1mm increase in Bill Length, the odds of predicting the penguin sex is multiplied by 1.157, which is a 15.7% increase.
+- For 1g increase in Body Mass, the odds of predicting the penguin sex is multiplied by 1.003, which is a 0.3% increase.
+- For 1mm increase in Flipper Length, the odds of predicting the penguin sex is multiplied by 0.874, which is a 12.6% decrease.
+
 **4e. Construct the 95% confidence intervals for the odds ratios.**
+```{r}
+round(exp(confint(m1)),3)
+```
 
 **4f. Use the Confusion Matrix metrics discussed in the last lecture to determine if this is a good model.**
+```{r}
+
+```
+
