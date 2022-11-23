@@ -6,7 +6,7 @@ self-contained: true
 editor: source
 ---
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE}
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
 library(tidyverse)
 library(gsheet)
 library(gmodels)
