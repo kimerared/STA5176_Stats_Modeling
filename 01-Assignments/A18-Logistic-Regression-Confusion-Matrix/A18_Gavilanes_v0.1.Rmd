@@ -11,7 +11,7 @@ library(tidyverse)
 library(gsheet)
 library(gmodels)
 library(ggplot2)
-library(InformationValue) # miscalculation error
+#library(InformationValue) # miscalculation error
 library(ISLR)
 library(caret)
 library(e1071)
@@ -81,7 +81,6 @@ Predicted = factor(data$Predicted)
 
 # get confusion matrix function
 confusionMatrix(Predicted, Actual, positive = "1")
-
 ```
 
 **2c. Find the sensitivity of the model.**
@@ -97,7 +96,6 @@ sensitivity = tp / (tp + fn)
 round(sensitivity, 3)
 
 # get miscalculation error
-misClassError(data$Survived, data$Predicted)
 1 - 0.2391
 ```
 
