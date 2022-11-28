@@ -96,28 +96,33 @@ CrossTable(data$sex, data$species,
 **3b. Construct a graph to accompany the test performed in 3a.**
 ```{r, message=FALSE}
 get_count_percent <- function(categorical){
-  total = length(categorical) 
-  c_count <- table(categorical)  
-  c_percent <- round(((c_count/total)*100), digits = 2)
-  return(c(c_percent))
+  data %>% 
+    group_by(species, sex) 
+    total = length(categorical) 
+    count <- table(categorical)  
+    percent <- round(((count/total)*100), digits = 2)
+    return(c(percent))
 }
+get_count_percent(data$species)
 
+
+xtab <- table(data$sex, data$species)
+class(xtab)
+xtab
 
 g_data <- data %>%
   select(species, sex) %>% 
   group_by(species, sex) %>%
-  drop_na() %>%
-  count(sex) %>% 
-  ungroup()
+  count(sex)
    
-g_data
 
 perc_data <- data %>% 
   select(species, sex) %>% 
   group_by(species, sex) %>%
-  drop_na()
+  drop_na() %>% 
+  mutate(species = fct_infreq(species))
   
-get_count_percent(perc_data$sex)
+get_count_percent(perc_data$species)
 
 g2 <- ggplot(g_data, aes(x = fct_infreq(species), y = n, fill = fct_infreq(sex)))+
   geom_col(position = "dodge", colour = "black")+
@@ -132,6 +137,18 @@ g2 <- ggplot(g_data, aes(x = fct_infreq(species), y = n, fill = fct_infreq(sex))
             cex = 2.5, vjust = -1)
 
 g2
+
+g3 <- ggplot(mutate(data, species = fct_infreq(species)))+
+  geom_bar(aes(x = species, fill = sex), position = "dodge")
+  
+g3
+
+g4 <- ggplot(mutate(data, species = fct_infreq(species)))+
+  geom_bar(aes(x = species, fill = sex), position = "dodge")+
+  geom_text(mapping = aes(y = g_data$n, label = g_data$n), position = position_dodge(width = 0.9),
+            cex = 2.5, vjust = -1)
+  
+g4
 ```
 
 **4. Suppose we want to predict the sex of the penguin.**
