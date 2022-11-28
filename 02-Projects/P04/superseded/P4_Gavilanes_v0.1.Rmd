@@ -1,0 +1,272 @@
+---
+title: "Project 4"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(gmodels) #prop.test
+library(caret)
+library(e1071)
+library(cvms) # plot confusion matrix
+```
+
+**Consider the [Palmer penguin data](https://allisonhorst.github.io/palmerpenguins/), available through the [`palmerpenguins` package](https://www.rdocumentation.org/packages/palmerpenguins/versions/0.1.1) in R. Note that if you are using R/RStudio on your own computer, you may need to install this package.**
+
+```{r, echo = TRUE, warning = FALSE, message = FALSE}
+# clear environment
+rm(list = ls())
+# load data frame
+data <- palmerpenguins::penguins
+```
+
+**For all questions, assume $\alpha=0.05$.**
+
+**1. Consider the sex (*sex*) of the penguins.**
+```{r}
+data %>% count(sex)
+```
+
+**1a. It is known that the split of biological sex in humans is 50/50. Perform the appropriate hypothesis test to determine if the Palmer penguins have the same split.**
+```{r}
+# two proportion test
+prop.test(x = c(165, 168),
+          n = c(165+168, 165+168),
+          correct = FALSE)
+```
+**Hypotheses**
+
+- $H_0: \ \pi_{\text{female}} = \pi_{\text{male}}$ 
+- $H_1: \ \pi_{\text{female}} \ne \pi_{\text{male}}$
+
+**Test Statistic and *p*-Value**
+
+- $\chi^2_0 = 0.054$ or $z_0 = \sqrt{0.054} = `r round(sqrt(0.054054),3)`$
+- $p = 0.816$
+
+**Rejection Region**
+
+- Reject $H_0$ if $p < \alpha$; $\alpha=0.05$
+
+**Conclusion/Interpretation**
+
+- Keep $H_0$ at the $\alpha=0.05$ level. There is not sufficient evidence to suggest that the data does not follow a 50/50 split of biological sex in penguins.
+- In other words, the data follows a 50/50 split of biological sex in penguins.
+
+**1b. Find the 95% CI for the proportion of female penguins.**
+```{r}
+# two proportion test
+prop.test(x = 165,
+          n = 165+168,
+          correct = FALSE)
+```
+- The 95% CI for the proportion of female penguins is (0.442, 0.549)
+
+**2. Consider the species (*species*) of the penguins.**
+```{r}
+data %>% count(species)
+```
+
+**2a. Use the appropriate hypothesis test to determine if there is an even split of species in the dataset.**
+```{r}
+# k > 2: goodness of fit (multiple proportions)
+counts <- c(152,68,124)
+probs <- c(1/3, 1/3, 1/3)
+chisq.test(counts, p = probs)
+
+#Null hypothesis (H0): There is no significant difference between the observed and the expected value.
+#Alternative hypothesis (Ha): There is a significant difference between the observed and the expected value.
+```
+**Hypotheses**
+
+- $H_0$: The data follows an even split of penguin species.
+- $H_1$: The data does not follow an even split of penguin species.
+
+**Test Statistic and *p*-Value**
+
+- $\chi_0^2=31.907$; $\ p < 0.001$
+
+**Rejection Region**
+
+- Reject $H_0$ if $p < \alpha$; $\alpha=0.05$
+
+**Conclusion/Interpretation**
+
+- Reject $H_0$ at the $\alpha=0.05$ level. There is sufficient evidence to suggest that the data does not follow an even split of penguin species.
+
+**2b. Construct a graph to accompany the test performed in 2a.**
+```{r, warning=FALSE}
+species_count <- data %>% 
+  count(species) %>% 
+  mutate(perc = n/nrow(data)) %>% 
+  arrange(desc(n))
+
+bar_colors <- c("#AE0D7A", "#FCBA12", "#448D76")
+
+g <- ggplot(data, aes(species)) +
+  geom_bar(aes(y = (..count..)/sum(..count..), fill=species), stat= "count")+
+  geom_text(aes(label = scales::percent((..count..)/sum(..count..)),
+            y= ((..count..)/sum(..count..))), stat="count",
+            vjust = -.35)+
+  labs(title = "Proportion of Penguin Species",
+       x = "Species",
+       y = "Count & Percent")+
+  scale_fill_manual(values= bar_colors)+
+  scale_y_continuous(labels = scales::percent, limits = c(0, 0.5))+
+  theme_bw()
+g
+```
+
+**3. Consider sex and species.**
+
+**3a. Use the appropriate hypothesis test to determine if sex depends on species.**
+```{r}
+# contingency Table
+CrossTable(data$sex, data$species,
+           prop.r = FALSE, prop.t = FALSE, prop.chisq = FALSE, chisq = TRUE)
+```
+
+**3b. Construct a graph to accompany the test performed in 3a.**
+```{r, message=FALSE}
+g_data <- data %>%
+  select(species, sex) %>% 
+  group_by(species, sex) %>%
+  drop_na() %>%
+  count(sex) %>% 
+  ungroup()
+   
+g_data 
+
+g2 <- ggplot(g_data, aes(x = fct_infreq(species), y = n, fill = fct_infreq(sex)))+
+  geom_col(position = "dodge", colour = "black")+
+  labs(title = "Proportion of Penguin Species by Sex",
+       x = "Species",
+       y = "Count & Percent",
+       fill = 'Sex')+
+  scale_fill_manual(values= bar_colors, labels = c("Female", "Male"))+
+  scale_y_continuous(labels = scales::percent_format(scale = 1))+
+  theme_bw()+
+  geom_text(mapping = aes(label = n), position = position_dodge(width = 0.9),
+            cex = 2.5, vjust = -1)
+
+g2
+```
+
+**4. Suppose we want to predict the sex of the penguin.**
+
+**4a. Construct the regression model that models sex as a function of bill length (*bill_length_mm*), body mass (*body_mass_g*), and flipper length (*flipper_length_mm*). Remember to state the resulting model.**
+```{r}
+m1 <- glm(sex ~ bill_length_mm + body_mass_g + flipper_length_mm,
+          data = data,
+          family = binomial,
+          na.action = na.exclude)
+summary(m1)
+```
+```{r}
+c <- coefficients(m1)
+```
+
+
+$$
+\ln \left( \frac{\hat{\pi}}{1-\hat{\pi}} \right) = `r round(c[1],3)` + `r round(c[2],3)` \text{ bill length} + `r round(c[3],3)` \text{ body mass} `r round(c[4],3)`0 \text{ flipper length}
+$$
+
+**4b. Use the appropriate hypothesis tests to determine if there are any significant predictors of sex. You do not need to state all parts of the hypothesis tests, but you must justify your answer statistically.**
+
+All predictors are significant:
+
+- Bill Length     ($p < 0.001$)
+- Body Mass       ($p < 0.001$)
+- Flipper Length  ($p < 0.001$)
+
+**4c. Find the odds ratios for all of the predictors in the model.**
+```{r}
+round(exp(coefficients(m1)[-1]), 3)
+```
+
+**4d. Provide interpretations for each of the odds ratios.**
+
+- For 1mm increase in Bill Length, the odds of predicting the penguin sex is multiplied by 1.157, which is a 15.7% increase.
+- For 1g increase in Body Mass, the odds of predicting the penguin sex is multiplied by 1.003, which is a 0.3% increase.
+- For 1mm increase in Flipper Length, the odds of predicting the penguin sex is multiplied by 0.874, which is a 12.6% decrease.
+
+**4e. Construct the 95% confidence intervals for the odds ratios.**
+```{r}
+round(exp(confint(m1)),3)
+```
+
+**4f. Use the Confusion Matrix metrics discussed in the last lecture to determine if this is a good model.**
+
+The Confusion Matrix has good, and realistic metrics with accuracy of 71.47%.
+The model has high scores for True Positives (TP = 123) and True Negative (TN = 115), while low False Positives (FP = 50) and False Negatives (FN = 45) rates.
+Below, further metrics have been documented in greater detail.
+
+```{r}
+# get predicted values
+data <- data %>% 
+  mutate(p_hat = predict(m1, type = "response"))
+
+# misclassification error
+data <- data %>% 
+  mutate(Predict = ifelse(p_hat > 0.5, 1, 0))
+
+# change sex variable levels to 0 & 1
+levels(data$sex) <- list("0" = "female", "1" = "male")
+
+# get Confusion Matrix cross-table with 0 & 1 levels
+CrossTable(data$Predict, data$sex,
+           prop.r = FALSE,
+           prop.c = FALSE,
+           prop.t = FALSE,
+           prop.chisq = FALSE)
+
+# convert to factor
+Actual <- factor(data$sex)
+Predicted <- factor(data$Predict)
+
+# get confusion matrix function
+confusionMatrix(Predicted, Actual, positive = "1")
+```
+
+### Sensitivity
+```{r}
+tn = 115
+fn = 45
+fp = 50
+tp = 123
+
+# get sensitivity (recall)
+sensitivity = tp / (tp + fn)
+round(sensitivity, 3)
+```
+### Specificity
+```{r}
+# get specificity
+specificity = tn / (tn + fp)
+round(specificity, 3)
+```
+### Positive Predictive Value
+```{r, echo = TRUE}
+# get positive predictive value (Precision)
+pos_pred_value = tp / (tp + fp)
+round(pos_pred_value, 3)
+```
+
+### Negative Predictive Value
+```{r, echo = TRUE}
+# get negative predictive value
+neg_pred_value = tn / (tn + fn)
+round(neg_pred_value, 3)
+```
+
+### Miscalculation Error
+```{r}
+# get miscalculation error
+# (fp+fn)/(tp+tn+fp+fn)
+# 1 - Accuracy
+1 - 0.7147
+```
+
