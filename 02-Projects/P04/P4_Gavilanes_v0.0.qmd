@@ -62,7 +62,7 @@ chisq.test(counts, p = probs)
 ```
 
 **2b. Construct a graph to accompany the test performed in 2a.**
-```{r}
+```{r, warning=FALSE}
 species_count <- data %>% 
   count(species) %>% 
   mutate(perc = n/nrow(data)) %>% 
@@ -88,31 +88,35 @@ g
 
 **3a. Use the appropriate hypothesis test to determine if sex depends on species.**
 ```{r}
-# Contengency Table
-cont_spec <- CrossTable(data$sex, data$species,
+# contingency Table
+CrossTable(data$sex, data$species,
            prop.r = FALSE, prop.t = FALSE, prop.chisq = FALSE, chisq = TRUE)
-cont_spec
 ```
 
 **3b. Construct a graph to accompany the test performed in 3a.**
-```{r}
-g2 <- ggplot(data, aes(x = species)) +
-  geom_bar(aes(y = (..count..)/sum(..count..), fill=sex), stat= "count")+
-  geom_text(aes(label = scales::percent((..count..)/sum(..count..)),
-            y= ((..count..)/sum(..count..))), stat="count",
-            vjust = -.35)+
-  labs(title = "Proportion of Penguin Species",
+```{r, message=FALSE}
+g_data <- data %>%
+  select(species, sex) %>% 
+  group_by(species, sex) %>%
+  drop_na() %>%
+  count(sex) %>% 
+  ungroup()
+   
+g_data 
+
+g2 <- ggplot(g_data, aes(x = fct_infreq(species), y = n, fill = fct_infreq(sex)))+
+  geom_col(position = "dodge", colour = "black")+
+  labs(title = "Proportion of Penguin Species by Sex",
        x = "Species",
-       y = "Count & Percent")+
-  scale_fill_manual(values= bar_colors)+
-  scale_y_continuous(labels = scales::percent)+
-  theme_bw()
+       y = "Count & Percent",
+       fill = 'Sex')+
+  scale_fill_manual(values= bar_colors, labels = c("Female", "Male"))+
+  scale_y_continuous(labels = scales::percent_format(scale = 1))+
+  theme_bw()+
+  geom_text(mapping = aes(label = n), position = position_dodge(width = 0.9),
+            cex = 2.5, vjust = -1)
+
 g2
-
-#cont_spec$prop.row
-cont_spec$prop.col
-cont_spec$t
-
 ```
 
 **4. Suppose we want to predict the sex of the penguin.**
@@ -159,6 +163,10 @@ round(exp(confint(m1)),3)
 ```
 
 **4f. Use the Confusion Matrix metrics discussed in the last lecture to determine if this is a good model.**
+
+In general, the model has good metrics with accuracy of 71.47%. It's a realistic model.
+Below, the model metrics are documented in greater detail.
+
 ```{r}
 # get predicted values
 data <- data %>% 
