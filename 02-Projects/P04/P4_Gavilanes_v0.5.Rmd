@@ -312,7 +312,7 @@ confusionMatrix(Predicted, Actual, positive = "1")
 # plot confusion matrix
 base_matrix <- tibble("Predicted" = c(0, 0, 1, 1),
                       "Actual" =    c(0, 1, 0, 1),
-                      "Counts" =    c(115, 45, 50, 123))
+                      "Counts" =    c(115, 45, 50, 123)) # TN, FN, FP, TP
 
 plot_confusion_matrix(base_matrix,
                       target_col = "Actual",
