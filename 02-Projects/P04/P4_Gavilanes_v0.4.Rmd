@@ -25,6 +25,9 @@ library(formattable)
 rm(list = ls())
 # load data frame
 data <- palmerpenguins::penguins
+
+# custom colors
+bar_colors <- c("#236AB9","#AE0D7A", "#448D76", "#B85B14")
 ```
 
 **For all questions, assume $\alpha=0.05$.**
@@ -102,38 +105,27 @@ chisq.test(counts, p = probs)
 ```{r, warning=FALSE}
 species_count <- data %>% 
   count(species) %>% 
-  mutate(freq = n/nrow(data)) %>% 
+  mutate(freq = round((n/nrow(data)*100), 2)) %>% 
   arrange(desc(n))
 
-bar_colors <- c("#AE0D7A", "#FCBA12", "#448D76")
-
-g <- ggplot(data, aes(species)) +
-  geom_bar(aes(y = (..count..)/sum(..count..), fill=species), stat= "count")+
-  geom_text(aes(label = scales::percent((..count..)/sum(..count..)),
-            y= ((..count..)/sum(..count..))), stat="count",
-            vjust = -.35)+
-  labs(title = "Proportion of Penguin Species",
-       x = "Species",
-       y = "Count & Percent")+
-  scale_fill_manual(values= bar_colors)+
-  scale_y_continuous(labels = scales::percent, limits = c(0, 0.5))+
-  theme_bw()
-g
-
-p1 <- ggplot(data, aes(x = species, fill = species))+
-  geom_bar()+
+cp <- ggplot(species_count, aes(x = species, y = n, fill = species))+
+  geom_col()+
   theme_bw()+
   scale_fill_manual(values= bar_colors)+
-  geom_text(species_count, mapping =  aes(label = scales::percent((n)/sum(n))), stat="count",
-            position = position_dodge(width = 0.9),
-            cex = 3.5, vjust = -6)+
-  labs(title = "Penguin Species",
-       subtitle = "Proportion by Sex",
+  labs(title = "Penguins",
+       subtitle = "Proportion by Species",
        x = "Species",
        y = "Count",
-       fill = 'Sex')
-  
-p1
+       fill = 'Species')+
+  geom_text(aes(x = species, y = n,
+                label = paste0(round(freq, 2),"%")),
+                vjust = -.5)+
+  geom_text(aes(x = species, y = n,
+                label = (n)),
+                vjust = 3, cex = 4.5, colour = "white")+
+  ylim(0,165)
+
+cp
 ```
 
 **3. Consider sex and species.**
@@ -168,7 +160,7 @@ g_data <- data %>%
   group_by(species, sex) %>%
   drop_na() %>%
   count(sex)
-   
+# print table   
 formattable(g_data) 
 
 g2 <- ggplot(g_data, aes(x = species, y = n, fill = sex))+
@@ -192,8 +184,7 @@ pct <- prop.table(table(data$species, data$sex), margin = 1)
 pct <- as.data.frame(pct)
 # rename columns
 colnames(pct) <- c("species", "sex", "freq")
-pct <- pct %>% 
-  group_by(species, sex)
+# print table
 formattable(pct)
 
 # percentage plot
@@ -216,6 +207,22 @@ p2
 # combine both graphs
 grid.arrange(g2, p2, ncol = 1)
 
+# g3 <- ggplot(g_data, aes(x = species, y = n, fill = sex))+
+#   geom_col(position = "dodge", colour = "black")+
+#   labs(title = "Penguin Species",
+#        subtitle = "Proportion by Sex",
+#        x = "Species",
+#        y = "Count",
+#        fill = 'Sex')+
+#   scale_fill_manual(values= bar_colors, labels = c("Female", "Male"))+
+#   theme_bw()+
+#   geom_text(mapping = aes(label = n), position = position_dodge(width = 0.9),
+#             cex = 4.5, vjust = 5, colour = "white")+
+#   geom_text(aes(x = species, y = n, label = scales::percent(pct$freq)), 
+#             vjust = -0.5, cex = 3.5)+
+#   ylim(0,90)
+# 
+# g3
 ```
 
 **4. Suppose we want to predict the sex of the penguin.**
