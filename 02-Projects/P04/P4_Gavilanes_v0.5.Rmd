@@ -187,6 +187,8 @@ colnames(pct) <- c("species", "sex", "freq")
 # print table
 formattable(pct)
 
+# merge(g_data, pct, by='species', all=TRUE)
+
 # percentage plot
 p2 <- ggplot(pct, aes(x = species, y = round(freq, 2), fill = sex))+
   # geom_bar(position = "fill")+
@@ -206,6 +208,23 @@ p2
 
 # combine both graphs
 grid.arrange(g2, p2, ncol = 1)
+
+# g3 <- ggplot(g_data, aes(x = species, y = n, fill = sex))+
+#   geom_col(position = "dodge", colour = "black")+
+#   labs(title = "Penguin Species",
+#        subtitle = "Proportion by Sex",
+#        x = "Species",
+#        y = "Count",
+#        fill = 'Sex')+
+#   scale_fill_manual(values= bar_colors, labels = c("Female", "Male"))+
+#   theme_bw()+
+#   geom_text(mapping = aes(label = n), position = position_dodge(width = 0.9),
+#             cex = 4.5, vjust = 5, colour = "white")+
+#   geom_text(aes(x = species, y = n, label = scales::percent(pct$freq)), 
+#             vjust = -0.5, cex = 3.5)+
+#   ylim(0,90)
+# 
+# g3
 ```
 
 **4. Suppose we want to predict the sex of the penguin.**
