@@ -1,0 +1,105 @@
+---
+title: "Project 3"
+author: "Your Name Here"
+format: html
+self-contained: true
+editor: source
+---
+
+```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
+
+```
+
+**Consider the insurance cost data availabile [here](https://github.com/stedy/Machine-Learning-with-R-datasets/blob/master/insurance.csv).**
+
+**1. Import the data. Extra credit will be given to students that figure out how to directly import from GitHub.**
+
+```{r, echo = TRUE}
+
+```
+
+**2. Fill in the following table:**
+
+|                    |        | Mean (Standard Deviation) or Number (Percent) |
+|--------------------|--------|-----------------------------------------------|
+| Charges            |        |                                               |
+| Age                |        |                                               |
+| BMI                |        |                                               |
+| Sex                | Male   |                                               |
+|                    | Female |                                               |
+| Smoking Status     | Yes    |                                               |
+|                    | No     |                                               |
+| Number of Children | 0      |                                               |
+|                    | 1      |                                               |
+|                    | 2      |                                               |
+|                    | ... (add a row for each additional number needed)      |                                               |
+
+```{r, echo = TRUE}
+
+```
+
+**3. Model insurance charges as a function of age, BMI, and number of children. Remember to state the resulting model.**
+
+```{r, echo = TRUE}
+
+```
+
+**4. Provide brief and appropriate interpretations for all regression coefficients.**
+
+**5. Fill in the following table:**
+
+| Predictor          | $\hat{\beta}_i$ (95% CI) | *p*-Value |
+|--------------------|--------------------------|-----------|
+| Age                |                          |           |
+| BMI                |                          |           |
+| Number of Children |                          |           |
+
+```{r, echo = TRUE}
+
+```
+
+**(yes, I am asking you to place both the estimated $\beta$ as well as the corresponding 95% CI in the cell.)**
+
+**6. Which, if any, are significant predictors of insurance charges? Test at the $\alpha=0.05$ level. You do not need to state all hypothesis test pieces, but you must provide appropriate justification for your conclusions.**
+
+```{r, echo = TRUE}
+
+```
+
+**7. Use the appropriate hypothesis test to determine if this is a significant regression line. Test at the $\alpha=0.05$ level.**
+
+```{r, echo = TRUE}
+
+```
+
+**8. Construct the correlation matrix for the variables in the regression model. Are any suspiciously high?**
+
+```{r, echo = TRUE}
+
+```
+
+**9. Check for outliers. How many are there?**
+
+```{r, echo = TRUE}
+
+```
+
+**10. Check for influential/leverage points. How many are there?**
+
+```{r, echo = TRUE}
+
+```
+
+**11. Check for multicollinearity. Do the results surprise you?**
+
+```{r, echo = TRUE}
+
+```
+
+**12. Construct a graph to aid with explanation of the regression model. Create lines for 0, 2, and 4 children. You pick what goes on the *x*-axis and what is plugged in for the remaining variable. Extra credit if you make the outlier dots a different color than the non-outlier dots.**
+
+```{r, echo = TRUE}
+
+```
+
+**13. Write a short paragraph to accompany your results, appropriate for your supervisor who is not a statistician or data scientist. Outline your modeling technique as well as the summary of the data (i.e., the first table) and results.**

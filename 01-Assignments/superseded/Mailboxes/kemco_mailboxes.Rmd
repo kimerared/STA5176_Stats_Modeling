@@ -1,0 +1,32 @@
+---
+title: "KEMCO Mailboxes"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+
+```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
+library(tidyverse)
+library(gsheet)
+library(formattable)
+library(DescTools) # perform Dunnett, Levene Test
+library(pgirmess) # perform Kruskal-Wallis Post-hoc
+library(ggpubr) # interaction plot
+library(ggstatsplot) # boxplot
+library(ISLR)
+```
+
+```{r}
+# clear environment
+rm(list = ls())
+# Import data
+data <- read.csv("10_5_2022 11_56_39 AM_kemco.com.csv")
+
+# transform
+data %>% 
+  select(Mailbox.Size.in.MB) %>%
+  drop_na() %>% 
+  mutate(GB = Mailbox.Size.in.MB / 100)
+```
+

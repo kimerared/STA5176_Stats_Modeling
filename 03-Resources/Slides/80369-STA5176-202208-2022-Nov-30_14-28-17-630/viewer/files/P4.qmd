@@ -1,0 +1,47 @@
+---
+title: "Project 4"
+author: "Your Name Here"
+format: html
+self-contained: true
+editor: source
+---
+
+**Consider the [Palmer penguin data](https://allisonhorst.github.io/palmerpenguins/), available through the [`palmerpenguins` package](https://www.rdocumentation.org/packages/palmerpenguins/versions/0.1.1) in R. Note that if you are using R/RStudio on your own computer, you may need to install this package.**
+
+```{r, echo = TRUE, warning = FALSE, message = FALSE}
+data <- palmerpenguins::penguins
+```
+
+**For all questions, assume $\alpha=0.05$.**
+
+**1. Consider the sex (*sex*) of the penguins.**
+
+**1a. It is known that the split of biological sex in humans is 50/50. Perform the appropriate hypothesis test to determine if the Palmer penguins have the same split.**
+
+**1b. Find the 95% CI for the proportion of female penguins.**
+
+**2. Consider the species (*species*) of the penguins.**
+
+**2a. Use the appropriate hypothesis test to determine if there is an even split of species in the dataset.**
+
+**2b. Construct a graph to accompany the test performed in 2a.**
+
+**3. Consider sex and species.**
+
+**3a. Use the appropriate hypothesis test to determine if sex depends on species.**
+
+**3b. Construct a graph to accompany the test performed in 3a.**
+
+**4. Suppose we want to predict the sex of the penguin.**
+
+**4a. Construct the regression model that models sex as a function of bill length (*bill_length_mm*), body mass (*body_mass_g*), and flipper length (*flipper_length_mm*). Remember to state the resulting model.**
+
+**4b. Use the appropriate hypothesis tests to determine if there are any significant predictors of sex. You do not need to state all parts of the hypothesis tests, but you must justify your answer statistically.**
+
+**4c. Find the odds ratios for all of the predictors in the model.**
+
+**4d. Provide interpretations for each of the odds ratios.**
+
+**4e. Construct the 95% confidence intervals for the odds ratios.**
+
+**4f. Use the metrics discussed in the last lecture to determine if this is a good model.**
