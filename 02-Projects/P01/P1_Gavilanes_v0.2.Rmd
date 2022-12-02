@@ -1,0 +1,401 @@
+---
+title: "Project 1"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+
+```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
+library(tidyverse)
+library(gsheet)
+library(formattable)
+library(gridExtra)
+```
+
+
+**1. Members of the UWF basketball team decided to see if there was a difference in scoring on free throws during the first and second halves of games. Data was collected over thirteen games and is as follows:**
+
+| 1st Half | 19 | 13 | 7 | 21 | 20 | 13 | 14 | 8 | 11 | 20 | 16 | 9 | 10 |
+|----------|----|----|---|----|----|----|----|---|----|----|----|---|----|
+| **2nd Half** | **17** | **9**  | **8** | **22** | **14** | **9** | **15** | **8** | **12** | **14** | **8**  | **8** | **10** |
+
+```{r}
+# clear environment
+rm(list = ls())
+# data as vector
+half_1 <- c(19, 13, 7, 21, 20, 13, 14, 8, 11, 20, 16, 9, 10)
+half_2 <- c(17, 9, 8, 22, 14, 9, 15, 8, 12, 14, 8, 8, 10)
+
+# create data frame
+basketball <- tibble(half_1,half_2)
+# transform table from wide to long
+data_long <- basketball %>% 
+  drop_na() %>% 
+  pivot_longer(cols = half_1:half_2, 
+               names_to = "Half", 
+               values_to = "Scores")
+# ---CUSTOM COLORS---
+custom_green_dark = "#71CA97"
+custom_green_light = "#DeF7E9"
+custom_gray = "#3D3D3D"
+custom_orange = "#FC7307"
+custom_purple = "#5A18C9"
+custom_tan_light = "#F7E3D4"
+custom_density_hue = c(custom_purple,custom_orange)
+# ---FUNCTIONS---
+# f00 - Change default table format
+change_table_format <- function(data_table){
+  # local variables
+  first_column <- data_table[1]
+  dataframe_length <- NCOL(data_table)
+  # format
+  formattable(data_table, align = c("l",rep("c", dataframe_length - 1)),
+              list(first_column = formatter("span", style = ~ style(color = custom_gray, font.weight = "bold")),
+              area(row = 1, col = 2:dataframe_length) ~ color_tile(custom_green_light, custom_green_dark)
+              )#/end list
+              )#/end formattable
+}
+# f01 - get custom summary statistics
+# !! sym() creates a symbol from a string
+get_custom_summary <- function(data_table, category, values){
+  summary <- data_table %>%
+    group_by(!! sym(category)) %>% 
+    summarise(Avg = mean(!! sym(values)),
+              Median = median(!! sym(values)),
+              SD = sd(!! sym(values)),
+              Min = min(!! sym(values)),
+              Max = max(!! sym(values)),
+              IQRange = IQR(!! sym(values))
+              )
+    return(summary)
+}
+```
+
+**a. Find the appropriate summary statistics to summarize the data.**
+```{r}
+# summary statistics with custom table format
+change_table_format(get_custom_summary(data_long, "Half","Scores"))
+```
+
+The small standard deviation between the two halves of the game  indicates that the scores are around the mean (12.88). 
+Indeed, for both halves are approximately 1.04 points difference to the mean. 
+Since the difference between mean and median is small, we can infer that the data is symmetrically distributed.
+Even though the team has consistent scores, the first half are sligthly better than the second one. 
+
+**b. Perform the appropriate *t* test to determine if there is a difference in the number of free throws made during the first and second halves of games. Remember to typeset the hypothesis test results.**
+```{r}
+# dependent two.sided
+t.test(basketball$half_1, basketball$half_2,
+       paired = TRUE)
+```
+### Hypothesis
+$H_0$: $\mu_{1st} = \mu_{2nd}$\
+$H_1$: $\mu_{1st} \ne \mu_{2nd}$\
+
+### Test Statistics
+$t_0 = 2.359$
+
+### p-Value
+$p = 0.036$
+
+## Conclusion
+Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in the number of free throws made during the first and second halves of games.
+
+
+**c. Perform the appropriate nonparametric test to determine if there is a difference in the number of free throws made during the first and second halves of games. Remember to typeset the hypothesis test results.**
+```{r}
+# dependent two.sided nonparametric
+basket_wilcox <- wilcox.test(basketball$half_1, basketball$half_2,
+            paired = TRUE,
+            exact = FALSE)
+```
+### Hypothesis
+$H_0$ : $M_{1st} = M_{2nd}$\
+$H_1$ : $M_{1st} \ne M_{2nd}$\
+
+### Test Statistics
+$t_0 = 54$
+
+### p-Value
+$p = 0.065$
+
+## Conclusion
+Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in the number of free throws made during the first and second halves of games.
+
+**d. Construct the necessary graphs / hypothesis tests to assess the assumptions on the *t* test.**
+
+### Assumption
+```{r}
+graph_paired_qq_plot <- function(data_table, after_sample, before_sample){
+  data_table %>%
+    mutate(diff = after_sample - before_sample) %>%
+    ggplot(aes(sample = diff)) +
+    stat_qq(size=3, alpha = 0.6, color = custom_orange) +
+    stat_qq_line() +
+    theme_bw() +
+    labs(title = "Basketball Free Throws", subtitle = "QQ Plot")+
+    xlab("Theoretical Free Throws") +
+    ylab("Sample Free Throws")
+}
+graph_paired_qq_plot(basketball, half_2, half_1)
+```
+```{r}
+# summary statistics
+# median by dependent samples
+summary_long_table <- data_long %>% 
+  group_by(Half) %>%
+  summarise_all(list(Median = median))
+
+change_table_format(summary_long_table)
+
+# Basketball density
+basketball_density <- data_long %>% 
+  group_by(Half) %>% 
+  ggplot(aes(x = Scores, color = Scores, fill = Half)) +
+  geom_density(data = data_long, aes(color = Half), alpha = 0.25)+
+  geom_vline(data = summary_long_table, aes(xintercept=Median, color=Half), 
+             linetype="dashed", size = 1.1)+
+  annotate("text", x=12, y=0.025, label="Median", angle=90, size=5, color= custom_purple) +
+  xlim(0,30)+
+  ylab("Free Throws")+
+  labs(title = "Basketball Free Throws", subtitle = "Density Plot")+
+  theme_bw()+
+  scale_fill_manual(values = custom_density_hue)+
+  scale_color_manual(values = custom_density_hue)
+
+```
+    
+**e. State the assumption(s) on the *t* test and provide your assessment based on results in part (d).**
+
+The assumption of normality may not be valid. Normal distribution is not assumed.
+
+**f. Based on your assessment in part (e), are you going to report the *t* test or the nonparametric test?**
+
+The report will use the **nonparametric test**.
+
+**g. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of your chosen hypothesis test from part (f), and a graph to help convey the results.**
+
+# UWF Basketball Free Throw Statistics Report
+
+## Analysis
+The first half has shown better scores. The team has more energy at the beginning of the match; therefore, they can make better free throws. The UWF basketball team has to improve stamina and concentration throughout the game. The team has to perform better under pressure.
+
+
+### Summary Statistics
+
+The following summary statistics displays the difference in scores.
+```{r, echo=FALSE}
+change_table_format(get_custom_summary(data_long, "Half","Scores"))
+```
+The small standard deviation between the two halves of the game  indicates that the scores are around the mean (12.88). 
+Indeed, for both halves are approximately 1.04 points difference to the mean. 
+Since the difference between mean and median is small, we can infer that the data is symmetrically distributed.
+Even though the team has consistent scores, the first half are sligthly better than the second one. 
+
+### NonParametric Test
+
+#### Wilcoxon Test
+```{r, echo=FALSE}
+basket_wilcox
+```
+#### Hypothesis
+$H_0$ : $M_{1st} = M_{2nd}$\
+$H_1$ : $M_{1st} \ne M_{2nd}$\
+
+#### Test Statistics
+$t_0 = 54$
+
+#### p-Value
+$p = 0.065$
+
+#### Conclusion
+Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in the number of free throws made during the first and second halves of games.
+
+### Assumption
+The assumption of normality may not be valid. The normal distribution is not assumed.
+The following QQ and Density plots demonstrate some discrepancies between the two halves.
+```{r, echo=FALSE}
+graph_paired_qq_plot(basketball, half_2, half_1)
+basketball_density
+```
+
+
+
+**2. It is hypothesized that students in College Algebra skip class less often than students in General Chemistry I; both courses seat 90 students. Data on the total number of absences per section was collected for one fall semester, and is as follows:**
+
+| General Chemistry I | 161 | 140 | 136 | 171 | 106 | 149 |
+|---------------------|-----|-----|-----|-----|-----|-----|
+| **College Algebra** | **158** | **132** | **135** | **185** | **106** | **150** |
+
+
+```{r}
+# clear environment
+#rm(list = ls())
+# data as vector
+chemistry <- c(161, 140, 136, 171, 106, 149)
+algebra <- c(158, 132, 135, 185, 106, 150)
+
+# create data frame
+skip_class <- tibble(chemistry, algebra)
+# transform table from wide to long
+skip_long <- skip_class %>%
+  drop_na() %>%
+  pivot_longer(cols = chemistry: algebra,
+               names_to = "Course",
+               values_to = "Absence")
+
+```
+
+
+**a. Find the appropriate summary statistics to summarize the data.**
+```{r}
+change_table_format(get_custom_summary(skip_long, "Course", "Absence"))
+```
+
+**b. Perform the appropriate *t* test to determine if there are fewer absences in College Algebra. Remember to typeset the hypothesis test results.**
+```{r}
+# independent less
+t.test(skip_long$Absence ~ skip_long$Course,
+       alternative = "less")
+```
+
+### Hypothesis
+$H_0$: $\mu_{Algebra} \ge \mu_{Chemistry}$\
+$H_1$: $\mu_{Algebra} < \mu_{Chemistry}$\
+
+### Test Statistics
+$t_0 = 0.035$
+
+### p-Value
+$p = 0.51$
+
+## Conclusion
+Keep $H_0$ at the $\alpha$=0.05 level. There is not sufficient evidence to determine that there are fewer absences in College Algebra.
+
+**c. Perform the appropriate nonparametric test to determine if there are fewer absences in College Algebra. Remember to typeset the hypothesis test results.**
+```{r}
+wilcox.test(skip_long$Absence ~ skip_long$Course,
+            alternative = "less",
+            exact = FALSE)
+```
+
+### Hypothesis
+$H_0$: $M_{Algebra} \ge M_{Chemistry}$\
+$H_1$: $M_{Algebra} < M_{Chemistry}$\
+
+### Test Statistics
+$t_0 = 16.5$
+
+### p-Value
+$p = 0.44$
+
+## Conclusion
+Keep $H_0$ at the $\alpha$=0.05 level. There is not sufficient evidence to determine that there are fewer absences in College Algebra.
+
+**d. Construct the necessary graphs / hypothesis tests to assess the assumptions on the *t* test.**
+
+### Assumptions
+
+#### QQ Plot
+```{r}
+# algebra qq
+algebra_qq <- skip_long %>% 
+  filter(Course == "algebra") %>% 
+  ggplot(aes(sample = Absence)) +
+  stat_qq(size=3, alpha = 0.7, color = "magenta") +
+  stat_qq_line() +
+  theme_minimal() +
+  xlab("Theoretical Algebra") +
+  ylab("Sample Algebra")+
+  ylim(90, 190)
+# chemistry qq
+chemistry_qq <- skip_long %>% 
+  filter(Course == "chemistry") %>% 
+  ggplot(aes(sample = Absence)) +
+  stat_qq(size=3, alpha = 0.7, color = custom_orange) +
+  stat_qq_line() +
+  theme_minimal() +
+  xlab("Theoretical Chemistry") +
+  ylab("Sample Chemistry")+
+  ylim(90, 190)
+# Combine both graphs
+grid.arrange(algebra_qq, chemistry_qq, nrow=1, bottom = "Courses", top = "QQ Plot of Absences by Course")
+```
+### Assumption Supporting Graph
+```{r}
+# median by courses
+groups_median <- skip_long %>% 
+  group_by(Course) %>% 
+  summarise(Median = median(Absence))
+change_table_format(groups_median)
+```
+```{r}
+# absences density
+absence_density <- skip_long %>% 
+  group_by(Course) %>% 
+  ggplot(aes(x = Absence, colour = Absence, fill = Course)) +
+  geom_density(data = skip_long, aes(color = Course), alpha = 0.25)+
+  geom_vline(data = groups_median, aes(xintercept=Median, color=Course), 
+             linetype="dashed", size = 1.1)+
+  annotate("text", x=138, y=0.005, label="Median", angle=90, size=6, color=custom_purple)+
+  labs(title = "Absences by Course", subtitle = "Density Plot")+
+  ylab("Course")+
+  theme(legend.position="bottom")+
+  theme_bw()+
+  scale_fill_manual(values = custom_density_hue)+
+  scale_color_manual(values = custom_density_hue)+
+  xlim(70,220)
+
+absence_density
+```
+
+    
+**e. State the assumption(s) on the *t* test and provide your assessment based on results in part (d).**
+
+The assumption of normality may be valid. Normal distribution is assumed. 
+
+**f. Based on your assessment in part (e), are you going to report the *t* test or the nonparametric test?**
+
+The report will use the **T-test**.
+
+**g. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of your chosen hypothesis test from part (f), and a graph to help convey the results.**
+
+# Number of Absences per Course Report
+
+## Analisys
+College Algebra students skip class more often than students in General Chemistry. Algebra students need more time to understand the subject; however, students might feel frustrated. The educators should offer different tools to help students to understand the curriculum. Moreover, students can complement their studies with tutoring classes, video recordings, and study groups.  
+
+### Summary Statistics
+The following summary statistics displays the difference in absences per course.
+```{r, echo=FALSE}
+change_table_format(get_custom_summary(skip_long, "Course", "Absence"))
+```
+
+### T-test
+```{r, echo=FALSE}
+t.test(skip_long$Absence ~ skip_long$Course,
+       alternative = "less")
+```
+
+#### Hypothesis
+$H_0$: $\mu_{Algebra} \ge \mu_{Chemistry}$\
+$H_1$: $\mu_{Algebra} < \mu_{Chemistry}$\
+
+#### Test Statistics
+$t_0 = 0.035$
+
+#### p-Value
+$p = 0.51$
+
+### Conclusion
+Keep $H_0$ at the $\alpha$=0.05 level. There is not sufficient evidence to determine that there are fewer absences in College Algebra.
+
+### Assumption
+The assumption of normality may be valid. The normal distribution is assumed. The following QQ and Density plots demonstrate how the data match the general appearance of a normal distribution.
+
+```{r, echo=FALSE}
+grid.arrange(algebra_qq, chemistry_qq, nrow=1, bottom = "Courses", top = "QQ Plot of Absences by Course")
+absence_density
+```
+
