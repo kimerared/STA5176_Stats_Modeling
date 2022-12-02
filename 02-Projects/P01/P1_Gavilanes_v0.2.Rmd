@@ -78,10 +78,10 @@ get_custom_summary <- function(data_table, category, values){
 change_table_format(get_custom_summary(data_long, "Half","Scores"))
 ```
 
-The small standard deviation between the two halves of the game  indicates that the scores are around the mean (12.88). 
-Indeed, for both halves are approximately 1.04 points difference to the mean. 
-Since the difference between mean and median is small, we can infer that the data is symmetrically distributed.
-Even though the team has consistent scores, the first half are sligthly better than the second one. 
+The standard deviation between both halves of the game indicates that the scores are around the mean (12.88). 
+Indeed, both halves are approximately 1.04 points different from the mean. 
+We can infer that the data is symmetrically distributed because there is a minor difference between the mean and median.
+Even though the team has consistent scores, the first half is slightly better than the second. 
 
 **b. Perform the appropriate *t* test to determine if there is a difference in the number of free throws made during the first and second halves of games. Remember to typeset the hypothesis test results.**
 ```{r}
@@ -188,10 +188,10 @@ The following summary statistics displays the difference in scores.
 ```{r, echo=FALSE}
 change_table_format(get_custom_summary(data_long, "Half","Scores"))
 ```
-The small standard deviation between the two halves of the game  indicates that the scores are around the mean (12.88). 
-Indeed, for both halves are approximately 1.04 points difference to the mean. 
-Since the difference between mean and median is small, we can infer that the data is symmetrically distributed.
-Even though the team has consistent scores, the first half are sligthly better than the second one. 
+The standard deviation between both halves of the game indicates that the scores are around the mean (12.88). 
+Indeed, both halves are approximately 1.04 points different from the mean. 
+We can infer that the data is symmetrically distributed because there is a minor difference between the mean and median.
+Even though the team has consistent scores, the first half is slightly better than the second. 
 
 ### NonParametric Test
 
@@ -252,10 +252,14 @@ skip_long <- skip_class %>%
 ```{r}
 change_table_format(get_custom_summary(skip_long, "Course", "Absence"))
 ```
+The mean for both algebra and chemistry are similar. 
+The Chemistry data is likely skewed in distribution because the median (144.5) is higher than the mean (143.83). On the other hand, the Algebra data is likely to be normally distributed because the median (142.5) is lower than the mean (144.33).
+Chemistry has a lower standard deviation (26.76) indicating data points are around the mean; in contrast, Algebra has some dispersed data points because of the higher standard deviation (22.66) value. 
+
 
 **b. Perform the appropriate *t* test to determine if there are fewer absences in College Algebra. Remember to typeset the hypothesis test results.**
 ```{r}
-# independent less
+# two-independent sample T-test
 t.test(skip_long$Absence ~ skip_long$Course,
        alternative = "less")
 ```
@@ -371,6 +375,10 @@ The following summary statistics displays the difference in absences per course.
 ```{r, echo=FALSE}
 change_table_format(get_custom_summary(skip_long, "Course", "Absence"))
 ```
+The mean for both algebra and chemistry are similar. 
+The Chemistry data is likely skewed in distribution because the median (144.5) is higher than the mean (143.83). On the other hand, the Algebra data is likely to be normally distributed because the median (142.5) is lower than the mean (144.33).
+Chemistry has a lower standard deviation (26.76) indicating data points are around the mean; in contrast, Algebra has some dispersed data points because of the higher standard deviation (22.66) value. 
+
 
 ### T-test
 ```{r, echo=FALSE}
