@@ -1,0 +1,544 @@
+---
+title: "Project 2"
+author: "Hector Gavilanes"
+format: html
+self-contained: true
+editor: source
+---
+
+```{r, echo = TRUE, warnings = FALSE, message = FALSE}
+library(tidyverse)
+library(gsheet)
+library(formattable)
+library(DescTools) # perform Dunnett, Levene Test
+library(pgirmess) # perform Kruskal-Wallis Post-hoc
+library(ggpubr) # interaction plot
+library(ggstatsplot) # boxplot
+library(ISLR)
+library(knitr) #table format
+```
+
+**1. Consider a sample of data from the [Jackson Heart Study](https://www.jacksonheartstudy.org/). In this problem, we will be examining body mass index (*BMI*; kg/m<sup>2</sup>) as a function of health as categorized by physical activity (*PA3cat*; Ideal Health, Intermediate Health, and Poor Health).**
+
+```{r}
+# clear environment
+rm(list = ls())
+# import data
+data <- as_tibble(gsheet2tbl("https://docs.google.com/spreadsheets/d/1H3TP-2SBMGleriJLESOe1cdCjtSj2F76bUh5iBqC8tI/edit#gid=2142000894"))
+# clean data
+clean_data <- data %>% 
+  select(BMI, BMI3cat) %>% 
+  drop_na()
+
+# ---CUSTOM COLORS---
+custom_green_dark = "#71CA97"
+custom_green_light = "#DeF7E9"
+custom_gray = "#3D3D3D"
+custom_orange = "#FC7307"
+custom_purple = "#5A18C9"
+# custom_tan_light = "#F7E3D4"
+custom_red_light = "#F7D0C7"
+custom_red_dark = "#F1917C"
+# custom_density_hue = c(custom_purple,custom_orange)
+# ---FUNCTIONS---
+# f00 - Change default table format
+change_table_format <- function(data_table){
+  # local variables
+  first_column <- data_table[1]
+  dataframe_length <- NCOL(data_table)
+  # format
+  formattable(data_table, align = c("l",rep("c", dataframe_length - 1)),
+              list(first_column = formatter("span", style = ~ style(color = custom_gray, font.weight = "bold")),
+              area(row = 1, col = 2:dataframe_length) ~ color_tile(custom_green_light, custom_green_dark),
+              area(row = 3, col = 2:dataframe_length) ~ color_tile(custom_red_light, custom_red_dark)
+              )#/end list
+              )#/end formattable
+}
+# f01 - get custom summary statistics
+# !! sym() creates a symbol from a string
+get_custom_summary <- function(data_table, category, values){
+  summary <- data_table %>%
+    group_by(!! sym(category)) %>% 
+    summarise(Avg = mean(!! sym(values)),
+              Median = median(!! sym(values)),
+              SD = sd(!! sym(values)),
+              Min = min(!! sym(values)),
+              Max = max(!! sym(values)),
+              IQRange = IQR(!! sym(values))
+              )
+    return(summary)
+}
+```
+
+
+**a. Find the appropriate summary statistics to summarize the data.**
+```{r}
+change_table_format(get_custom_summary(clean_data, "BMI3cat", "BMI"))
+```
+
+The ideal BMI group has a mean of 22.79, followed by the intermediate group with 27.61 and 36.64 for the poor health group.
+The standard deviation for ideal and intermediate groups are similar at 1.79 and 1.41, respectively. Interestingly enough, the poor health group has a value of 5.85. The higher standard deviation indicates the data points are more dispersed.
+The ideal group has a higher median value than its mean, indicating a skewed data distribution.
+
+**b. Use ANOVA to determine if there is a difference in BMI between the three levels of health as categorized by physical activity. Test at the $\alpha=0.05$ level.**
+```{r}
+# One-way ANOVA
+# Null Hypothesis:
+# - H0: All means of observations grouped by BMI category are the same
+# - H1: At least one category is different
+
+h1 <- aov(clean_data$BMI ~ clean_data$BMI3cat)
+summary(h1)
+
+```
+### Hypothesis
+- $H_0$: $\mu Ideal = \mu Intermediate\ = \mu Poor$\
+- $H_1$: at least one is different
+
+### Test Statistic
+- $F_0 = 1966$
+
+### p-Value
+- $p < 0.001$
+
+## Conclusion
+Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in BMI between the three levels of health.
+
+**c. Use the Kruskal-Wallis to determine if there is a difference in BMI between the three levels of health as categorized by physical activity (*PA3cat*; Ideal Health, Intermediate Health, and Poor Health). Test at the $\alpha=0.05$ level.**
+```{r}
+kruskal.test(clean_data$BMI ~ clean_data$BMI3cat)
+```
+### Hypothesis: Kruskal-Wallis
+- $H_0$: $M_{Ideal} = M_{Intermediate} = M_{Poor}$\
+- $H_1$: at least one group is different
+
+### Test Statistic
+- $H = 2129.4$
+
+### p-Value
+- $p < 0.001$
+
+## Conclusion
+Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is a difference in BMI between the three levels of health.
+
+**d. State/explain the ANOVA assumptions and assess them. Remember to state your conclusion (that you either meet the ANOVA assumptions or you do not).**
+
+We are unwilling to assume normality because we have found the assumption of normality invalid in diagnostic checks. We have performed the following ANOVA assumptions:
+
+1. Independence – the observations in each group need to be independent of each other.
+The data provided meets this requirement.
+
+2. Normality – the dependent variable should be approximately normally distributed for each combination of the groups.
+However, the residuals are not normally distributed; thus, we cannot assume normality.
+
+```{r}
+# 2. Normality check
+plot(h1)
+boxplot(clean_data$BMI ~ clean_data$BMI3cat)
+```
+3. Equal Variance - the variances for each group are equal or approximately equal.
+Since the p-value < 0.001 which is lower than our 0.05 level of significance, we cannot assume equality of variances.
+
+```{r}
+# 3. Levene's test for equality of variance
+LeveneTest(clean_data$BMI ~ clean_data$BMI3cat,
+           exact = FALSE)
+```
+
+**e. Based on your responses in part (d), which test's result are you going to present to the lead scientist at the JHS? (Hint: you will pick either (b) or (c)).**
+
+Nonparametric test, Kruskal-Wallis, in this case.
+
+**f. Perform the appropriate post-hoc test to determine pairwise differences between the three groups. Test at the $\alpha=0.05$ level.**
+
+### Post-hoc Pairwise Comparison
+```{r}
+# Kruskal-Wallis post-hoc 
+kruskalmc(clean_data$BMI ~ clean_data$BMI3cat)
+
+# nonparametric post-hoc DunnTest with p-values
+DunnTest(clean_data$BMI ~ clean_data$BMI3cat,
+         method = "bonferroni")
+```
+
+- Dunn's test pairwise comparison determined that All groups had significant variance among each other.
+- All groups had a p-value < 0.001 lower than 0.05 level of significance.
+- Due to multiple comparisons at once, we controlled the family-wise error rate with the Bonferroni adjustment method.
+
+**g. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of your chosen hypothesis test from part (e), results of the post-hoc test in part (f), and a graph to help convey the results.**
+
+## Analisis
+The ANOVA assumptions were invalid after normality checks and Levene’s test.
+Therefore, to find a statistically significant difference in BMI between the three levels of health (poor, intermediate, and ideal), a nonparametric Kruskal-Wallis test was conducted.
+The procedure following a Kruskal-Wallis test was to perform a Dunn's post-hoc test.
+
+## Conclusion
+All three levels of health grouped by BMI were significantly different from each other. BMI and physical activity displayed an inverse correlation. People with the lowest BMI had a higher physical activity, categorized as ideal health. On the other hand, people with the highest BMI calculations had lower physical activity. 
+
+54% of the sample represented the dominant group with poor health levels of physical activity.
+
+It is recommended to increase physical activity to have a better BMI calculation.
+
+### Summary Statistics
+To better understood the data, we calculated the mean, median, and standard deviation.
+```{r, echo=FALSE}
+change_table_format(get_custom_summary(clean_data, "BMI3cat", "BMI"))
+```
+
+The ideal BMI group has a mean of 22.79, followed by the intermediate group with 27.61 and 36.64 for the poor health group.
+The standard deviation for ideal and intermediate groups are similar at 1.79 and 1.41, respectively. Interestingly enough, the poor health group has a value of 5.85. The higher standard deviation indicates the data points are more dispersed.
+The ideal group has a higher median value than its mean, indicating a skewed data distribution.
+
+### ANOVA Assumptions
+We were unwilling to assume normality because we have found the assumption of normality invalid in diagnostic checks. We have performed the following ANOVA assumptions:
+
+* **1. Independence** – the observations in each group need to be independent of each other.
+The data provided met this requirement.
+
+* **2. Normality** – the dependent variable should be approximately normally distributed for each combination of the groups.
+However, the residuals were not normally distributed; thus, normality was not assumed.
+
+The *Fitted vs. Residuals* graph showed how the residuals had differences in size among the groups.
+
+```{r, echo=FALSE}
+# 2. Normality check
+lm_model = lm(clean_data$BMI ~ clean_data$BMI3cat)
+#anova(lm_model)
+
+# fitted vs residuals
+ggplot(lm_model) + 
+  geom_point(aes(x=.fitted, y=.resid), 
+             size=3, alpha = 0.35, color = custom_purple)+
+  labs(title = "Fitted vs Residuals")+
+  xlab("Fitted")+
+  ylab("Standarized Residuals")+
+  theme_bw()
+```
+
+The *QQ (quantile-quantile) plot*  did not display the normality of residuals. The residuals did not follow the 45-degree line.
+```{r, echo=FALSE}
+# QQ plot
+ggplot(lm_model, aes(sample = lm_model$residuals))+
+  geom_qq(size=3, alpha = 0.6, color = custom_orange)+
+  geom_qq_line()+
+  theme_bw() +
+  labs(title = "Normal Q-Q Plot")+
+  xlab("Theoretical Quantiles") +
+  ylab("Standarized Residuals")
+```
+
+Moreover, a *Boxplot* displayed the distribution of BMI health for each group with significant differences, and outliers.
+```{r, echo=FALSE}
+ggbetweenstats(
+  data = clean_data,
+  x = BMI3cat,
+  y = BMI,
+  plot.type = "box",
+  type = "np",
+  pairwise.display = "s",
+  var.equal = T,
+  p.adjust.method = "bonferroni",
+  ylab = "BMI",
+  xlab = "Health Levels",
+  k = 0,
+  bf.message = F
+)
+```
+**3. Equal Variance** - the variances for each group are equal or approximately equal.
+
+Since the p-value < 0.001 was lower than 0.05 level of significance, we did not assume equality of variances.
+
+```{r, echo=FALSE, warning=FALSE}
+# 3. Levene's test for equality of variance
+LeveneTest(clean_data$BMI ~ clean_data$BMI3cat,
+           exact = FALSE)
+```
+The ANOVA assumptions are invalid.
+
+### Kruskal-Wallis Test
+We used a nonparametric alternative to ANOVA test. 
+```{r, echo=FALSE}
+kruskal.test(clean_data$BMI ~ clean_data$BMI3cat)
+```
+#### Hypothesis: 
+- $H_0$: $M_{Ideal} = M_{Intermediate} = M_{Poor}$\
+- $H_1$: at least one group is different
+
+#### Test Statistic
+- $H = 2129.4$
+
+#### p-Value
+- $p < 0.001$
+
+#### Conclusion
+Rejected $H_0$ at the $\alpha$=0.05 level. There was sufficient evidence to suggest that there was a difference in BMI between the three levels of health.
+
+### Post-hoc Dunn's Test
+
+- Dunn's test pairwise comparison determined that All groups had significant variance among each other.
+- All groups had a p-value < 0.001 lower than 0.05 level of significance.
+- Due to multiple comparisons at once, we controlled the family-wise error rate with the Bonferroni adjustment method.
+
+```{r, echo=FALSE}
+# nonparametric DunnTest
+DunnTest(clean_data$BMI ~ clean_data$BMI3cat)
+```
+
+## Part 2
+
+**2. Again, consider the sample of data from the JHS. In this problem, we will be examining systolic blood pressure (*sbp*; mmHg) as a function of health as categorized by body mass index (*BMI3cat*; Ideal Health, Intermediate Health, and Poor Health), smoking status (*everSmoker*; 0=never smoker, 1=former or current smoker), and the interaction between health as categorized by body mass index and smoking status.**
+
+```{r}
+blood_data <- data %>% 
+  select(BMI3cat, sbp, everSmoker) %>%
+  drop_na()
+```
+
+**a. Find the appropriate summary statistics to summarize the data.**
+```{r}
+# functions for FUN attribute
+multiple.func <- function(x) {
+      c(mean = mean(x), sd = sd(x), median = median(x), min = min(x), max = max(x))
+}
+# means by BMI and Smoke
+means_summary <-tapply(blood_data$sbp,
+                       INDEX = list(blood_data$BMI3cat, blood_data$everSmoker), 
+                       FUN = multiple.func)
+
+formattable(as.data.frame(means_summary))
+```
+
+- Within all health groups, the smoker groups have a higher mean than non-smokers indicating worse blood pressure.
+- The highest standard deviation of 18.5 is for smokers within the ideal health group, indicating a dispersion for its data points.
+- All the mean values are higher than the median for smokers and non-smokers within all health groups, indicating a normal distribution.
+
+**b. Use ANOVA to determine if there is a difference in systolic blood pressure between health as categorized by body mass index, smoking status, and the interaction between health as categorized by body mass index and smoking status. Test at the $\alpha=0.05$ level. Remember to remove the interaction term if appropriate to do so.**
+```{r}
+# Two-way ANOVA with Interaction
+# Null Hypothesis:
+# - H1: The means of observations grouped by Health Levels are the same
+# - H2: The means of observations grouped by Smoking are the same
+# - H3: There is no interaction between Health Levels and Smoking
+
+blood_interaction = blood_data$sbp ~ factor(blood_data$BMI3cat) * factor(blood_data$everSmoker)
+lm_model_blood = lm(blood_interaction)
+
+# ANOVA Model
+anova_model <- summary(two_way <- aov(sbp ~ BMI3cat * everSmoker, data = blood_data))  
+anova_model
+```
+### Hypothesis
+- $H_0$: There is no interaction between Health levels and Smoking status\
+- $H_1$: There is an interaction between Health levels and Smoking status 
+
+### Test Statistic
+- $F_{Health-Smoking} = 4.003$
+
+### p-Value
+- $p = 0.01837$
+
+### Conclusion
+Reject $H_0$ at the $\alpha$=0.05 level. There is sufficient evidence to suggest that there is an interaction between Health levels (ideal, intermediate, and poor), and Smoking status.
+
+In other words, the relationship between blood pressure and Health Levels depends on the Smoking status.
+No further hypothesis are required because there is an interaction between Health levels and Smoking status.
+
+**c. Construct a profile plot to help explain results of part (b).**
+
+Using Rstudio function to have a general idea of the plot.
+```{r}
+interaction.plot(blood_data$BMI3cat, blood_data$everSmoker, blood_data$sbp, mean)
+interaction.plot(blood_data$everSmoker, blood_data$BMI3cat, blood_data$sbp, mean)
+```
+
+Interaction plot using ggplot.
+```{r}
+gg_mean <- blood_data %>% 
+  group_by(BMI3cat, everSmoker) %>% 
+  summarise(mean_groups = mean(sbp),
+            .groups = "keep") 
+
+p <- gg_mean %>%
+  ggplot(aes(x = BMI3cat, y = mean_groups, color = everSmoker))+
+  geom_line(aes(group = gg_mean$everSmoker), size = 1.5)+
+  geom_point(size = 3)+
+  labs(title = "Blood Pressure - Interaction Plot", subtitle = "Health Levels & Smoking Status", color = "Smoking Status")+
+  xlab("BMI Health Categories")+
+  ylab("Blood Pressure")+
+  scale_color_manual(values = c(custom_orange, "gray"))+
+  theme_bw()
+p
+```
+Another way to represent the interaction.
+```{r}
+# profile plot using ggline
+# health levels
+bmi_categories <- factor(blood_data$BMI3cat, levels = c("Ideal Health", "Intermediate Health", "Poor Health"))
+profile <- ggline(blood_data, x = "BMI3cat", y = "sbp", color = "everSmoker",
+       add = "mean",
+       size = 1.5,
+       order = c("Ideal Health", "Intermediate Health", "Poor Health"),
+       palette = c(custom_orange, "gray"),
+       ylab = "Blood Pressure",
+       xlab = "BMI Health Categories",)+
+  theme_bw()
+  
+interaction_health <- ggpar(profile, 
+                      main = "Blood Pressure - Interaction Plot",
+                      submain = "Health Levels & Smoking Status",
+                      legend.title = "Smoking Status",
+                      legend = "right")
+                
+interaction_health
+
+# smoking status
+profile_smoke <- ggline(blood_data, x = "everSmoker", y = "sbp", color = "BMI3cat",
+       add = "mean",
+       show.line.label = TRUE,
+       label.rectangle = TRUE,
+       repel = TRUE,
+       size = 1.5,
+       palette = c(custom_orange, "gray", "gray"),
+       xlab = "Smoking Status",)+
+  theme_minimal()
+interaction_smoke <- ggpar(profile_smoke, 
+                      main = "Interaction Plot",
+                      submain = "Smoking Status & Health Levels",
+                      legend = "none",
+                      ylim = c(120, 128))
+interaction_smoke
+```
+
+**d. Use the appropriate post-hoc test to determine differences in main effects or the interaction term, whichever is appropriate for the results in part (b). Test at the $\alpha=0.05$ level.**
+
+## ANOVA Assumption
+### 1. Independence
+The sample data are independent from each other.
+
+### 2. Normality
+```{r}
+plot(lm_model_blood)
+# histogram
+hist(resid(lm_model_blood))
+# boxplot
+boxplot(blood_interaction)
+```
+Visually, the data has some outliers towards the right tail; nonetheless, the data does not represent a concern to invalidate the normality assumption.
+
+### 3. Equal Variance: Levene's Test for Equality of Variances
+
+```{r}
+LeveneTest(blood_data$sbp ~ factor(blood_data$BMI3cat))
+LeveneTest(blood_data$sbp ~ factor(blood_data$everSmoker))
+```
+The ANOVA assumptions are valid.
+
+### Interaction Post-hoc
+```{r}
+TukeyHSD(aov(blood_interaction))
+```
+- The ideal non-smoker group was significantly different from the smoker group.
+- The ideal non-smoker group was significantly different from non-smokers in the poor health group.
+- The ideal non-smoker group was significantly different from smokers in either poor, and intermediate group.
+- The ideal group was significantly different from the poor health group.
+
+**e. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of the hypothesis testing in part (b), results of the post-hoc test in part (d), and the profile plot in part (c) to help convey the results.**
+
+## Analisis
+The ANOVA assumptions were valid after normality inspections and Levene’s test.
+During the ANOVA test, there was an interaction between Health levels and Smoking status. 
+Therefore, a parametric Tukey's honest significance (HSD) post-hoc test found statistically significant differences in systolic blood pressure between the three levels of health (poor, intermediate, and ideal) and smoking status.
+
+## Conclusion
+There was a significant exponential difference between poor and ideal health levels depended among smokers and non-smokers.
+People who smoke scored higher in blood pressure results regardless of their health level. On the other hand, non-smokers from intermediate and ideal health groups had better blood pressure than the poor health group. Interestingly enough, there was an antagonist interaction between ideal and intermediate health groups depended on the smoking status.
+
+The ideal health level group showcased that non-smokers with great physical activity had the best blood pressure.
+
+It is recommended to limit the consumption of cigarettes and increase physical activity to improve blood pressure.
+
+### Summary Statistics
+To better understood the data, we calculated the mean for all groups.
+```{r, echo=FALSE}
+# means by BMI and Smoke
+means_summary <- tapply(blood_data$sbp,
+                     INDEX = list(blood_data$BMI3cat, blood_data$everSmoker), 
+                     FUN = mean)
+formattable(as.data.frame(means_summary))
+```
+- Within all health groups, the smoker groups had a higher mean than non-smokers indicated worse blood pressure.
+- The highest standard deviation of 18.5 was for smokers within the ideal health group, indicated a dispersion for its data points.
+- All the mean values were higher than the median for smokers and non-smokers within all health groups, indicated a normal distribution.
+
+
+### Two-way ANOVA Model
+```{r, echo=FALSE}
+anova_model
+```
+### Hypothesis
+- $H_0$: There is no interaction between Health levels and Smoking status\
+- $H_1$: There is an interaction between Health levels and Smoking status 
+
+### Test Statistic
+- $F_{Health-Smoking} = 4.003$
+
+### p-Value
+- $p = 0.01837$
+
+### Conclusion
+Rejected $H_0$ at the $\alpha$=0.05 level. There was sufficient evidence to suggest that there was an interaction between Health levels (ideal, intermediate, and poor), and Smoking status.
+
+In other words, the relationship between blood pressure and Health Levels depended on the Smoking status.
+
+### Interaction Plot
+```{r, echo=FALSE}
+gg_mean <- blood_data %>% 
+  group_by(BMI3cat, everSmoker) %>% 
+  summarise(mean_groups = mean(sbp),
+            .groups = "keep") 
+
+p <- gg_mean %>%
+  ggplot(aes(x = BMI3cat, y = mean_groups, color = everSmoker))+
+  geom_line(aes(group = gg_mean$everSmoker), size = 1.5)+
+  geom_point(size = 3)+
+  labs(title = "Blood Pressure - Interaction Plot", subtitle = "Health Levels & Smoking Status", color = "Smoking Status")+
+  xlab("BMI Health Categories")+
+  ylab("Blood Pressure")+
+  scale_color_manual(values = c(custom_orange, "gray"))+
+  theme_bw()
+p
+```
+
+## Parametric Post-hoc 
+### Health Levels & Smoking Status Interactions
+For the following significant results, only p-values < 0.05 were selected. 
+```{r, echo=FALSE}
+posthoc_interaction <- TukeyHSD(aov(blood_interaction))
+# select the interaction factors
+interaction_table <- posthoc_interaction$`factor(blood_data$BMI3cat):factor(blood_data$everSmoker)` %>%
+  as_tibble(rownames = "Interactions") %>% 
+  filter(`p adj` < 0.05)
+# print p-values < 0.05
+kable(interaction_table)
+```
+- The ideal non-smoker group was significantly different from the smoker group.
+- The ideal non-smoker group was significantly different from non-smokers in the poor health group.
+- The ideal non-smoker group was significantly different from smokers in either poor, and intermediate group.
+
+### Health Levels
+```{r, echo=FALSE}
+health_table <- posthoc_interaction$`factor(blood_data$BMI3cat)` %>% 
+  as_tibble(rownames = "Health Levels") %>% 
+  filter(`p adj` < 0.05)
+
+kable(health_table)
+```
+### Smoking Status
+```{r, echo=FALSE}
+smoking_table <- posthoc_interaction$`factor(blood_data$everSmoker)` %>% 
+  as_tibble(rownames = "Smoking Status") %>% 
+  filter(`p adj` < 0.05)
+
+kable(smoking_table)
+```
+- The ideal group was significantly different from the poor health group.

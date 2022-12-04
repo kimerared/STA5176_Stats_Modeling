@@ -78,10 +78,11 @@ get_custom_summary <- function(data_table, category, values){
 change_table_format(get_custom_summary(data_long, "Half","Scores"))
 ```
 
-The standard deviation between both halves of the game indicates that the scores are around the mean (12.88). 
-Indeed, both halves are approximately 1.04 points different from the mean. 
-We can infer that the data is symmetrically distributed because there is a minor difference between the mean and median.
+The mean for the first half is 13.92, representing 66.28% of the maximum score of 21. 
+The mean for the second half is 11.85, representing 53.86% of the maximum score of 22. 
 Even though the team has consistent scores, the first half is slightly better than the second. 
+For both halves, the similar values for standard deviation indicate that the scores are around the mean.
+We can infer that the data distribution is symmetrical because the mean values are higher than the median.
 
 **b. Perform the appropriate *t* test to determine if there is a difference in the number of free throws made during the first and second halves of games. Remember to typeset the hypothesis test results.**
 ```{r}
@@ -188,10 +189,11 @@ The following summary statistics displays the difference in scores.
 ```{r, echo=FALSE}
 change_table_format(get_custom_summary(data_long, "Half","Scores"))
 ```
-The standard deviation between both halves of the game indicates that the scores are around the mean (12.88). 
-Indeed, both halves are approximately 1.04 points different from the mean. 
-We can infer that the data is symmetrically distributed because there is a minor difference between the mean and median.
+The mean for the first half is 13.92, representing 66.28% of the maximum score of 21. 
+The mean for the second half is 11.85, representing 53.86% of the maximum score of 22. 
 Even though the team has consistent scores, the first half is slightly better than the second. 
+For both halves, the similar values for standard deviation indicate that the scores are around the mean.
+We can infer that the data distribution is symmetrical because the mean values are higher than the median.
 
 ### NonParametric Test
 
@@ -252,15 +254,16 @@ skip_long <- skip_class %>%
 ```{r}
 change_table_format(get_custom_summary(skip_long, "Course", "Absence"))
 ```
-The mean for both algebra and chemistry are similar. 
+Algebra's higher mean absences are 144.33, and Chemistry's mean absences are 143.83.
+The mean for Algebra represents 78.01% of the maximum absences of 185. Chemistry's mean represents 84.11% of the maximum of 171. 
+Chemistry has a lower standard deviation (26.76), indicating data points are around the mean; in contrast, Algebra has some dispersed data points because of the higher standard deviation (22.66) value. 
 The Chemistry data is likely skewed in distribution because the median (144.5) is higher than the mean (143.83). On the other hand, the Algebra data is likely to be normally distributed because the median (142.5) is lower than the mean (144.33).
-Chemistry has a lower standard deviation (26.76) indicating data points are around the mean; in contrast, Algebra has some dispersed data points because of the higher standard deviation (22.66) value. 
 
 
 **b. Perform the appropriate *t* test to determine if there are fewer absences in College Algebra. Remember to typeset the hypothesis test results.**
 ```{r}
 # two-independent sample T-test
-t.test(skip_long$Absence ~ skip_long$Course,
+t.test(skip_class$algebra, skip_class$chemistry,
        alternative = "less")
 ```
 
@@ -282,6 +285,10 @@ Keep $H_0$ at the $\alpha$=0.05 level. There is not sufficient evidence to deter
 wilcox.test(skip_long$Absence ~ skip_long$Course,
             alternative = "less",
             exact = FALSE)
+
+# wilcox.test(skip_class$algebra, skip_class$chemistry,
+#             alternative = "less",
+#             exact = FALSE)
 ```
 
 ### Hypothesis
@@ -368,16 +375,17 @@ The report will use the **T-test**.
 # Number of Absences per Course Report
 
 ## Analisys
-College Algebra students skip class more often than students in General Chemistry. Algebra students need more time to understand the subject; however, students might feel frustrated. The educators should offer different tools to help students to understand the curriculum. Moreover, students can complement their studies with tutoring classes, video recordings, and study groups.  
+College Algebra students skip more classes than students in General Chemistry. Algebra students need more time to understand the subject; however, students might feel frustrated. The educators should offer different tools to help students to understand the curriculum. Moreover, students can complement their studies with tutoring classes, video recordings, and study groups.  
 
 ### Summary Statistics
 The following summary statistics displays the difference in absences per course.
 ```{r, echo=FALSE}
 change_table_format(get_custom_summary(skip_long, "Course", "Absence"))
 ```
-The mean for both algebra and chemistry are similar. 
+Algebra's higher mean absences are 144.33, and Chemistry's mean absences are 143.83.
+The mean for Algebra represents 78.01% of the maximum absences of 185. Chemistry's mean represents 84.11% of the maximum of 171. 
+Chemistry has a lower standard deviation (26.76), indicating data points are around the mean; in contrast, Algebra has some dispersed data points because of the higher standard deviation (22.66) value. 
 The Chemistry data is likely skewed in distribution because the median (144.5) is higher than the mean (143.83). On the other hand, the Algebra data is likely to be normally distributed because the median (142.5) is lower than the mean (144.33).
-Chemistry has a lower standard deviation (26.76) indicating data points are around the mean; in contrast, Algebra has some dispersed data points because of the higher standard deviation (22.66) value. 
 
 
 ### T-test
