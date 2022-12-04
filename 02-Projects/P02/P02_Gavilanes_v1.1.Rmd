@@ -6,15 +6,15 @@ self-contained: true
 editor: source
 ---
 
-```{r, echo = TRUE, warnings = FALSE, message = FALSE}
+```{r, echo = TRUE, warning = FALSE, message = FALSE}
 library(tidyverse)
 library(gsheet)
 library(formattable)
 library(DescTools) # perform Dunnett, Levene Test
 library(pgirmess) # perform Kruskal-Wallis Post-hoc
 library(ggpubr) # interaction plot
-library(ggstatsplot) # boxplot
-library(ISLR)
+library(ggstatsplot) # boxplot graph
+library(ISLR) # boxplot graph
 library(knitr) #table format
 ```
 
@@ -76,9 +76,9 @@ get_custom_summary <- function(data_table, category, values){
 change_table_format(get_custom_summary(clean_data, "BMI3cat", "BMI"))
 ```
 
-The ideal BMI group has a mean of 22.79, followed by the intermediate group with 27.61 and 36.64 for the poor health group.
-The standard deviation for ideal and intermediate groups are similar at 1.79 and 1.41, respectively. Interestingly enough, the poor health group has a value of 5.85. The higher standard deviation indicates the data points are more dispersed.
-The ideal group has a higher median value than its mean, indicating a skewed data distribution.
+- The ideal BMI group has a mean of 22.79, followed by the intermediate group with 27.61 and 36.64 for the poor health group. The majority has poor health.
+- The standard deviation for ideal and intermediate groups are similar at 1.79 and 1.41, respectively. Interestingly enough, the poor health group has a value of 5.85. The higher standard deviation indicates the data points are more dispersed.
+- The ideal group has a higher median value than its mean, indicating a skewed data distribution.
 
 **b. Use ANOVA to determine if there is a difference in BMI between the three levels of health as categorized by physical activity. Test at the $\alpha=0.05$ level.**
 ```{r}
@@ -151,7 +151,7 @@ Nonparametric test, Kruskal-Wallis, in this case.
 
 **f. Perform the appropriate post-hoc test to determine pairwise differences between the three groups. Test at the $\alpha=0.05$ level.**
 
-### Post-hoc Pairwise Comparison
+### Non-Parametric Post-hoc Pairwise Comparison
 ```{r}
 # Kruskal-Wallis post-hoc 
 kruskalmc(clean_data$BMI ~ clean_data$BMI3cat)
@@ -161,8 +161,8 @@ DunnTest(clean_data$BMI ~ clean_data$BMI3cat,
          method = "bonferroni")
 ```
 
-- Dunn's test pairwise comparison determined that All groups had significant variance among each other.
-- All groups had a p-value < 0.001 lower than 0.05 level of significance.
+- Dunn's test pairwise comparison determined that all groups had significant variance among each other.
+- All groups had a p-value < 0.001, lower than 0.05 level of significance.
 - Due to multiple comparisons at once, we controlled the family-wise error rate with the Bonferroni adjustment method.
 
 **g. Write a brief paragraph describing the results of your analysis. Include summary statistics, results of your chosen hypothesis test from part (e), results of the post-hoc test in part (f), and a graph to help convey the results.**
@@ -170,7 +170,7 @@ DunnTest(clean_data$BMI ~ clean_data$BMI3cat,
 ## Analisis
 The ANOVA assumptions were invalid after normality checks and Levene’s test.
 Therefore, to find a statistically significant difference in BMI between the three levels of health (poor, intermediate, and ideal), a nonparametric Kruskal-Wallis test was conducted.
-The procedure following a Kruskal-Wallis test was to perform a Dunn's post-hoc test.
+The procedure following a Kruskal-Wallis test was to perform a Dunn's post-hoc pairwise comparison.
 
 ## Conclusion
 All three levels of health grouped by BMI were significantly different from each other. BMI and physical activity displayed an inverse correlation. People with the lowest BMI had a higher physical activity, categorized as ideal health. On the other hand, people with the highest BMI calculations had lower physical activity. 
@@ -185,9 +185,9 @@ To better understood the data, we calculated the mean, median, and standard devi
 change_table_format(get_custom_summary(clean_data, "BMI3cat", "BMI"))
 ```
 
-The ideal BMI group has a mean of 22.79, followed by the intermediate group with 27.61 and 36.64 for the poor health group.
-The standard deviation for ideal and intermediate groups are similar at 1.79 and 1.41, respectively. Interestingly enough, the poor health group has a value of 5.85. The higher standard deviation indicates the data points are more dispersed.
-The ideal group has a higher median value than its mean, indicating a skewed data distribution.
+- The ideal BMI group had a mean of 22.79, followed by the intermediate and poor health group with 27.61 and 36.64, respectively.
+- The standard deviation for ideal and intermediate groups were similar at 1.79 and 1.41, respectively. Interestingly enough, the poor health group had a value of 5.85. The higher standard deviation indicates the data points were more dispersed.
+- The ideal group had a higher median value than its mean, indicated a skewed data distribution.
 
 ### ANOVA Assumptions
 We were unwilling to assume normality because we have found the assumption of normality invalid in diagnostic checks. We have performed the following ANOVA assumptions:
@@ -275,7 +275,7 @@ Rejected $H_0$ at the $\alpha$=0.05 level. There was sufficient evidence to sugg
 
 ### Post-hoc Dunn's Test
 
-- Dunn's test pairwise comparison determined that All groups had significant variance among each other.
+- Dunn's test pairwise comparison determined that all groups had significant variance among each other.
 - All groups had a p-value < 0.001 lower than 0.05 level of significance.
 - Due to multiple comparisons at once, we controlled the family-wise error rate with the Bonferroni adjustment method.
 
@@ -295,17 +295,22 @@ blood_data <- data %>%
 ```
 
 **a. Find the appropriate summary statistics to summarize the data.**
+
+The summary by BMI and Smoker group was calculated in the following order: Mean, Standard Deviation, Median, Min, Max.
 ```{r}
 # functions for FUN attribute
-multiple.func <- function(x) {
-      c(mean = mean(x), sd = sd(x), median = median(x), min = min(x), max = max(x))
+multiple_func <- function(x) {
+  c(mean = mean(x), sd = sd(x), median = median(x), min = min(x), max = max(x))
 }
-# means by BMI and Smoke
-means_summary <-tapply(blood_data$sbp,
-                       INDEX = list(blood_data$BMI3cat, blood_data$everSmoker), 
-                       FUN = multiple.func)
 
-formattable(as.data.frame(means_summary))
+# summary by BMI and Smoker group
+pressure_summary <-tapply(blood_data$sbp,
+                       INDEX = list(blood_data$BMI3cat, blood_data$everSmoker), 
+                       FUN = multiple_func)
+pressure_summary <- as.data.frame(pressure_summary)
+# print table
+kable(pressure_summary, col.names = c("Non-Smoker", "Smoker"))
+
 ```
 
 - Within all health groups, the smoker groups have a higher mean than non-smokers indicating worse blood pressure.
@@ -458,13 +463,21 @@ The ideal health level group showcased that non-smokers with great physical acti
 It is recommended to limit the consumption of cigarettes and increase physical activity to improve blood pressure.
 
 ### Summary Statistics
-To better understood the data, we calculated the mean for all groups.
-```{r, echo=FALSE}
-# means by BMI and Smoke
-means_summary <- tapply(blood_data$sbp,
-                     INDEX = list(blood_data$BMI3cat, blood_data$everSmoker), 
-                     FUN = mean)
-formattable(as.data.frame(means_summary))
+The summary by BMI and Smoker group was calculated in the following order: Mean, Standard Deviation, Median, Min, Max.
+```{r}
+# functions for FUN attribute
+multiple_func <- function(x) {
+  c(mean = mean(x), sd = sd(x), median = median(x), min = min(x), max = max(x))
+}
+
+# summary by BMI and Smoker group
+pressure_summary <-tapply(blood_data$sbp,
+                       INDEX = list(blood_data$BMI3cat, blood_data$everSmoker), 
+                       FUN = multiple_func)
+pressure_summary <- as.data.frame(pressure_summary)
+# print table
+kable(pressure_summary, col.names = c("Non-Smoker", "Smoker"))
+
 ```
 - Within all health groups, the smoker groups had a higher mean than non-smokers indicated worse blood pressure.
 - The highest standard deviation of 18.5 was for smokers within the ideal health group, indicated a dispersion for its data points.

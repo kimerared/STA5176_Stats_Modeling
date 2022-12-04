@@ -6,7 +6,7 @@ self-contained: true
 editor: source
 ---
 
-```{r setup, echo = TRUE, warnings = FALSE, message = FALSE}
+```{r setup, echo = TRUE, warning=FALSE, message = FALSE}
 library(tidyverse)
 library(gsheet)
 library(formattable)
@@ -78,11 +78,11 @@ get_custom_summary <- function(data_table, category, values){
 change_table_format(get_custom_summary(data_long, "Half","Scores"))
 ```
 
-The mean for the first half is 13.92, representing 66.28% of the maximum score of 21. 
-The mean for the second half is 11.85, representing 53.86% of the maximum score of 22. 
-Even though the team has consistent scores, the first half is slightly better than the second. 
-For both halves, the similar values for standard deviation indicate that the scores are around the mean.
-We can infer that the data distribution is symmetrical because the mean values are higher than the median.
+- The mean for the first half is 13.92, representing 66.28% of the maximum score of 21. 
+- The mean for the second half is 11.85, representing 53.86% of the maximum score of 22. 
+- Even though the team has consistent scores, the first half is slightly better than the second. 
+- For both halves, the similar values for standard deviation indicate that the scores are around the mean.
+- We can infer that the data distribution is symmetrical because the mean values are higher than the median.
 
 **b. Perform the appropriate *t* test to determine if there is a difference in the number of free throws made during the first and second halves of games. Remember to typeset the hypothesis test results.**
 ```{r}
@@ -189,11 +189,11 @@ The following summary statistics displays the difference in scores.
 ```{r, echo=FALSE}
 change_table_format(get_custom_summary(data_long, "Half","Scores"))
 ```
-The mean for the first half is 13.92, representing 66.28% of the maximum score of 21. 
-The mean for the second half is 11.85, representing 53.86% of the maximum score of 22. 
-Even though the team has consistent scores, the first half is slightly better than the second. 
-For both halves, the similar values for standard deviation indicate that the scores are around the mean.
-We can infer that the data distribution is symmetrical because the mean values are higher than the median.
+- The mean for the first half is 13.92, representing 66.28% of the maximum score of 21. 
+- The mean for the second half is 11.85, representing 53.86% of the maximum score of 22. 
+- Even though the team has consistent scores, the first half is slightly better than the second. 
+- For both halves, the similar values for standard deviation indicate that the scores are around the mean.
+- We can infer that the data distribution is symmetrical because the mean values are higher than the median.
 
 ### NonParametric Test
 
@@ -232,8 +232,6 @@ basketball_density
 
 
 ```{r}
-# clear environment
-#rm(list = ls())
 # data as vector
 chemistry <- c(161, 140, 136, 171, 106, 149)
 algebra <- c(158, 132, 135, 185, 106, 150)
@@ -254,15 +252,15 @@ skip_long <- skip_class %>%
 ```{r}
 change_table_format(get_custom_summary(skip_long, "Course", "Absence"))
 ```
-Algebra's higher mean absences are 144.33, and Chemistry's mean absences are 143.83.
-The mean for Algebra represents 78.01% of the maximum absences of 185. Chemistry's mean represents 84.11% of the maximum of 171. 
-Chemistry has a lower standard deviation (26.76), indicating data points are around the mean; in contrast, Algebra has some dispersed data points because of the higher standard deviation (22.66) value. 
-The Chemistry data is likely skewed in distribution because the median (144.5) is higher than the mean (143.83). On the other hand, the Algebra data is likely to be normally distributed because the median (142.5) is lower than the mean (144.33).
+- Algebra's higher mean absences are 144.33, and Chemistry's mean absences are 143.83.
+- The mean for Algebra represents 78.01% of the maximum absences of 185. Chemistry's mean represents 84.11% of the maximum of 171. 
+- Chemistry has a lower standard deviation (26.76), indicating data points are around the mean; in contrast, Algebra has some dispersed data points because of the higher standard deviation (22.66) value. 
+- The Chemistry data is likely skewed in distribution because the median (144.5) is higher than the mean (143.83). On the other hand, the Algebra data is likely to be normally distributed because the median (142.5) is lower than the mean (144.33).
 
 
 **b. Perform the appropriate *t* test to determine if there are fewer absences in College Algebra. Remember to typeset the hypothesis test results.**
 ```{r}
-# two-independent sample T-test
+# two-independent sample parametric T-test
 t.test(skip_class$algebra, skip_class$chemistry,
        alternative = "less")
 ```
@@ -282,6 +280,7 @@ Keep $H_0$ at the $\alpha$=0.05 level. There is not sufficient evidence to deter
 
 **c. Perform the appropriate nonparametric test to determine if there are fewer absences in College Algebra. Remember to typeset the hypothesis test results.**
 ```{r}
+# nonparametric test
 wilcox.test(skip_long$Absence ~ skip_long$Course,
             alternative = "less",
             exact = FALSE)
@@ -382,10 +381,10 @@ The following summary statistics displays the difference in absences per course.
 ```{r, echo=FALSE}
 change_table_format(get_custom_summary(skip_long, "Course", "Absence"))
 ```
-Algebra's higher mean absences are 144.33, and Chemistry's mean absences are 143.83.
-The mean for Algebra represents 78.01% of the maximum absences of 185. Chemistry's mean represents 84.11% of the maximum of 171. 
-Chemistry has a lower standard deviation (26.76), indicating data points are around the mean; in contrast, Algebra has some dispersed data points because of the higher standard deviation (22.66) value. 
-The Chemistry data is likely skewed in distribution because the median (144.5) is higher than the mean (143.83). On the other hand, the Algebra data is likely to be normally distributed because the median (142.5) is lower than the mean (144.33).
+- Algebra's higher mean absences are 144.33, and Chemistry's mean absences are 143.83.
+- The mean for Algebra represents 78.01% of the maximum absences of 185. Chemistry's mean represents 84.11% of the maximum of 171. 
+- Chemistry has a lower standard deviation (26.76), indicating data points are around the mean; in contrast, Algebra has some dispersed data points because of the higher standard deviation (22.66) value. 
+- The Chemistry data is likely skewed in distribution because the median (144.5) is higher than the mean (143.83). On the other hand, the Algebra data is likely to be normally distributed because the median (142.5) is lower than the mean (144.33).
 
 
 ### T-test
