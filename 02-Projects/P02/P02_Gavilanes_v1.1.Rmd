@@ -64,7 +64,8 @@ get_custom_summary <- function(data_table, category, values){
               SD = sd(!! sym(values)),
               Min = min(!! sym(values)),
               Max = max(!! sym(values)),
-              IQRange = IQR(!! sym(values))
+              IQRange = IQR(!! sym(values)),
+              Count = length(!!sym(values))
               )
     return(summary)
 }
@@ -76,7 +77,7 @@ get_custom_summary <- function(data_table, category, values){
 change_table_format(get_custom_summary(clean_data, "BMI3cat", "BMI"))
 ```
 
-- The ideal BMI group has a mean of 22.79, followed by the intermediate group with 27.61 and 36.64 for the poor health group. The majority has poor health.
+- The ideal BMI group has a mean of 22.79, followed by the intermediate group with 27.61 and 36.64 for the poor health group. The poor health group represents the majority with 54.09% of total observations 2,649.
 - The standard deviation for ideal and intermediate groups are similar at 1.79 and 1.41, respectively. Interestingly enough, the poor health group has a value of 5.85. The higher standard deviation indicates the data points are more dispersed.
 - The ideal group has a higher median value than its mean, indicating a skewed data distribution.
 
@@ -175,7 +176,7 @@ The procedure following a Kruskal-Wallis test was to perform a Dunn's post-hoc p
 ## Conclusion
 All three levels of health grouped by BMI were significantly different from each other. BMI and physical activity displayed an inverse correlation. People with the lowest BMI had a higher physical activity, categorized as ideal health. On the other hand, people with the highest BMI calculations had lower physical activity. 
 
-54% of the sample represented the dominant group with poor health levels of physical activity.
+The poor health group represented the majority of the sample with 54.09% of total observations 2,649.
 
 It is recommended to increase physical activity to have a better BMI calculation.
 
@@ -185,7 +186,7 @@ To better understood the data, we calculated the mean, median, and standard devi
 change_table_format(get_custom_summary(clean_data, "BMI3cat", "BMI"))
 ```
 
-- The ideal BMI group had a mean of 22.79, followed by the intermediate and poor health group with 27.61 and 36.64, respectively.
+- The ideal BMI group had a mean of 22.79, followed by the intermediate and poor health group with 27.61 and 36.64, respectively. The poor health group had the majority of the observations with 54.09% of the total of 2,649.
 - The standard deviation for ideal and intermediate groups were similar at 1.79 and 1.41, respectively. Interestingly enough, the poor health group had a value of 5.85. The higher standard deviation indicates the data points were more dispersed.
 - The ideal group had a higher median value than its mean, indicated a skewed data distribution.
 
@@ -464,7 +465,7 @@ It is recommended to limit the consumption of cigarettes and increase physical a
 
 ### Summary Statistics
 The summary by BMI and Smoker group was calculated in the following order: Mean, Standard Deviation, Median, Min, Max.
-```{r}
+```{r, echo=FALSE}
 # functions for FUN attribute
 multiple_func <- function(x) {
   c(mean = mean(x), sd = sd(x), median = median(x), min = min(x), max = max(x))

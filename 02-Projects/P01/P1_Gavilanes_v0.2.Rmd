@@ -66,7 +66,8 @@ get_custom_summary <- function(data_table, category, values){
               SD = sd(!! sym(values)),
               Min = min(!! sym(values)),
               Max = max(!! sym(values)),
-              IQRange = IQR(!! sym(values))
+              IQRange = IQR(!! sym(values)),
+              Sum = sum(!! sym(values))
               )
     return(summary)
 }
@@ -254,7 +255,7 @@ change_table_format(get_custom_summary(skip_long, "Course", "Absence"))
 ```
 - Algebra's higher mean absences are 144.33, and Chemistry's mean absences are 143.83.
 - The mean for Algebra represents 78.01% of the maximum absences of 185. Chemistry's mean represents 84.11% of the maximum of 171. 
-- Chemistry has a lower standard deviation (26.76), indicating data points are around the mean; in contrast, Algebra has some dispersed data points because of the higher standard deviation (22.66) value. 
+- Chemistry has a lower standard deviation (22.66), indicating data points are around the mean; in contrast, Algebra has some dispersed data points because of the higher standard deviation (26.76) value. 
 - The Chemistry data is likely skewed in distribution because the median (144.5) is higher than the mean (143.83). On the other hand, the Algebra data is likely to be normally distributed because the median (142.5) is lower than the mean (144.33).
 
 
@@ -383,7 +384,7 @@ change_table_format(get_custom_summary(skip_long, "Course", "Absence"))
 ```
 - Algebra's higher mean absences are 144.33, and Chemistry's mean absences are 143.83.
 - The mean for Algebra represents 78.01% of the maximum absences of 185. Chemistry's mean represents 84.11% of the maximum of 171. 
-- Chemistry has a lower standard deviation (26.76), indicating data points are around the mean; in contrast, Algebra has some dispersed data points because of the higher standard deviation (22.66) value. 
+- Chemistry has a lower standard deviation (22.66), indicating data points are around the mean; in contrast, Algebra has some dispersed data points because of the higher standard deviation (26.76) value. 
 - The Chemistry data is likely skewed in distribution because the median (144.5) is higher than the mean (143.83). On the other hand, the Algebra data is likely to be normally distributed because the median (142.5) is lower than the mean (144.33).
 
 
